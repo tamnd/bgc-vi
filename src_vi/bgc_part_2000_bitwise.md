@@ -3,84 +3,84 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Bitwise Operations
+# Phép bitwise
 
 [i[Bitwise operations]<]
 
-These numeric operations effectively allow you to manipulate individual
-bits in variables, fitting since C is such a low-level langauge^[Not
-that other languages don't do this---they do. It is interesting how many
-modern languages use the same operators for bitwise that C does.].
+Mấy phép số này cho phép bạn thao tác từng bit trong biến, cũng hợp
+vì C là ngôn ngữ mức thấp^[Không phải các ngôn ngữ khác không làm
+vậy, chúng có làm. Thú vị là bao nhiêu ngôn ngữ hiện đại dùng cùng
+toán tử bitwise như C.].
 
-If you're not familiar with bitwise operations, [flw[Wikipedia has a
-good bitwise article|Bitwise_operation]].
+Nếu bạn chưa quen với phép bitwise, [flw[Wikipedia có bài viết về
+bitwise khá tốt|Bitwise_operation]].
 
-## Bitwise AND, OR, XOR, and NOT
+## Bitwise AND, OR, XOR và NOT
 
-For each of these, the [usual arithmetic
-conversions](#usual-arithmetic-conversions) take place on the operands
-(which in this case must be an integer type), and then the appropriate
-bitwise operation is performed.
+Với từng phép này, [các quy đổi số học thông
+thường](#usual-arithmetic-conversions) diễn ra trên toán hạng (trong
+trường hợp này phải là kiểu số nguyên), rồi phép bitwise tương ứng
+được thực hiện.
 
 [i[`&` bitwise AND]]
 [i[`|` bitwise OR]]
 [i[`^` bitwise XOR]]
 [i[`~` bitwise NOT]]
 
-|Operation|Operator|Example|
+|Phép|Toán tử|Ví dụ|
 |-|:-:|-|
 |AND|`&`|`a = b & c`|
 |OR|`|`|`a = b | c`|
 |XOR|`^`|`a = b ^ c`|
 |NOT|`~`|`a = ~c`|
 
-Note how they're similar to the Boolean operators `&&` and `||`.
+Lưu ý chúng giống toán tử Boolean `&&` và `||`.
 
-These have assignment shorthand variants similar to `+=` and `-=`:
+Mấy cái này có biến thể gán tắt tương tự `+=` và `-=`:
 
 [i[`&=` assignment]]
 [i[`|=` assignment]]
 [i[`^=` assignment]]
 
-|Operator|Example|Longhand equivalent|
+|Toán tử|Ví dụ|Tương đương đầy đủ|
 |-|-|-|
 |`&=`|`a &= c`|`a = a & c`|
 |`|=`|`a |= c`|`a = a | c`|
 |`^=`|`a ^= c`|`a = a ^ c`|
 
-## Bitwise Shift
+## Bitwise shift
 
-For these, the [i[Integer promotions]] [integer
-promotions](#integer-promotions) are performed on each operand (which
-must be an integer type) and then a bitwise shift is executed. The type
-of the result is the type of the promoted left operand.
+Với mấy cái này, [i[Integer promotions]] [integer
+promotion](#integer-promotions) diễn ra trên từng toán hạng (phải là
+kiểu số nguyên) rồi bitwise shift được thực hiện. Kiểu của kết quả
+là kiểu của toán hạng trái sau khi promote.
 
-New bits are filled with zeros, with a possible exception noted in the
-implementation-defined behavior, below.
+Bit mới được lấp bằng 0, với một ngoại lệ có thể có được nói trong
+phần hành vi implementation-defined, bên dưới.
 
 [i[`<<` shift left]]
 [i[`>>` shift right]]
 
-|Operation|Operator|Example|
+|Phép|Toán tử|Ví dụ|
 |-|:-:|-|
-|Shift left|`<<`|`a = b << c`|
-|Shift right|`>>`|`a = b >> c`|
+|Shift trái|`<<`|`a = b << c`|
+|Shift phải|`>>`|`a = b >> c`|
 
-There's also the same similar shorthand for shifting:
+Cũng có dạng viết tắt tương tự cho shift:
 
 [i[`>>=` assignment]]
 [i[`<<=` assignment]]
 
-|Operator|Example|Longhand equivalent|
+|Toán tử|Ví dụ|Tương đương đầy đủ|
 |-|-|-|
 |`>>=`|`a >>= c`|`a = a >> c`|
 |`<<=`|`a <<= c`|`a = a << c`|
 
-Watch for undefined behavior: no negative shifts, and no shifts that are
-larger than the size of the promoted left operand.
+Coi chừng hành vi không xác định: không shift số âm, và không shift
+lớn hơn kích thước của toán hạng trái sau khi promote.
 
-Also watch for implementation-defined behavior: if you right-shift a
-negative number, the results are implementation-defined. (It's perfectly
-fine to right-shift a signed `int`, just make sure it's positive.)
+Cũng coi chừng hành vi implementation-defined: nếu bạn shift phải
+một số âm, kết quả là implementation-defined. (Shift phải một `int`
+có dấu thì hoàn toàn ổn, chỉ cần nó là số dương.)
 
 [i[Bitwise operations]>]
