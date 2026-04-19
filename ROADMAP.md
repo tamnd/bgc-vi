@@ -26,7 +26,7 @@ Programming (Vietnamese).
 | bgc_part_1300_multifile.md | Multifile Projects | done |
 | bgc_part_1400_env.md | The Outside Environment | done |
 | bgc_part_1500_cpp.md | The C Preprocessor | done |
-| bgc_part_1600_structs2.md | `struct`s II: More Fun with `struct`s | not started |
+| bgc_part_1600_structs2.md | `struct`s II: More Fun with `struct`s | done |
 | bgc_part_1700_strings2.md | Characters and Strings II | not started |
 | bgc_part_1800_enum.md | Enumerated Types: `enum` | not started |
 | bgc_part_1900_ptrptr.md | Pointers III: Pointers to Pointers and More | not started |

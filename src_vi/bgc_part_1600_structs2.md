@@ -3,40 +3,40 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# `struct`s II: More Fun with `struct`s
+# `struct` II: Nghịch `struct` vui hơn
 
 [i[`struct` keyword]<]
 
-Turns out there's a lot more you can do with `struct`s than we've talked
-about, but it's just a big pile of miscellaneous things. So we'll throw
-them in this chapter.
+Hóa ra còn khá nhiều thứ có thể làm với `struct` mà ta chưa bàn,
+nhưng nó chỉ là một đống thứ linh tinh. Nên ta nhét hết vào chương
+này.
 
-If you're good with `struct` basics, you can round out your knowledge
-here.
+Nếu bạn đã thạo căn bản về `struct`, bạn có thể làm tròn kiến thức
+ở đây.
 
-## Initializers of Nested `struct`s and Arrays
+## Khởi tạo `struct` lồng nhau và mảng
 
 [i[`struct` keyword-->initializers]<]
 
-Remember how you could [initialize structure members along these
-lines](#struct-initializers)?
+Nhớ cách bạn có thể [khởi tạo thành viên struct theo các dòng
+này](#struct-initializers) không?
 
 ``` {.c}
 struct foo x = {.a=12, .b=3.14};
 ```
 
-Turns out we have more power in these initializers than we'd originally
-shared. Exciting!
+Hóa ra ta có nhiều sức mạnh trong các initializer này hơn là lúc đầu
+chia sẻ. Hấp dẫn!
 
-For one thing, if you have a nested substructure like the following, you
-can initialize members of that substructure by following the variable
-names down the line:
+Một chuyện là, nếu bạn có substructure lồng nhau như sau, bạn có thể
+khởi tạo thành viên của substructure đó bằng cách đi theo tên biến
+xuống dần:
 
 ``` {.c}
 struct foo x = {.a.b.c=12};
 ```
 
-Let's look at an example:
+Xem ví dụ:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -64,12 +64,12 @@ int main(void)
 }
 ```
 
-Check out lines 16-17! That's where we're initializing members of the
-`struct cabin_information` in the definition of `s`, our `struct
-spaceship`.
+Xem dòng 16-17! Đó là chỗ ta khởi tạo các thành viên của
+`struct cabin_information` trong định nghĩa `s`, tức `struct
+spaceship` của ta.
 
-And here is another option for that same initializer---this time we'll
-do something more standard-looking, but either approach works:
+Và đây là lựa chọn khác cho cùng initializer đó, lần này ta làm một
+thứ trông chuẩn hơn, nhưng cách nào cũng chạy:
 
 ``` {.c .numberLines startFrom="15"}
     struct spaceship s = {
@@ -81,11 +81,11 @@ do something more standard-looking, but either approach works:
     };
 ```
 
-Now, as if the above information isn't spectacular enough, we can also
-mix in array initializers in there, too.
+Giờ, như thể thông tin ở trên còn chưa đủ ngoạn mục, ta cũng có thể
+trộn initializer mảng vào đó luôn.
 
-Let's change this up to get an array of passenger information in there,
-and we can check out how the initializers work in there, too.
+Sửa cái này để có mảng thông tin hành khách, và ta có thể xem
+initializer hoạt động trong đó ra sao.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -128,14 +128,14 @@ int main(void)
 
 [i[`struct` keyword-->initializers]>]
 
-## Anonymous `struct`s
+## `struct` vô danh
 
 [i[`struct` keyword-->anonymous]<]
 
-These are "the `struct` with no name". We also mention these in the
-[`typedef`](#typedef-struct) section, but we'll refresh here.
+Đây là "struct không tên". Ta cũng có nhắc mấy cái này ở phần
+[`typedef`](#typedef-struct), nhưng ta sẽ ôn lại ở đây.
 
-Here's a regular `struct`:
+Đây là `struct` thường:
 
 ``` {.c}
 struct animal {
@@ -144,7 +144,7 @@ struct animal {
 };
 ```
 
-And here's the anonymous equivalent:
+Và đây là phiên bản vô danh tương đương:
 
 ``` {.c}
 struct {              // <-- No name!
@@ -153,14 +153,14 @@ struct {              // <-- No name!
 };
 ```
 
-Okaaaaay. So we have a `struct`, but it has no name, so we have no way
-of using it later? Seems pretty pointless.
+Ừuuuu. Vậy ta có một `struct` không tên, không có cách nào dùng sau
+này? Nghe có vẻ vô dụng.
 
-Admittedly, in that example, it is. But we can still make use of it a
-couple ways.
+Công nhận, trong ví dụ đó, đúng là thế. Nhưng ta vẫn có thể tận dụng
+nó bằng vài cách.
 
-One is rare, but since the anonymous `struct` represents a type, we can
-just put some variable names after it and use them.
+Một cách hiếm, nhưng vì `struct` vô danh đại diện một kiểu, ta có
+thể đặt vài tên biến ngay sau nó và dùng chúng.
 
 ``` {.c}
 struct {                   // <-- No name!
@@ -172,10 +172,10 @@ a.name = "antelope";
 c.leg_count = 4;           // for example
 ```
 
-But that's still not that useful.
+Nhưng cũng không hữu dụng mấy.
 
-Far more common is use of anonymous `struct`s with a `typedef` so that
-we can use it later (e.g. to pass variables to functions).
+Phổ biến hơn nhiều là dùng `struct` vô danh với `typedef` để có thể
+dùng sau (ví dụ để truyền biến cho hàm).
 
 ``` {.c}
 typedef struct {                   // <-- No name!
@@ -189,26 +189,25 @@ a.name = "antelope";
 c.leg_count = 4;           // for example
 ```
 
-Personally, I don't use many anonymous `struct`s. I think it's more
-pleasant to see the entire `struct animal` before the variable name in a
-declaration.
+Cá nhân tôi không dùng nhiều `struct` vô danh. Tôi thấy dễ chịu hơn
+khi thấy cả `struct animal` trước tên biến trong khai báo.
 
-But that's just, like, my opinion, man.
+Nhưng đó chỉ là, kiểu, ý kiến của tôi thôi, anh bạn.
 
 [i[`struct` keyword-->anonymous]>]
 
-## Self-Referential `struct`s
+## `struct` tự tham chiếu
 
 [i[`struct` keyword-->self-referential]<]
 
-For any graph-like data structure, it's useful to be able to have
-pointers to the connected nodes/vertices. But this means that in the
-definition of a node, you need to have a pointer to a node. It's chicken
-and eggy!
+Với bất kỳ cấu trúc dữ liệu dạng đồ thị nào, có con trỏ tới các
+node/đỉnh nối với nó là hữu ích. Nhưng điều này nghĩa là trong định
+nghĩa một node, bạn cần có con trỏ tới một node. Con gà và quả
+trứng!
 
-But it turns out you can do this in C with no problem whatsoever.
+Nhưng hóa ra bạn làm được chuyện này trong C mà không gặp vấn đề gì.
 
-For example, here's a linked list node:
+Ví dụ, đây là một node của linked list:
 
 ``` {.c}
 struct node {
@@ -217,11 +216,11 @@ struct node {
 };
 ```
 
-It's important to note that `next` is a pointer. This is what allows the
-whole thing to even build. Even though the compiler doesn't know what
-the entire `struct node` looks like yet, all pointers are the same size.
+Quan trọng là `next` là con trỏ. Đây là điều cho phép cả mớ build
+được. Dù compiler chưa biết nguyên `struct node` trông thế nào, mọi
+con trỏ đều cùng kích thước.
 
-Here's a cheesy linked list program to test it out:
+Đây là một chương trình linked list ẩu để thử nó:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -252,7 +251,7 @@ int main(void)
 }
 ```
 
-Running that prints:
+Chạy nó in ra:
 
 ``` {.default}
 11
@@ -262,20 +261,20 @@ Running that prints:
 
 [i[`struct` keyword-->self-referential]>]
 
-## Flexible Array Members
+## Flexible array member
 
 [i[`struct` keyword-->flexible array members]<]
 
-Back in the good old days, when people carved C code out of wood, some
-folks thought would be neat if they could allocate `struct`s that had
-variable length arrays at the end of them.
+Ngày xửa ngày xưa, khi người ta còn đẽo code C từ gỗ, có người nghĩ
+sẽ hay nếu có thể cấp phát `struct` mà có mảng độ dài biến đổi ở
+cuối.
 
-I want to be clear that the first part of the section is the old way of
-doing things, and we're going to do things the new way after that.
+Tôi muốn nói rõ rằng phần đầu của đoạn này là cách cũ, và ta sẽ làm
+cách mới ở phần sau.
 
-For example, maybe you could define a `struct` for holding strings and
-the length of that string. It would have a length and an array to hold
-the data. Maybe something like this:
+Ví dụ, có thể bạn định nghĩa một `struct` để chứa chuỗi cùng độ dài
+chuỗi đó. Nó sẽ có độ dài và một mảng để chứa dữ liệu. Có khi thế
+này:
 
 ``` {.c}
 struct len_string {
@@ -284,21 +283,20 @@ struct len_string {
 };
 ```
 
-But that has `8` hardcoded as the maximum length of a string, and that's
-not much. What if we did something _clever_ and just `malloc()`d some
-extra space at the end after the struct, and then let the data overflow
-into that space?
+Nhưng cái đó có `8` được đóng cứng làm độ dài tối đa của chuỗi, mà
+không nhiều lắm. Thế nếu ta làm gì đó _ngầu_ và chỉ cần `malloc()`
+thêm không gian ở cuối sau struct, rồi để dữ liệu tràn vào không
+gian đó?
 
-Let's do that, and then allocate another 40 bytes on top of it:
+Làm thế đi, rồi cấp phát thêm 40 byte:
 
 ``` {.c}
 struct len_string *s = malloc(sizeof *s + 40);
 ```
 
-Because `data` is the last field of the `struct`, if we overflow that
-field, it runs out into space that we already allocated! For this
-reason, this trick only works if the short array is the _last_ field in
-the `struct`.
+Vì `data` là field cuối của `struct`, nếu ta làm tràn field đó, nó
+chảy ra không gian mà ta đã cấp phát! Vì vậy, trò này chỉ hoạt động
+nếu mảng ngắn là field _cuối_ của `struct`.
 
 ``` {.c}
 // Copy more than 8 bytes!
@@ -308,8 +306,8 @@ strcpy(s->data, "Hello, world!");  // Won't crash. Probably.
 
 [i[Arrays-->zero length]<]
 
-In fact, there was a common compiler workaround for doing this, where
-you'd allocate a zero length array at the end:
+Thật ra, có một cách lách thường gặp cho compiler để làm chuyện này,
+bạn cấp phát một mảng độ dài không ở cuối:
 
 ``` {.c}
 struct len_string {
@@ -318,11 +316,11 @@ struct len_string {
 };
 ```
 
-And then every extra byte you allocated was ready for use in that
-string.
+Và rồi mỗi byte thừa bạn cấp phát đã sẵn sàng để dùng trong chuỗi
+đó.
 
-Because `data` is the last field of the `struct`, if we overflow that
-field, it runs out into space that we already allocated!
+Vì `data` là field cuối của `struct`, nếu ta làm tràn field đó, nó
+chảy ra không gian mà ta đã cấp phát!
 
 ``` {.c}
 // Copy more than 8 bytes!
@@ -330,17 +328,17 @@ field, it runs out into space that we already allocated!
 strcpy(s->data, "Hello, world!");  // Won't crash. Probably.
 ```
 
-But, of course, actually accessing the data beyond the end of that array
-is undefined behavior! In these modern times, we no longer deign to
-resort to such savagery.
+Nhưng dĩ nhiên, truy cập dữ liệu vượt cuối mảng đó là undefined
+behavior! Trong thời hiện đại, ta không còn hạ mình làm kiểu man rợ
+đó.
 
 [i[Arrays-->zero length]>]
 
-Luckily for us, we can still get the same effect with C99 and later, but
-now it's legal.
+May cho ta, ta vẫn có hiệu quả tương tự với C99 trở về sau, nhưng
+giờ là hợp pháp.
 
-Let's just change our above definition to have no size for the
-array^[Technically we say that it has an _incomplete type_.]:
+Chỉ việc đổi định nghĩa trên để mảng không có kích thước^[Kỹ thuật
+mà nói, ta gọi nó có _incomplete type_.]:
 
 ``` {.c}
 struct len_string {
@@ -349,12 +347,12 @@ struct len_string {
 };
 ```
 
-Again, this only works if the flexible array member is the _last_ field
-in the `struct`.
+Vẫn thế, cái này chỉ chạy nếu flexible array member là field _cuối_
+của `struct`.
 
-And then we can allocate all the space we want for those strings by
-`malloc()`ing larger than the `struct len_string`, as we do in this
-example that makes a new `struct len_string` from a C string:
+Rồi ta có thể cấp phát bao nhiêu không gian tùy ý cho các chuỗi đó
+bằng cách `malloc()` lớn hơn `struct len_string`, như trong ví dụ
+này tạo một `struct len_string` mới từ chuỗi C:
 
 
 ``` {.c}
@@ -376,22 +374,20 @@ struct len_string *len_string_from_c_string(char *s)
 
 [i[`struct` keyword-->flexible array members]>]
 
-## Padding Bytes {#struct-padding-bytes}
+## Byte đệm (padding) {#struct-padding-bytes}
 
 [i[`struct` keyword-->padding bytes]<]
 
-Beware that C is allowed to add padding bytes within or after a `struct`
-as it sees fit. You can't trust that they will be directly adjacent in
-memory^[Though some compilers have options to force this to
-occur---search for `__attribute__((packed))` to see how to do this with
-GCC.].
+Cẩn thận rằng C được phép thêm byte đệm bên trong hoặc sau một
+`struct` tùy ý nó. Bạn không thể tin rằng chúng sẽ liền kề nhau
+trong bộ nhớ^[Dù vài compiler có tùy chọn ép chuyện này xảy ra, tra
+`__attribute__((packed))` để xem cách làm với GCC.].
 
-Let's take a look at this program. We output two numbers. One is the sum
-of the `sizeof`s the individual field types. The other is the `sizeof`
-the entire `struct`.
+Xem chương trình này. Ta xuất hai số. Một là tổng `sizeof` của từng
+kiểu field riêng lẻ. Cái kia là `sizeof` cả `struct`.
 
-One would expect them to be the same. The size of the total is the size
-of the sum of its parts, right?
+Lẽ ra ta kỳ vọng chúng bằng nhau. Kích thước của cái toàn thể là
+tổng kích thước các phần, đúng không?
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -410,17 +406,16 @@ int main(void)
 }
 ```
 
-But on my system, this outputs:
+Nhưng trên hệ của tôi, cái này xuất:
 
 ``` {.default}
 10
 16
 ```
 
-They're not the same! The compiler has added 6 bytes of padding to help
-it be more performant. Maybe you got different output with your
-compiler, but unless you're forcing it, you can't be sure there's no
-padding.
+Chúng không bằng nhau! Compiler đã thêm 6 byte đệm để giúp nó chạy
+nhanh hơn. Có thể bạn nhận kết quả khác với compiler của bạn, nhưng
+trừ khi bạn ép buộc, bạn không thể chắc không có đệm.
 
 [i[`struct` keyword-->padding bytes]>]
 
@@ -428,14 +423,13 @@ padding.
 
 [i[`offsetof()` macro]<]
 
-In the previous section, we saw that the compiler could inject padding
-bytes at will inside a structure.
+Trong đoạn trước, ta thấy compiler có thể chêm byte đệm tùy ý vào
+trong cấu trúc.
 
-What if we needed to know where those were? We can measure it with
-`offsetof`, defined in `<stddef.h>`.
+Nếu ta cần biết chúng ở đâu? Ta có thể đo bằng `offsetof`, định
+nghĩa trong `<stddef.h>`.
 
-Let's modify the code from above to print the offsets of the individual
-fields in the `struct`:
+Sửa code ở trên để in offset của từng field trong `struct`:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -457,7 +451,7 @@ int main(void)
 }
 ```
 
-For me, this outputs:
+Với tôi, cái này xuất:
 
 ``` {.default}
 0
@@ -466,10 +460,10 @@ For me, this outputs:
 12
 ```
 
-indicating that we're using 4 bytes for each of the fields. It's a
-little weird, because `char` is only 1 byte, right? The compiler is
-putting 3 padding bytes after each `char` so that all the fields are 4
-bytes long. Presumably this will run faster on my CPU.
+cho biết ta đang dùng 4 byte cho mỗi field. Hơi lạ, vì `char` chỉ
+có 1 byte, đúng không? Compiler đang đặt 3 byte đệm sau mỗi `char`
+để mọi field đều dài 4 byte. Chắc chuyện này sẽ chạy nhanh hơn trên
+CPU của tôi.
 
 [i[`offsetof()` macro]>]
 
@@ -491,16 +485,16 @@ bytes long. Presumably this will run faster on my CPU.
 
 -->
 
-## Fake OOP {#fake-oop}
+## OOP giả {#fake-oop}
 
-There's a slightly abusive thing that's sort of OOP-like that you can do
-with `struct`s.
+Có một trò hơi lạm dụng, kiểu kiểu OOP, mà bạn có thể làm với
+`struct`.
 
-Since the pointer to the `struct` is the same as a pointer to the first
-element of the `struct`, you can freely cast a pointer to the `struct`
-to a pointer to the first element.
+Vì con trỏ tới `struct` trùng với con trỏ tới phần tử đầu tiên của
+`struct`, bạn có thể thoải mái ép kiểu con trỏ tới `struct` sang con
+trỏ tới phần tử đầu tiên.
 
-What this means is that we can set up a situation like this:
+Điều này có nghĩa là ta có thể dựng tình huống thế này:
 
 ``` {.c}
 struct parent {
@@ -513,17 +507,17 @@ struct child {
 };
 ```
 
-Then we are able to pass a pointer to a `struct child` to a function
-that expects either that _or_ a pointer to a `struct parent`!
+Rồi ta có thể truyền con trỏ tới `struct child` cho một hàm mong đợi
+_hoặc_ con trỏ tới `struct parent`!
 
-Because `struct parent super` is the first item in the `struct child`, a
-pointer to any `struct child` is the same as a pointer to that `super`
-field^[`super` isn't a keyword, incidentally. I'm just stealing some OOP
-terminology.].
+Vì `struct parent super` là phần tử đầu của `struct child`, con trỏ
+tới bất kỳ `struct child` nào cũng trùng với con trỏ tới field
+`super` đó^[Nhân tiện, `super` không phải từ khóa. Tôi chỉ mượn vài
+thuật ngữ OOP thôi.].
 
-Let's set up an example here. We'll make `struct`s as above, but then
-we'll pass a pointer to a `struct child` to a function that needs a
-pointer to a `struct parent`... and it'll still work.
+Dựng ví dụ luôn. Ta làm `struct` như trên, rồi truyền con trỏ tới
+`struct child` cho hàm cần con trỏ tới `struct parent`... và vẫn
+chạy.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -563,21 +557,20 @@ int main(void)
 }
 ```
 
-See what we did on the last line of `main()`? We called `print_parent()`
-but passed a `struct child*` as the argument! Even though
-`print_parent()` needs the argument to point to a `struct parent`, we're
-_getting away with it_ because the first field in the `struct child` is
-a `struct parent`.
+Thấy chuyện ta làm ở dòng cuối `main()` chứ? Ta gọi `print_parent()`
+mà truyền `struct child*` làm tham số! Dù `print_parent()` cần tham
+số trỏ tới `struct parent`, ta _thoát_ được vì field đầu của
+`struct child` là `struct parent`.
 
-Again, this works because a pointer to a `struct` has the same value as
-a pointer to the first field in that `struct`.
+Vẫn vậy, cái này chạy được vì con trỏ tới `struct` có cùng giá trị
+với con trỏ tới field đầu trong `struct` đó.
 
-This all hinges on this part of the spec:
+Tất cả dựa trên phần này của spec:
 
 > **§6.7.2.1¶15** [...] A pointer to a structure object, suitably
 > converted, points to its initial member [...], and vice versa.
 
-and
+và
 
 > **§6.5¶7** An object shall have its stored value accessed only by an
 > lvalue expression that has one of the following types:
@@ -585,18 +578,18 @@ and
 > * a type compatible with the effective type of the object
 > * [...]
 
-and my assumption that "suitably converted" means "cast to the
-effective type of the initial member".
+và giả định của tôi rằng "suitably converted" nghĩa là "ép kiểu sang
+kiểu hiệu lực của phần tử đầu".
 
-## Bit-Fields
+## Bit-field
 
 [i[`struct` keyword-->bit fields]<]
 
-In my experience, these are rarely used, but you might see them out
-there from time to time, especially in lower-level applications that
-pack bits together into larger spaces.
+Theo kinh nghiệm của tôi, mấy cái này ít khi dùng, nhưng bạn có thể
+thấy đây đó, đặc biệt trong ứng dụng tầng thấp nơi người ta dồn bit
+vào không gian lớn hơn.
 
-Let's take a look at some code to demonstrate a use case:
+Xem đoạn code để minh họa trường hợp dùng:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -614,20 +607,20 @@ int main(void)
 }
 ```
 
-For me, this prints `16`. Which makes sense, since `unsigned`s are 4
-bytes on my system.
+Với tôi, cái này in `16`. Hợp lý, vì `unsigned` là 4 byte trên hệ
+của tôi.
 
-But what if we knew that all the values that were going to be stored in
-`a` and `b` could be stored in 5 bits, and the values in `c`, and `d`
-could be stored in 3 bits?  That's only a total 16 bits. Why have 128
-bits reserved for them if we're only going to use 16?
+Nhưng nếu ta biết mọi giá trị sẽ được lưu trong `a` và `b` đều chứa
+được trong 5 bit, và giá trị trong `c` và `d` chứa được trong 3 bit?
+Tổng cộng mới 16 bit. Sao lại phải dành 128 bit cho chúng nếu ta chỉ
+dùng 16?
 
-Well, we can tell C to pretty-please try to pack these values in. We can
-specify the maximum number of bits that values can take (from 1 up the
-size of the containing type).
+Ta có thể nói với C làm-ơn-thử-gói các giá trị này lại. Ta có thể
+chỉ định số bit tối đa mà giá trị có thể chiếm (từ 1 lên kích thước
+kiểu chứa).
 
-We do this by putting a colon after the field name, followed by the
-field width in bits.
+Làm bằng cách đặt dấu hai chấm sau tên field, rồi tới độ rộng field
+tính bằng bit.
 
 ``` {.c .numberLines startFrom="3"}
 struct foo {
@@ -638,18 +631,17 @@ struct foo {
 };
 ```
 
-Now when I ask C how big my `struct foo` is, it tells me 4! It was 16
-bytes, but now it's only 4. It has "packed" those 4 values down into 4
-bytes, which is a four-fold memory savings.
+Giờ khi tôi hỏi C `struct foo` lớn cỡ nào, nó nói 4! Trước là 16
+byte, giờ chỉ còn 4. Nó đã "gói" 4 giá trị đó vào 4 byte, tiết kiệm
+bộ nhớ gấp bốn.
 
-The tradeoff is, of course, that the 5-bit fields can only hold values
-from 0-31 and the 3-bit fields can only hold values from 0-7. But life's
-all about compromise, after all.
+Đánh đổi dĩ nhiên là field 5-bit chỉ chứa giá trị 0-31 và field
+3-bit chỉ chứa giá trị 0-7. Nhưng đời sau cùng vẫn là về thỏa hiệp.
 
-### Non-Adjacent Bit-Fields
+### Bit-field không liền kề
 
-A gotcha: C will only combine **adjacent** bit-fields. If they're
-interrupted by non-bit-fields, you get no savings:
+Một cái bẫy: C chỉ gộp bit-field **liền kề** thôi. Nếu chúng bị ngắt
+bởi non-bit-field, bạn không tiết kiệm được gì:
 
 ``` {.c}
 struct foo {            // sizeof(struct foo) == 16 (for me)
@@ -660,14 +652,14 @@ struct foo {            // sizeof(struct foo) == 16 (for me)
 };
 ```
 
-In that example, since `a` is not adjacent to `c`, they are both
-"packed" in their own `int`s.
+Trong ví dụ đó, vì `a` không liền kề `c`, chúng đều được "gói" vào
+`int` riêng của mình.
 
-So we have one `int` each for `a`, `b`, `c`, and `d`. Since my `int`s
-are 4 bytes, that's a grand total of 16 bytes.
+Nên ta có một `int` cho mỗi `a`, `b`, `c`, `d`. Vì `int` của tôi là
+4 byte, tổng cộng 16 byte.
 
-A quick rearrangement yields some space savings from 16 bytes down to 12
-bytes (on my system):
+Sắp xếp lại nhanh tiết kiệm không gian từ 16 byte xuống 12 byte
+(trên hệ của tôi):
 
 ``` {.c}
 struct foo {            // sizeof(struct foo) == 12 (for me)
@@ -678,32 +670,31 @@ struct foo {            // sizeof(struct foo) == 12 (for me)
 };
 ```
 
-And now, since `a` is next to `c`, the compiler puts them together into
-a single `int`.
+Và giờ, vì `a` kế bên `c`, compiler đặt chúng vào một `int` duy
+nhất.
 
-So we have one `int` for a combined `a` and `c`, and one `int` each for
-`b` and `d`. For a grand total of 3 `int`s, or 12 bytes.
+Nên ta có một `int` cho `a` và `c` gộp, và một `int` mỗi cái cho
+`b` và `d`. Tổng cộng 3 `int`, hay 12 byte.
 
-Put all your bitfields together to get the compiler to combine them.
+Đặt hết bitfield chung với nhau để compiler gộp chúng.
 
-### Signed or Unsigned `int`s
+### `int` có dấu hay không dấu
 
-If you just declare a bit-field to be `int`, the different compilers
-will treat it as `signed` or `unsigned`. Just like the situation with
-`char`.
+Nếu bạn chỉ khai báo bit-field là `int`, các compiler khác nhau sẽ
+xử lý nó là `signed` hoặc `unsigned`. Giống tình huống với `char`.
 
-Be specific about the signedness when using bit-fields.
+Hãy rõ ràng về dấu khi dùng bit-field.
 
-### Unnamed Bit-Fields
+### Bit-field không tên
 
-In some specific circumstances, you might need to reserve some bits for
-hardware reasons, but not need to use them in code.
+Trong vài tình huống cụ thể, bạn có thể cần dành một số bit vì lý do
+phần cứng, nhưng không cần dùng chúng trong code.
 
-For example, let's say you have a byte where the top 2 bits have a
-meaning, the bottom 1 bit has a meaning, but the middle 5 bits do not
-get used by you^[Assuming 8-bit `char`s, i.e. `CHAR_BIT == 8`.].
+Ví dụ, giả sử bạn có một byte mà 2 bit trên có ý nghĩa, 1 bit dưới
+có ý nghĩa, còn 5 bit giữa không được bạn dùng^[Giả sử `char` 8 bit,
+tức là `CHAR_BIT == 8`.].
 
-We _could_ do something like this:
+Ta _có thể_ làm thế này:
 
 ``` {.c}
 struct foo {
@@ -713,13 +704,13 @@ struct foo {
 };
 ```
 
-And that works---in our code we use `a` and `b`, but never `dummy`. It's
-just there to eat up 5 bits to make sure `a` and `b` are in the
-"required" (by this contrived example) positions within the byte.
+Và cái đó chạy, trong code ta dùng `a` và `b`, không bao giờ dùng
+`dummy`. Nó chỉ ở đó để ăn hết 5 bit để chắc rằng `a` và `b` ở đúng
+vị trí "yêu cầu" (theo ví dụ giả định này) trong byte.
 
-C allows us a way to clean this up: _unnamed bit-fields_. You can just
-leave the name (`dummy`) out in this case, and C is perfectly happy for
-the same effect:
+C cho ta một cách dọn cái này: _bit-field không tên_. Bạn chỉ cần
+bỏ tên (`dummy`) trong trường hợp này, và C hoàn toàn hài lòng cho
+hiệu quả tương tự:
 
 ``` {.c}
 struct foo {
@@ -729,13 +720,13 @@ struct foo {
 };
 ```
 
-### Zero-Width Unnamed Bit-Fields
+### Bit-field không tên độ rộng zero
 
-Some more esoterica out here... Let's say you were packing bits into an
-`unsigned int`, and you needed some adjacent bit-fields to pack into the
-_next_ `unsigned int`.
+Thêm tí thứ bí hiểm ngoài đây... Giả sử bạn đang gói bit vào một
+`unsigned int`, và bạn cần vài bit-field liền kề được gói vào
+`unsigned int` _tiếp theo_.
 
-That is, if you do this:
+Tức là, nếu bạn làm thế này:
 
 ``` {.c}
 struct foo {
@@ -746,12 +737,12 @@ struct foo {
 };
 ```
 
-the compiler packs all those into a single `unsigned int`. But what if
-you needed `a` and `b` in one `int`, and `c` and `d` in a different one?
+compiler gói hết tất cả vào một `unsigned int` duy nhất. Nhưng nếu
+bạn cần `a` và `b` trong một `int`, và `c` và `d` trong một cái
+khác?
 
-There's a solution for that: put an unnamed bit-field of width `0` where
-you want the compiler to start anew with packing bits in a different
-`int`:
+Có giải pháp: đặt bit-field không tên độ rộng `0` ở chỗ bạn muốn
+compiler bắt đầu lại việc gói bit vào `int` khác:
 
 ``` {.c}
 struct foo {
@@ -763,29 +754,30 @@ struct foo {
 };
 ```
 
-It's analogous to an explicit page break in a word processor. You're
-telling the compiler, "Stop packing bits in this `unsigned`, and start
-packing them in the next one."
+Nó tương tự như ngắt trang tường minh trong word processor. Bạn nói
+với compiler: "Dừng gói bit vào `unsigned` này, và bắt đầu gói vào
+cái tiếp theo."
 
-By adding the zero-width unnamed bit field in that spot, the compiler
-puts `a` and `b` in one `unsigned int`, and `c` and `d` in another
-`unsigned int`. Two total, for a size of 8 bytes on my system (`unsigned
-int`s are 4 bytes each).
+Bằng cách thêm bit-field không tên độ rộng zero ở chỗ đó, compiler
+đặt `a` và `b` vào một `unsigned int`, và `c` với `d` vào một
+`unsigned int` khác. Tổng cộng hai, cỡ 8 byte trên hệ của tôi
+(`unsigned int` mỗi cái 4 byte).
 
 [i[`struct` keyword-->bit fields]>]
 
-## Unions
+## Union
 
 [i[`union` keyword]<]
 
-These are basically just like `struct`s, except the fields overlap in
-memory. The `union` will be only large enough for the largest field, and
-you can only use one field at a time.
+Về cơ bản mấy cái này giống `struct`, chỉ khác là các field chồng
+lên nhau trong bộ nhớ. `union` sẽ chỉ đủ lớn cho field lớn nhất, và
+bạn chỉ dùng được một field mỗi lần.
 
-It's a way to reuse the same memory space for different types of data.
+Đây là cách tái sử dụng cùng không gian bộ nhớ cho các kiểu dữ liệu
+khác nhau.
 
-You declare them just like `struct`s, except it's `union`. Take a look
-at this:
+Bạn khai báo chúng y như `struct`, chỉ đổi sang `union`. Xem cái
+này:
 
 ``` {.c}
 union foo {
@@ -795,30 +787,30 @@ union foo {
 };
 ```
 
-Now, that's a lot of fields. If this were a `struct`, my system would
-tell me it took 36 bytes to hold it all.
+Đấy, có một đống field. Nếu đây là `struct`, hệ tôi sẽ nói cần 36
+byte để chứa tất cả.
 
-But it's a `union`, so all those fields overlap in the same stretch of
-memory. The biggest one is `int` (or `float`), taking up 4 bytes on my
-system. And, indeed, if I ask for the `sizeof` the `union foo`, it tells
-me 4!
+Nhưng đây là `union`, nên mọi field đó chồng lên cùng đoạn bộ nhớ.
+Field lớn nhất là `int` (hoặc `float`), chiếm 4 byte trên hệ tôi.
+Và đúng thế, nếu tôi hỏi `sizeof` của `union foo`, nó nói 4!
 
-The tradeoff is that you can only portably use one of those fields at a
-time. However...
+Đánh đổi là bạn chỉ dùng được di động một trong các field đó mỗi
+lần. Tuy nhiên...
 
-### Unions and Type Punning {#union-type-punning}
+### Union và type punning {#union-type-punning}
 
 [i[`union` keyword-->type punning]<]
 
-You can non-portably write to one `union` field and read from another!
+Bạn có thể ghi vào một field của `union` rồi đọc từ field khác,
+nhưng không di động!
 
-Doing so is called [flw[type punning|Type_punning]], and you'd use it if
-you really knew what you were doing, typically with some kind of
-low-level programming.
+Làm vậy gọi là [flw[type punning|Type_punning]], và bạn dùng nó nếu
+bạn thật sự biết mình đang làm gì, thường là trong kiểu lập trình
+tầng thấp nào đó.
 
-Since the members of a union share the same memory, writing to one
-member necessarily affects the others. And if you read from one what was
-written to another, you get some weird effects.
+Vì các thành viên của union chia sẻ cùng bộ nhớ, ghi vào một thành
+viên tất yếu ảnh hưởng các thành viên khác. Và nếu bạn đọc từ cái đã
+được ghi vào cái khác, bạn sẽ có những hiệu ứng kỳ lạ.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -840,31 +832,31 @@ int main(void)
 }
 ```
 
-On my system, this prints out:
+Trên hệ của tôi, cái này in ra:
 
 ```
 3.141590
 4048
 ```
 
-because under the hood, the object representation for the float `3.14159`
-was the same as the object representation for the short `4048`. On my
-system. Your results may vary.
+vì dưới mui xe, biểu diễn đối tượng cho float `3.14159` giống hệt
+biểu diễn đối tượng cho short `4048`. Trên hệ của tôi. Kết quả của
+bạn có thể khác.
 
 [i[`union` keyword-->type punning]>]
 
-### Pointers to `union`s
+### Con trỏ tới `union`
 
 [i[`union` keyword-->pointers to]<]
 
-If you have a pointer to a `union`, you can cast that pointer to any of
-the types of the fields in that `union` and get the values out that way.
+Nếu bạn có con trỏ tới `union`, bạn có thể ép kiểu con trỏ đó sang
+bất kỳ kiểu nào của các field trong `union` đó và lấy giá trị ra
+theo cách đó.
 
-In this example, we see that the `union` has `int`s and `float`s in it.
-And we get pointers to the `union`, but we cast them to `int*` and
-`float*` types (the cast silences compiler warnings). And then if we
-dereference those, we see that they have the values we stored directly
-in the `union`.
+Trong ví dụ này, ta thấy `union` có `int` và `float` trong đó. Và
+ta lấy con trỏ tới `union`, nhưng ép sang kiểu `int*` và `float*`
+(cast để làm im compiler). Rồi nếu ta dereference chúng, ta thấy
+chúng có giá trị ta đã lưu trực tiếp trong `union`.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -892,9 +884,9 @@ int main(void)
 }
 ```
 
-The reverse is also true. If we have a pointer to a type inside the
-`union`, we can cast that to a pointer to the `union` and access its
-members.
+Điều ngược lại cũng đúng. Nếu ta có con trỏ tới một kiểu bên trong
+`union`, ta có thể ép sang con trỏ tới `union` và truy cập các thành
+viên của nó.
 
 ``` {.c}
 union foo x;
@@ -905,23 +897,23 @@ p->a = 12;  // This line the same as...
 x.a = 12;   // this one.
 ```
 
-All this just lets you know that, under the hood, all these values in a
-`union` start at the same place in memory, and that's the same as where
-the entire `union` is.
+Tất cả chuyện này chỉ cho bạn biết rằng, dưới mui xe, mọi giá trị
+trong một `union` bắt đầu cùng chỗ trong bộ nhớ, và đó cũng là chỗ
+cả `union` ở.
 
 [i[`union` keyword-->pointers to]>]
 
-### Common Initial Sequences in Unions
+### Common initial sequence trong union
 
 [i[`union` keyword-->common initial sequences]<]
 
-If you have a `union` of `struct`s, and all those `struct`s begin with a
-_common initial sequence_, it's valid to access members of that sequence
-from any of the `union` members.
+Nếu bạn có một `union` các `struct`, và tất cả `struct` đó bắt đầu
+bằng một _common initial sequence_, truy cập các thành viên của
+sequence đó từ bất kỳ thành viên nào của `union` là hợp lệ.
 
-What?
+Gì cơ?
 
-Here are two `struct`s with a common initial sequence:
+Đây là hai `struct` với common initial sequence:
 
 ``` {.c}
 struct a {
@@ -940,12 +932,12 @@ struct b {
 };
 ```
 
-Do you see it? It's that they start with `int` followed by
-`float`---that's the common initial sequence. The members in the
-sequence of the `struct`s have to be compatible types. And we see that
-with `x` and `y`, which are `int` and `float` respectively.
+Bạn thấy chưa? Là chúng bắt đầu bằng `int` tiếp theo là `float`, đó
+là common initial sequence. Các thành viên trong sequence của các
+`struct` phải là kiểu tương thích. Và ta thấy với `x` và `y`, là
+`int` và `float`.
 
-Now let's build a union of these:
+Giờ xây một union của mấy cái này:
 
 ``` {.c}
 union foo {
@@ -954,30 +946,28 @@ union foo {
 };
 ```
 
-What this rule tells us is that we're guaranteed that the members of the
-common initial sequences are interchangeable in code. That is:
+Quy tắc này nói cho ta rằng ta được đảm bảo các thành viên của
+common initial sequence có thể hoán đổi cho nhau trong code. Tức là:
 
-* `f.sa.x` is the same as `f.sb.x`.
+* `f.sa.x` giống `f.sb.x`.
 
-and
+* `f.sa.y` giống `f.sb.y`.
 
-* `f.sa.y` is the same as `f.sb.y`.
+Vì field `x` và `y` đều nằm trong common initial sequence.
 
-Because fields `x` and `y` are both in the common initial sequence.
+Ngoài ra, tên của các thành viên trong common initial sequence không
+quan trọng, chỉ quan trọng kiểu phải giống nhau.
 
-Also, the names of the members in the common initial sequence don't
-matter---all that matters is that the types are the same.
+Tất cả gộp lại cho ta cách an toàn để thêm vài thông tin chia sẻ
+giữa các `struct` trong `union`. Ví dụ hay nhất của chuyện này có
+lẽ là dùng một field để xác định kiểu `struct` nào trong tất cả các
+`struct` của `union` đang "được dùng".
 
-All together, this allows us a way to safely add some shared information
-between `struct`s in the `union`. The best example of this is probably
-using a field to determine the type of `struct` out of all the `struct`s
-in the `union` that is currently "in use".
+Tức là, nếu ta không được phép làm thế và ta truyền `union` cho một
+hàm, hàm đó làm sao biết thành viên nào của `union` là cái nó nên
+nhìn?
 
-That is, if we weren't allowed this and we passed the `union` to some
-function, how would that function know which member of the `union` was
-the one it should look at?
-
-Take a look at these `struct`s. Note the common initial sequence:
+Xem các `struct` này. Để ý common initial sequence:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -1001,7 +991,7 @@ struct octopus {
 
 ```
 
-Now let's throw them into a `union`:
+Giờ quẳng chúng vào `union`:
 
 ``` {.c .numberLines startFrom="20"}
 union animal {
@@ -1012,7 +1002,7 @@ union animal {
 
 ```
 
-Also, please indulge me these two `#define`s for the demo:
+Ngoài ra, làm ơn chiều tôi hai `#define` sau cho ví dụ:
 
 ``` {.c .numberLines startFrom="26"}
 #define ANTELOPE 1
@@ -1020,15 +1010,14 @@ Also, please indulge me these two `#define`s for the demo:
 
 ```
 
-So far, nothing special has happened here. It seems like the `type`
-field is completely useless.
+Tới giờ, chẳng có gì đặc biệt xảy ra ở đây. Có vẻ field `type` hoàn
+toàn vô dụng.
 
-But now let's make a generic function that prints a `union animal`. It
-has to somehow be able to tell if it's looking at a `struct antelope` or
-a `struct octopus`.
+Nhưng giờ ta làm hàm chung in `union animal`. Nó phải cách nào đó
+biết được mình đang nhìn vào `struct antelope` hay `struct octopus`.
 
-Because of the magic of common initial sequences, it can look up the
-animal type in any of these places for a particular `union animal x`:
+Nhờ phép thuật của common initial sequence, nó có thể tra kiểu
+animal ở bất kỳ chỗ nào cho một `union animal x` cụ thể:
 
 ``` {.c}
 int type = x.common.type;    // or...
@@ -1036,12 +1025,12 @@ int type = x.antelope.type;  // or...
 int type = x.octopus.type;
 ```
 
-All those refer to the same value in memory.
+Tất cả đều trỏ đến cùng giá trị trong bộ nhớ.
 
-And, as you might have guessed, the `struct common` is there so code can
-agnostically look at the type without mentioning a particular animal.
+Và, như bạn có thể đoán, `struct common` ở đó để code có thể nhìn
+kiểu một cách tổng quát mà không phải nhắc tới con vật cụ thể.
 
-Let's look at the code to print a `union animal`:
+Xem code để in `union animal`:
 
 ``` {.c .numberLines startFrom="29"}
 void print_animal(union animal *x)
@@ -1073,24 +1062,22 @@ int main(void)
 }
 ```
 
-See how on line 29 we're just passing in the `union`---we have no idea
-what type of animal `struct` is in use within it.
+Xem cách ở dòng 29 ta chỉ truyền vào `union`, ta không biết kiểu
+animal `struct` nào đang được dùng bên trong.
 
-But that's OK! Because on line 31 we check the type to see if it's an
-antelope or an octopus. And then we can look at the proper `struct` to
-get the members.
+Nhưng không sao! Vì ở dòng 31 ta kiểm tra kiểu xem là antelope hay
+octopus. Rồi ta có thể nhìn vào đúng `struct` để lấy thành viên.
 
-It's definitely possible to get this same effect using just `struct`s,
-but you can do it this way if you want the memory-saving effects of a
-`union`.
+Hoàn toàn có thể có hiệu quả tương tự chỉ dùng `struct`, nhưng bạn
+có thể làm thế này nếu muốn hiệu quả tiết kiệm bộ nhớ của `union`.
 
 [i[`union` keyword-->common initial sequences]>]
 
-## Unions and Unnamed Structs
+## Union và struct vô danh
 
 [i[`union` keyword-->and unnamed `struct`s]<]
 
-You know how you can have an unnamed `struct`, like this:
+Bạn biết cách có `struct` vô danh, thế này:
 
 ``` {.c}
 struct {
@@ -1098,10 +1085,10 @@ struct {
 } s;
 ```
 
-That defines a variable `s` that is of anonymous `struct` type (because
-the `struct` has no name tag), with members `x` and `y`.
+Cái đó định nghĩa biến `s` thuộc kiểu `struct` vô danh (vì `struct`
+không có tag tên), với thành viên `x` và `y`.
 
-So things like this are valid:
+Nên những chuyện kiểu này là hợp lệ:
 
 ``` {.c}
 s.x = 34;
@@ -1110,8 +1097,7 @@ s.y = 90;
 printf("%d %d\n", s.x, s.y);
 ```
 
-Turns out you can drop those unnamed `struct`s in `union`s just like you
-might expect:
+Hóa ra bạn có thể thả `struct` vô danh vào `union` y như bạn nghĩ:
 
 ``` {.c}
 union foo {
@@ -1125,7 +1111,7 @@ union foo {
 };
 ```
 
-And then access them as per normal:
+Rồi truy cập chúng như bình thường:
 
 ``` {.c}
 union foo f;
@@ -1136,21 +1122,21 @@ f.b.z = 3;
 f.b.w = 4;
 ```
 
-No problem!
+Không sao!
 
 [i[`union` keyword-->and unnamed `struct`s]>]
 
-## Passing and Returning `struct`s and `union`s
+## Truyền và trả `struct` và `union`
 
 [i[`union` keyword-->passing and returning]<]
 [i[`struct` keyword-->passing and returning]<]
 
-You can pass a `struct` or `union` to a function by value (as opposed to
-a pointer to it)---a copy of that object to the parameter will be made
-as if by assignment as per usual.
+Bạn có thể truyền `struct` hoặc `union` cho hàm theo giá trị (thay
+vì con trỏ tới nó), một bản sao của đối tượng đó sẽ được tạo cho
+tham số như khi gán thông thường.
 
-You can also return a `struct` or `union` from a function and it is
-also passed by value back.
+Bạn cũng có thể trả `struct` hoặc `union` từ hàm và nó cũng được
+truyền ngược lại theo giá trị.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -1172,17 +1158,17 @@ int main(void)
 }
 ```
 
-Fun fact: if you do this, you can use the `.` operator right off the
-function call:
+Chuyện vui: nếu làm thế, bạn có thể dùng toán tử `.` ngay trên lời
+gọi hàm:
 
 ``` {.c .numberLines startFrom="16"}
     printf("%d %d\n", f().x, f().y);
 ```
 
-(Of course that example calls the function twice, inefficiently.)
+(Dĩ nhiên ví dụ đó gọi hàm hai lần, không hiệu quả.)
 
-And the same holds true for returning pointers to `struct`s and
-`union`s---just be sure to use the `->` arrow operator in that case.
+Và điều tương tự đúng với việc trả con trỏ tới `struct` và `union`,
+chỉ cần nhớ dùng toán tử mũi tên `->` trong trường hợp đó.
 
 [i[`union` keyword-->passing and returning]>]
 [i[`struct` keyword-->passing and returning]>]
