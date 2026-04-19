@@ -3,41 +3,38 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Long Jumps with `setjmp`, `longjmp` {#setjmp-longjmp}
+# Long Jump với `setjmp`, `longjmp` {#setjmp-longjmp}
 
 [i[Long jumps]<]
 
-We've already seen `goto`, which jumps in function scope. But
-`longjmp()` allows you to jump back to an earlier point in execution,
-back to a function that called this one.
+Ta đã thấy `goto`, nhảy trong scope hàm. Nhưng `longjmp()` cho phép
+bạn nhảy ngược về một điểm sớm hơn trong thực thi, về một hàm đã gọi
+hàm này.
 
-There are a lot of limitations and caveats, but this can be a useful
-function for bailing out from deep in the call stack back up to an
-earlier state.
+Có cả đống hạn chế và cảnh báo, nhưng đây có thể là hàm hữu ích để
+thoát từ sâu trong call stack ngược lên trạng thái sớm hơn.
 
-In my experience, this is very rarely-used functionality.
+Theo kinh nghiệm của tôi, chức năng này rất hiếm khi được dùng.
 
-## Using `setjmp` and `longjmp`
+## Dùng `setjmp` và `longjmp`
 
 [i[`setjmp()` function]<]
 [i[`longjmp()` function]<]
 
-The dance we're going to do here is to basically put a bookmark in
-execution with `setjmp()`. Later on, we'll call `longjmp()` and it'll
-jump back to the earlier point in execution where we set the bookmark
-with `setjmp()`.
+Vũ điệu ta sẽ làm ở đây là về cơ bản đặt một bookmark trong thực
+thi với `setjmp()`. Sau đó, ta gọi `longjmp()` và nó sẽ nhảy về điểm
+sớm hơn trong thực thi nơi ta đặt bookmark bằng `setjmp()`.
 
-And it can do this even if you've called subfunctions.
+Và nó có thể làm chuyện này ngay cả khi bạn đã gọi các hàm con.
 
-Here's a quick demo where we call into functions a couple levels deep
-and then bail out of it.
+Đây là demo nhanh trong đó ta gọi vào các hàm sâu vài cấp rồi thoát
+ra khỏi nó.
 
-We're going to use a file scope variable `env` to keep the _state_ of
-things when we call `setjmp()` so we can restore them when we call
-`longjmp()` later. This is the variable in which we remember our
-"place".
+Ta sẽ dùng biến file scope `env` để giữ _state_ khi gọi `setjmp()`
+để có thể khôi phục khi gọi `longjmp()` sau này. Đây là biến ta nhớ
+"vị trí" của mình.
 
-The variable `env` is of type `jmp_buf`, an opaque type declared in
+Biến `env` thuộc kiểu `jmp_buf`, một kiểu mờ được khai báo trong
 `<setjmp.h>`.
 
 ``` {.c .numberLines}
@@ -76,7 +73,7 @@ int main(void)
 }
 ```
 
-When run, this outputs:
+Khi chạy, cái này xuất ra:
 
 ``` {.default}
 Calling into functions, setjmp() returned 0
@@ -85,65 +82,62 @@ Entering depth 2
 Bailed back to main, setjmp() returned 3490
 ```
 
-If you try to take that output and match it up with the code, it's clear
-there's some really _funky_ stuff going on.
+Nếu bạn cố lấy output đó và khớp với code, rõ là có chuyện gì đó rất
+_quái_ đang xảy ra.
 
-One of the most notable things is that `setjmp()` returns _twice_. What
-the actual frank? What is this sorcery?!
+Một trong những thứ đáng chú ý nhất là `setjmp()` return _hai lần_.
+Cái quái gì thế? Phép thuật gì đây?!
 
-So here's the deal: if `setjmp()` returns `0`, it means that you've
-successfully set the "bookmark" at that point.
+Vậy đây là deal: nếu `setjmp()` trả `0`, tức là bạn đã đặt
+"bookmark" thành công tại điểm đó.
 
-If it returns non-zero, it means you've just returned to the "bookmark"
-set earlier. (And the value returned is the one you pass to
-`longjmp()`.)
+Nếu nó trả khác 0, tức là bạn vừa trở về "bookmark" đã đặt trước đó.
+(Và giá trị trả về là giá trị bạn truyền cho `longjmp()`.)
 
-This way you can tell the difference between setting the bookmark and
-returning to it later.
+Kiểu này bạn có thể phân biệt giữa việc đặt bookmark và trở về nó
+sau này.
 
-So when the code, above, calls `setjmp()` the first time, `setjmp()`
-_stores_ the state in the `env` variable and returns `0`.  Later when we
-call `longjmp()` with that same `env`, it restores the state and
-`setjmp()` returns the value `longjmp()` was passed.
+Nên khi code trên gọi `setjmp()` lần đầu, `setjmp()` _lưu_ state vào
+biến `env` và trả về `0`. Sau đó khi ta gọi `longjmp()` với cùng
+`env` đó, nó khôi phục state và `setjmp()` trả về giá trị đã truyền
+cho `longjmp()`.
 
 [i[`setjmp()` function]>]
 [i[`longjmp()` function]>]
 
-## Pitfalls
+## Bẫy
 
-Under the hood, this is pretty straightforward. Typically the _stack
-pointer_ keeps track of the locations in memory that local variables are
-stored, and the _program counter_ keeps track of the address of the
-currently-executing instruction^[Both "stack pointer" and "program
-counter" are related to the underlying architecture and C
-implementation, and are not part of the spec.].
+Dưới mui, cái này khá thẳng thắn. Thông thường _stack pointer_ theo
+dõi vị trí trong bộ nhớ nơi biến cục bộ được lưu, và _program
+counter_ theo dõi địa chỉ của lệnh hiện đang thực thi^[Cả "stack
+pointer" và "program counter" đều liên quan tới kiến trúc nằm dưới
+và cài đặt C, và không phải phần của spec.].
 
-So if we want to jump back to an earlier function, it's basically only a
-matter of restoring the stack pointer and program counter to the values
-kept in the [i[`jmp_buf` type]] `jmp_buf` variable, and making sure the
-return value is set correctly. And then execution will resume there.
+Nên nếu ta muốn nhảy về hàm sớm hơn, về cơ bản chỉ là chuyện khôi
+phục stack pointer và program counter về giá trị giữ trong biến
+[i[`jmp_buf` type]] `jmp_buf`, và đảm bảo giá trị trả về được set
+đúng. Và rồi thực thi sẽ tiếp tục ở đó.
 
-But a variety of factors confound this, making a significant number of
-undefined behavior traps.
+Nhưng đủ kiểu yếu tố làm rối cái này, tạo ra một số lượng đáng kể
+các bẫy hành vi không xác định.
 
-### The Values of Local Variables
+### Giá trị của biến cục bộ
 
 [i[`setjmp()` function]<]
 
-If you want the values of automatic (non-`static` and non-`extern`)
-local variables to persist in the function that called `setjmp()` after
-a [i[`longjmp()`]] `longjmp()` happens, you must declare those variables
-to be [i[`volatile` type qualifier-->with `setjmp()`]<] `volatile`.
+Nếu bạn muốn giá trị của biến cục bộ automatic (không `static` và
+không `extern`) tồn tại trong hàm đã gọi `setjmp()` sau khi một
+[i[`longjmp()`]] `longjmp()` xảy ra, bạn phải khai báo các biến đó
+là [i[`volatile` type qualifier-->with `setjmp()`]<] `volatile`.
 
-Technically, they only have to be `volatile` if they change between the
-time `setjmp()` is called and `longjmp()` is called^[The rationale here
-is that the program might store a value temporarily in a _CPU register_
-while it's doing work on it. In that timeframe, the register holds the
-correct value, and the value on the stack might be out of date. Then
-later the register values would get overwritten and the changes to the
-variable lost.].
+Về mặt kỹ thuật, chúng chỉ cần `volatile` nếu chúng thay đổi giữa
+lúc `setjmp()` được gọi và lúc `longjmp()` được gọi^[Lý lẽ ở đây là
+chương trình có thể lưu giá trị tạm thời trong _CPU register_ khi nó
+đang làm việc với giá trị đó. Trong khoảng thời gian đó, register
+giữ giá trị đúng, và giá trị trên stack có thể đã cũ. Rồi sau đó giá
+trị register bị ghi đè và các thay đổi đối với biến bị mất.].
 
-For example, if we run this code:
+Ví dụ, nếu ta chạy code này:
 
 ``` {.c}
 int x = 20;
@@ -153,9 +147,9 @@ if (setjmp(env) == 0) {
 }
 ```
 
-and then later `longjmp()` back, the value of `x` will be indeterminate.
+và sau đó `longjmp()` quay lại, giá trị của `x` sẽ không xác định.
 
-If we want to fix this, `x` must be `volatile`:
+Nếu ta muốn sửa chuyện này, `x` phải là `volatile`:
 
 ``` {.c}
 volatile int x = 20;
@@ -169,56 +163,54 @@ if (setjmp(env) == 0) {
 
 [i[`volatile` type qualifier-->with `setjmp()`]>]
 
-Now the value will be the correct `30` after a [i[`longjmp()`]]
-`longjmp()` returns us to this point.
+Giờ giá trị sẽ là đúng `30` sau khi một [i[`longjmp()`]] `longjmp()`
+đưa ta về điểm này.
 
-### How Much State is Saved?
+### Bao nhiêu state được lưu?
 
 [i[`setjmp()` function]<]
 [i[`longjmp()` function]<]
 
-When you `longjmp()`, execution resumes at the point of the
-corresponding `setjmp()`. And that's it.
+Khi bạn `longjmp()`, thực thi tiếp tục tại điểm của `setjmp()` tương
+ứng. Và thế thôi.
 
 [i[`setjmp()` function]>]
 
-The spec points out that it's just as if you'd jumped back into the function
-at that point with local variables set to whatever values they had when
-the `longjmp()` call was made.
+Spec chỉ rõ nó giống như bạn đã nhảy về hàm tại điểm đó với biến cục
+bộ được set về bất cứ giá trị nào chúng có tại lúc gọi `longjmp()`.
 
 [i[`longjmp()` function]>]
 
-Things that aren't restored include, paraphrasing the spec:
+Những thứ không được khôi phục bao gồm, diễn giải lại spec:
 
-* Floating point status flags
-* Open files
-* Any other component of the abstract machine
+* Cờ trạng thái dấu chấm động
+* File đang mở
+* Bất kỳ thành phần nào khác của máy trừu tượng
 
-### You Can't Name Anything `setjmp`
+### Bạn không thể đặt tên gì là `setjmp`
 
-You can't have any `extern` identifiers with the name `setjmp`. Or, if
-`setjmp` is a macro, you can't undefine it.
+Bạn không thể có định danh `extern` nào với tên `setjmp`. Hoặc, nếu
+`setjmp` là macro, bạn không thể undefine nó.
 
-Both are undefined behavior.
+Cả hai đều là hành vi không xác định.
 
-### You Can't `setjmp()` in a Larger Expression
+### Bạn không thể `setjmp()` trong biểu thức lớn hơn
 
 [i[`setjmp()`-->in an expression]<]
 
-That is, you can't do something like this:
+Tức là, bạn không thể làm kiểu này:
 
 ``` {.c}
 if (x == 12 && setjmp(env) == 0) { ... }
 ```
 
-That's too complex to be allowed by the spec due to the machinations
-that must occur when unrolling the stack and all that. We can't
-`longjmp()` back into some complex expression that's only been partially
-executed.
+Chuyện đó quá phức tạp để spec cho phép vì những cỗ máy cần chạy khi
+tháo stack và tất cả mấy chuyện đó. Ta không thể `longjmp()` về vào
+biểu thức phức tạp nào đó mà chỉ mới thực thi một phần.
 
-So there are limits on the complexity of that expression. 
+Nên có giới hạn về độ phức tạp của biểu thức đó.
 
-* It can be the entire controlling expression of the conditional.
+* Nó có thể là toàn bộ biểu thức điều khiển của điều kiện.
 
   ``` {.c}
   if (setjmp(env)) {...}
@@ -228,22 +220,22 @@ So there are limits on the complexity of that expression.
   switch (setjmp(env)) {...}
   ```
 
-* It can be part of a relational or equality expression, as long as the
-  other operand is an integer constant. And the whole thing is the
-  controlling expression of the conditional.
+* Nó có thể là một phần của biểu thức quan hệ hay đẳng thức, miễn là
+  toán hạng kia là hằng số nguyên. Và toàn bộ là biểu thức điều
+  khiển của điều kiện.
 
   ``` {.c}
   if (setjmp(env) == 0) {...}
   ```
 
-* The operand to a logical NOT (`!`) operation, being the entire
-  controlling expression.
+* Toán hạng của phép NOT logic (`!`), là toàn bộ biểu thức điều
+  khiển.
 
   ``` {.c}
   if (!setjmp(env)) {...}
   ```
 
-* A standalone expression, possibly cast to `void`.
+* Biểu thức đứng một mình, có thể được cast thành `void`.
 
   ``` {.c}
   setjmp(env);
@@ -254,44 +246,43 @@ So there are limits on the complexity of that expression.
 
 [i[`setjmp()`-->in an expression]>]
 
-### When Can't You `longjmp()`?
+### Khi nào bạn không thể `longjmp()`?
 
 [i[`lonjmp()`]<]
 
-It's undefined behavior if:
+Là hành vi không xác định nếu:
 
-* You didn't call `setjmp()` earlier
-* You called `setjmp()` from another thread
-* You called `setjmp()` in the scope of a variable length array (VLA),
-  and execution left the scope of that VLA before `longjmp()` was
-  called.
-* The function containing the `setjmp()` exited before `longjmp()` was
-  called.
+* Bạn không gọi `setjmp()` trước đó
+* Bạn gọi `setjmp()` từ thread khác
+* Bạn gọi `setjmp()` trong scope của một mảng độ dài biến đổi (VLA),
+  và thực thi rời khỏi scope của VLA đó trước khi `longjmp()` được
+  gọi.
+* Hàm chứa `setjmp()` đã thoát trước khi `longjmp()` được gọi.
 
-On that last one, "exited" includes normal returns from the function, as
-well as the case if another `longjmp()` jumped back to "earlier" in the
-call stack than the function in question.
+Ở cái cuối, "thoát" bao gồm return bình thường khỏi hàm, cũng như
+trường hợp một `longjmp()` khác nhảy về "sớm hơn" trong call stack
+so với hàm đang nói tới.
 
-### You Can't Pass `0` to `longjmp()`
+### Bạn không thể truyền `0` cho `longjmp()`
 
-If you try to pass the value `0` to `longjmp()`, it will silently change
-that value to `1`.
+Nếu bạn thử truyền giá trị `0` cho `longjmp()`, nó sẽ âm thầm đổi
+giá trị đó thành `1`.
 
-Since `setjmp()` ultimately returns this value, and having `setjmp()`
-return `0` has special meaning, returning `0` is prohibited.
+Vì `setjmp()` rốt cuộc trả giá trị này, và việc `setjmp()` trả `0`
+có nghĩa đặc biệt, nên trả `0` bị cấm.
 
-### `longjmp()` and Variable Length Arrays
+### `longjmp()` và mảng độ dài biến đổi
 
-If you are in scope of a VLA and `longjmp()` out there, the memory
-allocated to the VLA could leak^[That is, remain allocated until the
-program ends with no way to free it.].
+Nếu bạn đang trong scope của một VLA và `longjmp()` ra ngoài, bộ nhớ
+cấp cho VLA có thể bị leak^[Tức là, vẫn được cấp phát tới khi chương
+trình kết thúc mà không có cách giải phóng.].
 
-Same thing happens if you `longjmp()` back over any earlier functions
-that had VLAs still in scope.
+Chuyện tương tự xảy ra nếu bạn `longjmp()` về qua bất kỳ hàm sớm hơn
+nào vẫn còn VLA trong scope.
 
-This is one thing that really bugged me about VLAs---that you could write
-perfectly legitimate C code that squandered memory. But, hey---I'm not
-in charge of the spec.
+Đây là một thứ thực sự làm tôi thấy phiền về VLA, rằng bạn có thể
+viết code C hoàn toàn hợp lệ mà phí bộ nhớ. Nhưng thôi, tôi không
+phải người quyết spec.
 
 [i[`lonjmp()`]>]
 [i[Long jumps]>]

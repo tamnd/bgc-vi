@@ -40,7 +40,7 @@ Programming (Vietnamese).
 | bgc_part_2600_goto.md | `goto` | done |
 | bgc_part_2700_typesv.md | Types Part V: Compound Literals and Generic Selections | done |
 | bgc_part_2800_arrays_2.md | Arrays Part II | done |
-| bgc_part_2900_jmp.md | Long Jumps with `setjmp`, `longjmp` | not started |
+| bgc_part_2900_jmp.md | Long Jumps with `setjmp`, `longjmp` | done |
 | bgc_part_3000_inctype.md | Incomplete Types | not started |
 | bgc_part_3100_complex.md | Complex Numbers | not started |
 | bgc_part_3200_fixedint.md | Fixed Width Integer Types | not started |
