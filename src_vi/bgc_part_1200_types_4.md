@@ -3,26 +3,26 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Types IV: Qualifiers and Specifiers
+# Types IV: Qualifiers và Specifiers
 
-Now that we have some more types under our belts, turns out we can give
-these types some additional attributes that control their behavior.
-These are the _type qualifiers_ and _storage-class specifiers_.
+Giờ ta đã có thêm vài kiểu dưới tay rồi, hóa ra ta có thể gắn cho
+chúng thêm vài thuộc tính để điều khiển cách chúng cư xử. Đó chính
+là _type qualifier_ (bổ từ kiểu) và _storage-class specifier_
+(specifier lớp lưu trữ).
 
-## Type Qualifiers
+## Type Qualifier
 
 [i[Type qualifiers]<]
 
-These are going to allow you to declare constant values, and also to
-give the compiler optimization hints that it can use.
+Mấy thứ này sẽ cho phép bạn khai báo giá trị hằng, và cũng cho
+compiler thêm gợi ý tối ưu hóa mà nó có thể dùng.
 
 ### `const`
 
 [i[`const` type qualifier]<]
 
-This is the most common type qualifier you'll see. It means the variable
-is constant, and any attempt to modify it will result in a very angry
-compiler.
+Đây là type qualifier phổ biến nhất bạn sẽ gặp. Nó nghĩa là biến đó
+là hằng, và bất kỳ nỗ lực nào hòng sửa nó sẽ khiến compiler nổi đóa.
 
 ``` {.c}
 const int x = 2;
@@ -30,9 +30,9 @@ const int x = 2;
 x = 4;  // COMPILER PUKING SOUNDS, can't assign to a constant
 ```
 
-You can't change a `const` value.
+Bạn không thể đổi giá trị `const`.
 
-Often you see `const` in parameter lists for functions:
+Bạn cũng hay thấy `const` trong danh sách tham số của hàm:
 
 ``` {.c}
 void foo(const int x)
@@ -41,16 +41,16 @@ void foo(const int x)
 }
 ```
 
-#### `const` and Pointers
+#### `const` và con trỏ
 
 [i[`const` type qualifier-->and pointers]<]
 
-This one gets a little funky, because there are two usages that have two
-meanings when it comes to pointers.
+Chỗ này hơi lạ đời, vì có hai cách dùng mang hai ý nghĩa khác nhau
+khi dính tới con trỏ.
 
-For one thing, we can make it so you can't change the thing the pointer
-points to. You do this by putting the `const` up front with the type
-name (before the asterisk) in the type declaration.
+Một là, ta có thể làm sao cho bạn không đổi được thứ mà con trỏ trỏ
+đến. Bạn làm thế bằng cách đặt `const` ra phía trước cùng với tên
+kiểu (trước dấu sao) trong khai báo kiểu.
 
 ``` {.c}
 int x[] = {10, 20};
@@ -61,19 +61,18 @@ p++;  // We can modify p, no problem
 *p = 30; // Compiler error! Can't change what it points to
 ```
 
-Somewhat confusingly, these two things are equivalent:
+Hơi khó hiểu tí, nhưng hai thứ sau là tương đương:
 
 ``` {.c}
 const int *p;  // Can't modify what p points to
 int const *p;  // Can't modify what p points to, just like the previous line
 ```
 
-Great, so we can't change the thing the pointer points to, but we can
-change the pointer itself. What if we want the other way around? We want
-to be able to change what the pointer points to, but _not_ the pointer
-itself?
+Hay rồi, vậy là ta không đổi được thứ con trỏ trỏ đến, nhưng vẫn đổi
+được bản thân con trỏ. Thế nếu muốn ngược lại thì sao? Ta muốn đổi
+được thứ con trỏ trỏ đến nhưng _không_ đổi được bản thân con trỏ?
 
-Just move the `const` after the asterisk in the declaration:
+Chỉ cần chuyển `const` ra sau dấu sao trong khai báo:
 
 ``` {.c}
 int *const p;   // We can't modify "p" with pointer arithmetic
@@ -81,7 +80,7 @@ int *const p;   // We can't modify "p" with pointer arithmetic
 p++;  // Compiler error!
 ```
 
-But we can modify what they point to:
+Nhưng ta vẫn đổi được thứ nó trỏ đến:
 
 ``` {.c}
 int x = 10;
@@ -90,16 +89,15 @@ int *const p = &x;
 *p = 20;   // Set "x" to 20, no problem
 ```
 
-You can also make both things `const`:
+Bạn cũng có thể làm cả hai thứ đều `const`:
 
 ``` {.c}
 const int *const p;  // Can't modify p or *p!
 ```
 
-Finally, if you have multiple levels of indirection, you should `const`
-the appropriate levels. Just because a pointer is `const`, doesn't mean
-the pointer it points to must also be. You can explicitly set them like
-in the following examples:
+Cuối cùng, nếu bạn có nhiều mức gián tiếp, bạn nên đặt `const` ở
+đúng mức. Một con trỏ `const` không có nghĩa là con trỏ mà nó trỏ
+tới cũng phải thế. Bạn có thể đặt tường minh như mấy ví dụ sau:
 
 ``` {.c}
 char **p;
@@ -125,23 +123,23 @@ p++;     // Error!
 
 [i[`const` type qualifier-->correctness]<]
 
-One more thing I have to mention is that the compiler will warn on
-something like this:
+Còn một chuyện nữa tôi phải nhắc, là compiler sẽ cảnh báo với thứ
+kiểu thế này:
 
 ``` {.c}
 const int x = 20;
 int *p = &x;
 ```
 
-saying something to the effect of:
+nói đại loại như:
 
 ``` {.default}
 initialization discards 'const' qualifier from pointer type target
 ```
 
-What's happening there?
+Có chuyện gì ở đây?
 
-Well, we need to look at the types on either side of the assignment:
+Ta cần nhìn kiểu ở hai bên dấu gán:
 
 ``` {.c}
     const int x = 20;
@@ -151,13 +149,12 @@ Well, we need to look at the types on either side of the assignment:
 //  int*    const int*
 ```
 
-The compiler is warning us that the value on the right side of the
-assignment is `const`, but the one of the left is not. And the compiler
-is letting us know that it is discarding the "const-ness" of the
-expression on the right.
+Compiler đang cảnh báo rằng giá trị bên phải dấu gán là `const`,
+còn bên trái thì không. Và compiler đang báo cho ta biết rằng nó
+đang vứt đi tính "const" của biểu thức bên phải.
 
-That is, we _can_ still try to do the following, but it's just wrong.
-The compiler will warn, and it's undefined behavior:
+Tức là ta _vẫn_ có thể thử làm như dưới đây, nhưng nó sai. Compiler
+sẽ cảnh báo, và đó là hành vi không xác định:
 
 ``` {.c}
 const int x = 20;
@@ -175,36 +172,35 @@ printf("%d\n", x);  // 40, if you're lucky
 
 [i[`restrict` type qualifier]<]
 
-TLDR: you never have to use this and you can ignore it every time you
-see it. If you use it correctly, you will likely realize some
-performance gain. If you use it incorrectly, you will realize undefined
-behavior.
+TLDR: bạn không bao giờ phải dùng cái này và có thể lờ nó đi mỗi khi
+thấy. Nếu bạn dùng đúng, rất có thể bạn sẽ được chút hiệu năng. Nếu
+dùng sai, bạn sẽ được undefined behavior.
 
-`restrict` is a hint to the compiler that a particular piece of memory
-will only be accessed by one pointer and never another. (That is, there
-will be no aliasing of the particular object the `restrict` pointer
-points to.) If a developer declares a pointer to be `restrict` and then
-accesses the object it points to in another way (e.g. via another
-pointer), the behavior is undefined.
+`restrict` là gợi ý cho compiler rằng một vùng bộ nhớ cụ thể sẽ chỉ
+được truy cập qua đúng một con trỏ chứ không phải qua cái khác. (Tức
+là sẽ không có aliasing với đối tượng mà con trỏ `restrict` trỏ
+tới.) Nếu dev khai báo một con trỏ là `restrict` rồi truy cập đối
+tượng đó theo cách khác (ví dụ qua con trỏ khác), hành vi là không
+xác định.
 
-Basically you're telling C, "Hey---I guarantee that this one single
-pointer is the only way I access this memory, and if I'm lying, you can
-pull undefined behavior on me."
+Về cơ bản bạn đang nói với C: "Này, tôi đảm bảo rằng cái con trỏ
+duy nhất này là đường duy nhất tôi truy cập bộ nhớ đó, và nếu tôi
+nói dối thì anh cứ quẳng undefined behavior vào mặt tôi."
 
-And C uses that information to perform certain optimizations. For
-instance, if you're dereferencing the `restrict` pointer repeatedly in a
-loop, C might decide to cache the result in a register and only store
-the final result once the loop completes. If any other pointer referred
-to that same memory and accessed it in the loop, the results would not be
-accurate.
+Và C dùng thông tin đó để thực hiện một số tối ưu. Ví dụ, nếu bạn
+dereference con trỏ `restrict` lặp đi lặp lại trong vòng lặp, C có
+thể quyết định cache kết quả trong một thanh ghi và chỉ lưu kết quả
+cuối cùng khi vòng lặp xong. Nếu có con trỏ khác cùng trỏ đến vùng
+nhớ đó và truy cập trong vòng lặp, kết quả sẽ không chính xác.
 
-(Note that `restrict` has no effect if the object pointed to is never
-written to. It's all about optimizations surrounding writes to memory.)
+(Lưu ý là `restrict` không có tác dụng nếu đối tượng được trỏ tới
+không bao giờ được ghi. Tất cả là về tối ưu quanh chuyện ghi vào bộ
+nhớ.)
 
-Let's write a function to swap two variables, and we'll use the
-`restrict` keyword to assure C that we'll never pass in pointers to the
-same thing. And then let's blow it and try passing in pointers to the
-same thing.
+Ta viết thử một hàm hoán đổi hai biến, và sẽ dùng từ khóa `restrict`
+để cam kết với C rằng ta sẽ không bao giờ truyền vào hai con trỏ
+cùng trỏ tới một chỗ. Rồi ta làm hỏng cam kết đó và thử truyền hai
+con trỏ cùng trỏ tới một chỗ.
 
 ``` {.c .numberLines}
 void swap(int *restrict a, int *restrict b)
@@ -226,35 +222,33 @@ int main(void)
 }
 ```
 
-If we were to take out the `restrict` keywords, above, that would allow
-both calls to work safely. But then the compiler might not be able to
-optimize.
+Nếu ta bỏ các từ khóa `restrict` ra, cả hai lời gọi trên đều an
+toàn. Nhưng khi đó compiler có thể không tối ưu được.
 
-`restrict` has block scope, that is, the restriction only lasts for the
-scope it's used. If it's in a parameter list for a function, it's in the
-block scope of that function.
+`restrict` có block scope, tức là hạn chế chỉ kéo dài trong scope nó
+được dùng. Nếu nó ở danh sách tham số của một hàm, nó ở trong block
+scope của hàm đó.
 
-If the restricted pointer points to an array, it only applies to the
-individual objects in the array. Other pointers could read and write
-from the array as long as they didn't read or write any of the same
-elements as the restricted one.
+Nếu con trỏ bị restrict trỏ vào một mảng, nó chỉ áp dụng cho từng
+đối tượng trong mảng. Các con trỏ khác vẫn có thể đọc và ghi mảng
+đó miễn là không đọc hay ghi cùng phần tử mà con trỏ restrict đã
+chạm vào.
 
-If it's outside any function in file scope, the restriction covers the
-entire program.
+Nếu nó ở ngoài mọi hàm, tức ở file scope, hạn chế áp dụng cho toàn
+bộ chương trình.
 
-You're likely to see this in library functions like `printf()`:
+Bạn rất có thể sẽ thấy cái này trong các hàm thư viện như
+`printf()`:
 
 ``` {.c}
 int printf(const char * restrict format, ...);
 ```
 
-Again, that's just telling the compiler that inside the `printf()`
-function, there will be only one pointer that refers to any part of that
-`format` string.
+Vẫn thế, nó chỉ báo với compiler rằng bên trong hàm `printf()`, chỉ
+có đúng một con trỏ nào đó trỏ đến phần bất kỳ của chuỗi `format`.
 
-One last note: if you're using array notation in your function parameter
-for some reason instead of pointer notation, you can use `restrict` like
-so:
+Một chú ý cuối: nếu vì lý do nào đó bạn dùng ký pháp mảng cho tham
+số hàm thay vì ký pháp con trỏ, bạn có thể dùng `restrict` như sau:
 
 ``` {.c}
 void foo(int p[restrict])     // With no size
@@ -262,7 +256,7 @@ void foo(int p[restrict])     // With no size
 void foo(int p[restrict 10])  // Or with a size
 ```
 
-But pointer notation would be more common.
+Nhưng ký pháp con trỏ thì phổ biến hơn.
 
 [i[`restrict` type qualifier]>]
 
@@ -270,23 +264,22 @@ But pointer notation would be more common.
 
 [i[`volatile` type qualifier]<]
 
-You're unlikely to see or need this unless you're dealing with hardware
-directly.
+Bạn ít khi gặp hay cần cái này trừ khi đang trực tiếp làm việc với
+phần cứng.
 
-`volatile` tells the compiler that a value might change behind its back
-and should be looked up every time.
+`volatile` báo với compiler rằng một giá trị có thể thay đổi sau
+lưng nó và phải được tra cứu lại mỗi lần.
 
-An example might be where the compiler is looking in memory at an
-address that continuously updates behind the scenes, e.g. some kind of
-hardware timer.
+Ví dụ: compiler đang nhìn vào bộ nhớ ở một địa chỉ mà liên tục được
+cập nhật trong hậu trường, ví dụ như một bộ đếm thời gian phần cứng.
 
-If the compiler decides to optimize that and store the value in a
-register for a protracted time, the value in memory will update and
-won't be reflected in the register.
+Nếu compiler quyết định tối ưu chuyện đó bằng cách lưu giá trị trong
+một thanh ghi suốt một quãng dài, giá trị trong bộ nhớ sẽ đổi còn
+thanh ghi thì không phản ánh.
 
-By declaring something `volatile`, you're telling the compiler, "Hey,
-the thing this points at might change at any time for reasons outside
-this program code."
+Khi khai báo một thứ là `volatile`, bạn đang nói với compiler: "Này,
+thứ con trỏ này trỏ đến có thể đổi bất cứ lúc nào vì lý do ngoài mã
+của chương trình này."
 
 ``` {.c}
 volatile int *p;
@@ -294,8 +287,8 @@ volatile int *p;
 
 ### `_Atomic`
 
-This is an optional C feature that we'll talk about in [the Atomics
-chapter](#chapter-atomics).
+Đây là một tính năng C tùy chọn mà ta sẽ bàn ở [chương
+Atomics](#chapter-atomics).
 
 [i[`volatile` type qualifier]>]
 [i[Type qualifiers]>]
@@ -304,17 +297,17 @@ chapter](#chapter-atomics).
 
 [i[Storage-Class Specifiers]<]
 
-Storage-class specifiers are similar to type quantifiers. They give the
-compiler more information about the type of a variable.
+Storage-class specifier tương tự như type qualifier. Chúng cho
+compiler thêm thông tin về kiểu của một biến.
 
 ### `auto`
 
 [i[`auto` storage class]<]
 
-You barely ever see this keyword, since `auto` is the default for block
-scope variables. It's implied.
+Bạn gần như không bao giờ thấy từ khóa này, vì `auto` là mặc định
+cho biến ở block scope. Nó được ngầm định.
 
-These are the same:
+Hai đoạn sau là như nhau:
 
 ``` {.c}
 {
@@ -323,42 +316,41 @@ These are the same:
 }
 ```
 
-The `auto` keyword indicates that this object has _automatic storage
-duration_. That is, it exists in the scope in which it is defined, and
-is automatically deallocated when the scope is exited.
+Từ khóa `auto` cho biết đối tượng này có _automatic storage
+duration_ (thời gian tồn tại tự động). Tức là nó tồn tại trong scope
+mà nó được định nghĩa, và tự động được giải phóng khi thoát scope.
 
-One gotcha about automatic variables is that their value is
-indeterminate until you explicitly initialize them. We say they're full
-of "random" or "garbage" data, though neither of those really makes me
-happy. In any case, you won't know what's in it unless you initialize
-it.
+Một cái bẫy với biến automatic là giá trị của chúng là không xác
+định cho đến khi bạn khởi tạo tường minh. Ta nói chúng đầy dữ liệu
+"random" hoặc "rác", dù tôi không ưa cả hai cách gọi đó lắm. Dù sao,
+bạn sẽ không biết trong đó có gì trừ khi bạn khởi tạo nó.
 
 [i[`auto` storage class]>]
 
-Always initialize all automatic variables before use!
+Luôn khởi tạo mọi biến automatic trước khi dùng!
 
 ### `static` {#static}
 
 [i[`static` storage class]<]
 
-This keyword has two meanings, depending on if the variable is file
-scope or block scope.
+Từ khóa này có hai nghĩa, tùy thuộc biến ở file scope hay block
+scope.
 
-Let's start with block scope.
+Bắt đầu với block scope.
 
-#### `static` in Block Scope
+#### `static` ở block scope
 
 [i[`static` storage class-->in block scope]<]
 
-In this case, we're basically saying, "I just want a single instance of
-this variable to exist, shared between calls."
+Ở đây, về cơ bản ta đang nói: "Tôi chỉ muốn một phiên bản duy nhất
+của biến này tồn tại, dùng chung giữa các lần gọi."
 
-That is, its value will persist between calls.
+Tức là giá trị của nó sẽ giữ nguyên giữa các lời gọi.
 
-`static` in block scope with an initializer will only be initialized one
-time on program startup, not each time the function is called.
+`static` ở block scope kèm initializer sẽ chỉ được khởi tạo đúng một
+lần lúc khởi động chương trình, chứ không phải mỗi lần hàm được gọi.
 
-Let's do an example:
+Làm ví dụ cái xem:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -381,36 +373,35 @@ int main(void)
 }
 ```
 
-See how the value of `count` persists between calls?
+Thấy cách giá trị của `count` còn giữ giữa các lời gọi không?
 
-One thing of note is that `static` block scope variables are initialized
-to `0` by default.
+Một chuyện đáng lưu ý là biến `static` ở block scope mặc định được
+khởi tạo bằng `0`.
 
 ``` {.c}
 static int foo;      // Default starting value is `0`...
 static int foo = 0;  // So the `0` assignment is redundant
 ```
 
-Finally, be advised that if you're writing multithreaded programs, you
-have to be sure you don't let multiple threads trample the same variable.
+Cuối cùng, hãy nhớ rằng nếu bạn viết chương trình đa luồng, bạn phải
+chắc chắn không để nhiều luồng cùng dẫm lên một biến.
 
 [i[`static` storage class-->in block scope]>]
 
-#### `static` in File Scope
+#### `static` ở file scope
 
 [i[`static` storage class-->in file scope]<]
 
-When you get out to file scope, outside any blocks, the meaning rather
-changes.
+Khi ra tới file scope, ngoài mọi block, nghĩa thay đổi kha khá.
 
-Variables at file scope already persist between function calls, so that
-behavior is already there.
+Biến ở file scope vốn đã tồn tại giữa các lời gọi hàm, nên chuyện đó
+đã sẵn ở đó rồi.
 
-Instead what `static` means in this context is that this variable isn't
-visible outside of this particular source file. Kinda like "global", but
-only in this file.
+Thay vào đó, `static` trong ngữ cảnh này nghĩa là biến này không
+nhìn thấy được bên ngoài file mã nguồn này. Hơi giống "global",
+nhưng chỉ trong file này.
 
-More on that in the section about building with multiple source files.
+Sẽ nói thêm ở phần build từ nhiều file mã nguồn.
 
 [i[`static` storage class-->in file scope]>]
 [i[`static` storage class]>]
@@ -419,10 +410,10 @@ More on that in the section about building with multiple source files.
 
 [i[`extern` storage class]<]
 
-The `extern` storage-class specifier gives us a way to refer to objects
-in other source files.
+Storage-class specifier `extern` cho ta cách tham chiếu đến các đối
+tượng trong file mã nguồn khác.
 
-Let's say, for example, the file `bar.c` had the following as its entirety:
+Ví dụ, giả sử file `bar.c` chỉ có đúng đoạn sau:
 
 ``` {.c .numberLines}
 // bar.c
@@ -430,12 +421,12 @@ Let's say, for example, the file `bar.c` had the following as its entirety:
 int a = 37;
 ```
 
-Just that. Declaring a new `int a` in file scope.
+Chỉ vậy thôi. Khai báo một `int a` mới ở file scope.
 
-But what if we had another source file, `foo.c`, and we wanted to refer
-to the `a` that's in `bar.c`?
+Nhưng nếu ta có file mã nguồn khác là `foo.c`, và muốn tham chiếu
+đến `a` ở trong `bar.c` thì sao?
 
-It's easy with the `extern` keyword:
+Dễ với từ khóa `extern`:
 
 ``` {.c .numberLines}
 // foo.c
@@ -452,8 +443,8 @@ int main(void)
 }
 ```
 
-We could have also made the `extern int a` in block scope, and it still
-would have referred to the `a` in `bar.c`:
+Ta cũng có thể đặt `extern int a` trong block scope, nó vẫn tham
+chiếu tới `a` trong `bar.c`:
 
 ``` {.c .numberLines}
 // foo.c
@@ -470,13 +461,13 @@ int main(void)
 }
 ```
 
-Now, if `a` in `bar.c` had been marked `static`. this wouldn't have
-worked. `static` variables at file scope are not visible outside that
-file.
+Bây giờ, nếu `a` trong `bar.c` đã được đánh dấu `static`, chuyện này
+sẽ không hoạt động. Biến `static` ở file scope không nhìn thấy được
+bên ngoài file đó.
 
-A final note about `extern` on functions. For functions, `extern` is the
-default, so it's redundant. You can declare a function `static` if you
-only want it visible in a single source file.
+Một ghi chú cuối về `extern` với hàm. Với hàm, `extern` là mặc định,
+nên nó thừa. Bạn có thể khai báo hàm là `static` nếu chỉ muốn nó
+nhìn thấy được trong một file mã nguồn duy nhất.
 
 [i[`extern` storage class]>]
 
@@ -484,14 +475,14 @@ only want it visible in a single source file.
 
 [i[`register` storage class]<]
 
-This is a keyword to hint to the compiler that this variable is
-frequently-used, and should be made as fast as possible to access. The
-compiler is under no obligation to agree to it.
+Đây là từ khóa để gợi ý cho compiler rằng biến này được dùng thường
+xuyên, và nên được làm cho truy cập nhanh nhất có thể. Compiler
+không có nghĩa vụ phải đồng ý.
 
-Now, modern C compiler optimizers are pretty effective at figuring this
-out themselves, so it's rare to see these days.
+Giờ thì, bộ tối ưu của compiler C hiện đại khá giỏi trong việc tự
+tìm ra chuyện này, nên hiếm khi thấy từ khóa này ngày nay.
 
-But if you must:
+Nhưng nếu bạn phải dùng:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -505,22 +496,21 @@ int main(void)
 }
 ```
 
-It does come at a price, however. You can't take the address of a
-register:
+Có cái giá đi kèm. Bạn không thể lấy địa chỉ của một register:
 
 ``` {.c}
 register int a;
 int *p = &a;    // COMPILER ERROR! Can't take address of a register
 ```
 
-The same applies to any part of an array:
+Điều tương tự áp dụng cho bất kỳ phần nào của một mảng:
 
 ``` {.c}
 register int a[] = {11, 22, 33, 44, 55};
 int *p = a;  // COMPILER ERROR! Can't take address of a[0]
 ```
 
-Or dereferencing part of an array:
+Hoặc dereference phần nào đó của mảng:
 
 ``` {.c}
 register int a[] = {11, 22, 33, 44, 55};
@@ -528,7 +518,8 @@ register int a[] = {11, 22, 33, 44, 55};
 int a = *(a + 2);  // COMPILER ERROR! Address of a[0] taken
 ```
 
-Interestingly, for the equivalent with array notation, gcc only warns:
+Thú vị là, với phiên bản tương đương dùng ký pháp mảng, gcc chỉ cảnh
+báo:
 
 ``` {.c}
 register int a[] = {11, 22, 33, 44, 55};
@@ -536,31 +527,28 @@ register int a[] = {11, 22, 33, 44, 55};
 int a = a[2];  // COMPILER WARNING!
 ```
 
-with:
+với:
 
 ``` {.default}
 warning: ISO C forbids subscripting ‘register’ array
 ```
 
-The fact that you can't take the address of a register variable frees
-the compiler up to make optimizations around that assumption if it
-hasn't figured them out already. Also adding `register` to a `const`
-variable prevents one from accidentally passing its pointer to another
-function that willfully ignore its
-constness^[https://gustedt.wordpress.com/2010/08/17/a-common-misconsception-the-register-keyword/].
+Việc không lấy được địa chỉ biến register giải phóng compiler để nó
+có thể tối ưu quanh giả định đó, nếu nó chưa tự tìm ra rồi. Thêm
+`register` vào biến `const` còn ngăn ta vô tình truyền con trỏ của
+nó cho hàm khác sẵn sàng ngó lơ tính
+const^[https://gustedt.wordpress.com/2010/08/17/a-common-misconsception-the-register-keyword/].
 
-A bit of historic backstory, here: deep inside the CPU are little
-dedicated "variables" called [flw[_registers_|Processor_register]]. They
-are super fast to access compared to RAM, so using them gets you a speed
-boost. But they're not in RAM, so they don't have an associated memory
-address (which is why you can't take the address-of or get a pointer to
-them).
+Chút gốc gác lịch sử cho vui: sâu trong CPU có mấy "biến" nhỏ chuyên
+dụng gọi là [flw[_thanh ghi_|Processor_register]]. Chúng truy cập
+siêu nhanh so với RAM, nên dùng chúng thì lên được ít tốc độ. Nhưng
+chúng không ở trong RAM, nên không có địa chỉ bộ nhớ gắn kèm (đó là
+lý do bạn không thể lấy địa chỉ của hay lấy con trỏ tới chúng).
 
-But, like I said, modern compilers are really good at producing optimal
-code, using registers whenever possible regardless of whether or not you
-specified the `register` keyword. Not only that, but the spec allows
-them to just treat it as if you'd typed `auto`, if they want. So no
-guarantees.
+Nhưng, như tôi nói, compiler hiện đại rất giỏi sinh mã tối ưu, dùng
+thanh ghi bất cứ khi nào có thể bất kể bạn có ghi từ khóa `register`
+hay không. Không những thế, spec còn cho phép chúng coi như bạn gõ
+`auto` nếu nó muốn. Nên không có đảm bảo gì.
 
 [i[`register` storage class]>]
 
@@ -568,18 +556,19 @@ guarantees.
 
 [i[`_Thread_local` storage class]<]
 
-When you're using multiple threads and you have some variables in either
-global or `static` block scope, this is a way to make sure that each
-thread gets its own copy of the variable. This'll help you avoid race
-conditions and threads stepping on each other's toes.
+Khi bạn dùng nhiều luồng và bạn có vài biến ở global scope hoặc ở
+`static` block scope, đây là cách để mỗi luồng có bản sao riêng của
+biến. Nó sẽ giúp bạn tránh race condition và việc các luồng dẫm lên
+chân nhau.
 
-If you're in block scope, you have to use this along with either
-`extern` or `static`.
+Nếu bạn đang ở block scope, bạn phải dùng cái này cùng với `extern`
+hoặc `static`.
 
-Also, if you include `<threads.h>`, you can use the rather more
-palatable `thread_local` as an alias for the uglier `_Thread_local`.
+Ngoài ra, nếu bạn include `<threads.h>`, bạn có thể dùng
+`thread_local` dễ nuốt hơn, làm alias cho cái `_Thread_local` xấu
+xí.
 
-More information can be found in the [Threads section](#thread-local).
+Thông tin thêm có ở [phần Threads](#thread-local).
 
 [i[`_Thread_local` storage class]>]
 [i[Storage-Class Specifiers]>]
