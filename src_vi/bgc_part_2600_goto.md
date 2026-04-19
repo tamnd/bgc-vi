@@ -7,30 +7,30 @@
 
 [i[`goto` statement]<]
 
-The `goto` statement is universally revered and can be here presented
-without contest.
+Câu lệnh `goto` được cả thế giới tôn sùng và có thể trình ra đây
+không ai cãi được.
 
-Just kidding! Over the years, there has been a lot of back-and-forth
-over whether or not (often not) `goto` is [flw[considered
-harmful|Goto#Criticism]].
+Đùa thôi! Qua năm tháng, đã có cả đống tranh cãi qua lại về việc
+`goto` có [flw[bị coi là có hại|Goto#Criticism]] hay không (thường
+là có).
 
-In this programmer's opinion, you should use whichever constructs leads
-to the _best_ code, factoring in maintainability and speed. And
-sometimes this might be `goto`!
+Theo ý của programmer này, bạn nên dùng cấu trúc nào dẫn tới code
+_tốt nhất_, có tính tới bảo trì và tốc độ. Và đôi khi cái đó có thể
+là `goto`!
 
-In this chapter, we'll see how `goto` works in C, and then check out
-some of the common cases where it is used^[I'd like to point out that
-using `goto` in all these cases is avoidable. You can use variables and
-loops instead. It's just that some people think `goto` produces the
-_best_ code in those circumstances.].
+Trong chương này, ta sẽ xem `goto` hoạt động sao trong C, rồi ngó
+qua vài trường hợp hay dùng^[Tôi muốn nói rõ rằng dùng `goto` trong
+tất cả các trường hợp này đều tránh được. Bạn có thể dùng biến và
+vòng lặp thay thế. Chỉ là có người thấy `goto` tạo code _tốt nhất_
+trong những hoàn cảnh đó.].
 
-## A Simple Example
+## Một ví dụ đơn giản
 
 [i[Labels]<]
 
-In this example, we're going to use `goto` to skip a line of code and
-jump to a _label_. The label is the identifier that can be a `goto`
-target---it ends with a colon (`:`).
+Trong ví dụ này, ta sẽ dùng `goto` để bỏ qua một dòng code và nhảy
+tới một _label_. Label là identifier có thể làm đích của `goto`, nó
+kết thúc bằng dấu hai chấm (`:`).
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -50,7 +50,7 @@ skip_3:
 }
 ```
 
-The output is:
+Output là:
 
 ``` {.default}
 One
@@ -58,10 +58,10 @@ Two
 Five!
 ```
 
-`goto` sends execution jumping to the specified label, skipping
-everything in between.
+`goto` đẩy thực thi nhảy tới label đã chỉ định, bỏ qua mọi thứ ở
+giữa.
 
-You can jump forward or backward with `goto`.
+Bạn có thể nhảy tiến hay lùi với `goto`.
 
 ``` {.c}
 infinite_loop:
@@ -69,8 +69,8 @@ infinite_loop:
     goto infinite_loop;
 ```
 
-Labels are skipped over during execution. The following will print all
-three numbers in order just as if the labels weren't there:
+Label bị bỏ qua khi thực thi. Cái sau sẽ in cả ba số theo thứ tự y
+như thể các label không có mặt:
 
 ``` {.c}
     printf("Zero\n");
@@ -83,29 +83,29 @@ label_4:
     printf("Three\n");
 ```
 
-As you've noticed, it's common convention to justify the labels all the
-way on the left. This increases readability because a reader can quickly
-scan to find the destination.
+Như bạn đã để ý, quy ước phổ biến là căn lề label sát bên trái. Điều
+này tăng khả năng đọc vì người đọc có thể quét nhanh để tìm đích.
 
-Labels have _function scope_. That is, no matter how many levels deep in
-blocks they appear, you can still `goto` them from anywhere in the
-function.
+Label có _function scope_. Tức là, dù chúng xuất hiện ở mức block
+sâu bao nhiêu, bạn vẫn có thể `goto` chúng từ bất cứ đâu trong hàm.
 
-It also means you can only `goto` labels that are in the same function
-as the `goto` itself. Labels in other functions are out of scope from
-`goto`'s perspective. And it means you can use the same label name in
-two functions---just not the same label name in the same function.
+Điều đó cũng có nghĩa là bạn chỉ có thể `goto` các label nằm trong
+cùng hàm với `goto`. Label ở các hàm khác là ngoài scope theo góc
+nhìn của `goto`. Và có nghĩa là bạn có thể dùng cùng tên label trong
+hai hàm khác nhau, chỉ không được dùng cùng tên label trong cùng một
+hàm.
 
 [i[Labels]>]
 
-## Labeled `continue`
+## `continue` có label
 
 [i[`goto` statement-->as labeled `continue`]<]
 
-In some languages, you can actually specify a label for a `continue`
-statement. C doesn't allow it, but you can easily use `goto` instead.
+Ở vài ngôn ngữ, bạn thực sự có thể chỉ định label cho câu lệnh
+`continue`. C không cho, nhưng bạn có thể dễ dàng dùng `goto` thay
+thế.
 
-To show the issue, check out `continue` in this nested loop:
+Để thấy vấn đề, xem `continue` trong vòng lặp lồng này:
 
 ``` {.c}
 for (int i = 0; i < 3; i++) {
@@ -116,11 +116,11 @@ for (int i = 0; i < 3; i++) {
 }
 ```
 
-As we see, that `continue`, like all `continues`, goes to the next
-iteration of the nearest enclosing loop. What if we want to `continue`
-in the next loop out, the loop with `i`?
+Như ta thấy, `continue` đó, giống như mọi `continue`, đi tới lần lặp
+kế của vòng lặp bao quanh gần nhất. Nếu ta muốn `continue` ở vòng
+lặp ngoài kế tiếp, vòng lặp với `i` thì sao?
 
-Well, we can `break` to get back to the outer loop, right?
+Thì, ta có thể `break` để ra lại vòng lặp ngoài, đúng không?
 
 ``` {.c}
 for (int i = 0; i < 3; i++) {
@@ -131,9 +131,9 @@ for (int i = 0; i < 3; i++) {
 }
 ```
 
-That gets us two levels of nested loop. But then if we nest another
-loop, we're out of options. What about this, where we don't have any
-statement that will get us out to the next iteration of `i`?
+Cái đó giải quyết được hai mức lồng. Nhưng rồi nếu ta lồng thêm vòng
+nữa, ta hết lựa chọn. Còn cái này, nơi ta không có câu lệnh nào đưa
+ta ra tới lần lặp kế của `i`?
 
 ``` {.c}
 for (int i = 0; i < 3; i++) {
@@ -150,7 +150,7 @@ for (int i = 0; i < 3; i++) {
 }
 ```
 
-The `goto` statement offers us a way!
+Câu lệnh `goto` cho ta lối!
 
 ``` {.c}
     for (int i = 0; i < 3; i++) {
@@ -165,19 +165,18 @@ continue_i: ;
     }
 ```
 
-We have a `;` at the end there---that's because you can't have a label
-pointing to the plain end of a compound statement (or before a variable
-declaration).
+Ta có `;` ở cuối đó, vì bạn không thể có label chỉ tới chỗ cuối
+thuần của compound statement (hay trước một khai báo biến).
 
 [i[`goto` statement-->as labeled `continue`]>]
 
-## Bailing Out
+## Thoát thân
 
 [i[`goto` statement-->for bailing out]<]
 
-When you're super nested in the middle of some code, you can use `goto`
-to get out of it in a manner that's often cleaner than nesting more
-`if`s and using flag variables.
+Khi bạn đang lồng cực sâu giữa mớ code, bạn có thể dùng `goto` để
+thoát ra theo cách thường sạch hơn là lồng thêm `if` và dùng biến
+cờ.
 
 ``` {.c}
     // Pseudocode
@@ -198,17 +197,17 @@ bail:
     // Cleanup here
 ```
 
-Without `goto`, you'd have to check an error condition flag in all of
-the loops to get all the way out.
+Không có `goto`, bạn sẽ phải check cờ điều kiện lỗi trong tất cả các
+vòng lặp để thoát hết.
 
 [i[`goto` statement-->for bailing out]>]
 
-## Labeled `break`
+## `break` có label
 
 [i[`goto` statement-->as labeled `break`]<]
 
-This is a very similar situation to how `continue` only continues the
-innermost loop. `break` also only breaks out of the innermost loop.
+Tình huống rất giống với chuyện `continue` chỉ continue vòng lặp
+trong cùng. `break` cũng chỉ break khỏi vòng lặp trong cùng.
 
 ``` {.c}
     for (int i = 0; i < 3; i++) {
@@ -221,7 +220,7 @@ innermost loop. `break` also only breaks out of the innermost loop.
     printf("Done!\n");
 ```
 
-But we can use `goto` to break farther:
+Nhưng ta có thể dùng `goto` để break xa hơn:
 
 ``` {.c}
     for (int i = 0; i < 3; i++) {
@@ -238,18 +237,17 @@ break_i:
 
 [i[`goto` statement-->as labeled `break`]>]
 
-## Multi-level Cleanup
+## Dọn dẹp nhiều tầng
 
 [i[`goto` statement-->multilevel cleanup]<]
 
-If you're calling multiple functions to initialize multiple systems and
-one of them fails, you should only de-initialize the ones that you've
-gotten to so far.
+Nếu bạn đang gọi nhiều hàm để khởi tạo nhiều hệ thống con và một
+trong số đó fail, bạn chỉ nên de-initialize các cái mà bạn đã tới
+được cho tới giờ.
 
-Let's do a fake example where we start initializing systems and checking
-to see if any returns an error (we'll use `-1` to indicate an error). If
-one of them does, we have to shutdown only the systems we've initialized
-so far.
+Làm một ví dụ giả trong đó ta bắt đầu khởi tạo hệ thống và check xem
+có cái nào trả về lỗi (ta dùng `-1` để báo lỗi). Nếu có, ta phải tắt
+chỉ những hệ thống mà ta đã khởi tạo đến lúc đó.
 
 ``` {.c}
     if (init_system_1() == -1)
@@ -281,31 +279,30 @@ shutdown:
     print("All subsystems shut down.\n");
 ```
 
-Note that we're shutting down in the reverse order that we initialized
-the subsystems. So if subsystem 4 fails to start up, it will shut down
-3, 2, then 1 in that order.
+Lưu ý rằng ta tắt theo thứ tự ngược với thứ tự khởi tạo hệ thống
+con. Nên nếu hệ con 4 fail khi khởi động, nó sẽ tắt 3, 2, rồi 1 theo
+thứ tự đó.
 
 [i[`goto` statement-->multilevel cleanup]>]
 
-## Tail Call Optimization
+## Tối ưu tail call
 
 [i[`goto` statement-->tail call optimzation]<]
 [i[Tail call optimzation-->with `goto`]<]
 
-Kinda. For recursive functions only.
+Kinda. Chỉ cho hàm đệ quy.
 
-If you're unfamiliar, [flw[Tail Call Optimization (TCO)|Tail_call]] is a
-way to not waste stack space when calling other functions under very
-specific circumstances. Unfortunately the details are beyond the scope
-of this guide.
+Nếu bạn chưa quen, [flw[Tail Call Optimization (TCO)|Tail_call]] là
+cách không phí stack space khi gọi hàm khác trong các tình huống rất
+cụ thể. Không may chi tiết nằm ngoài phạm vi guide này.
 
-But if you have a recursive function you know can be optimized in this
-way, you can make use of this technique. (Note that you can't tail call
-other functions due to the function scope of labels.)
+Nhưng nếu bạn có một hàm đệ quy bạn biết có thể được tối ưu theo
+kiểu này, bạn có thể tận dụng kỹ thuật này. (Lưu ý bạn không thể
+tail call hàm khác vì label có function scope.)
 
-Let's do a straightforward example, factorial.
+Làm ví dụ thẳng thắn, giai thừa.
 
-Here's a recursive version that's not TCO, but it can be!
+Đây là phiên bản đệ quy không phải TCO, nhưng có thể!
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -326,12 +323,12 @@ int main(void)
 }
 ```
 
-To make it happen, you can replace the call with two steps:
+Để biến nó thành TCO, bạn có thể thay lời gọi bằng hai bước:
 
-1. Set the values of the parameters to what they'd be on the next call.
-2. `goto` a label on the first line of the function.
+1. Set giá trị các tham số sang giá trị sẽ có ở lời gọi kế.
+2. `goto` một label ở dòng đầu tiên của hàm.
 
-Let's try it:
+Thử xem:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -364,11 +361,11 @@ int main(void)
 }
 ```
 
-I used temporary variables up there to set the next values of the
-parameters before jumping to the start of the function. See how they
-correspond to the recursive arguments that were in the recursive call?
+Tôi đã dùng biến tạm phía trên để set giá trị kế của các tham số
+trước khi nhảy về đầu hàm. Thấy chúng tương ứng với các đối số đệ
+quy trong lời gọi đệ quy chưa?
 
-Now, why use temp variables? I could have done this instead:
+Giờ, tại sao dùng biến tạm? Tôi có thể đã làm vầy thay thế:
 
 ``` {.c}
     a *= n;
@@ -377,34 +374,34 @@ Now, why use temp variables? I could have done this instead:
     goto tco;
 ```
 
-and that actually works just fine. But if I carelessly reverse those two
-lines of code:
+và cái đó thực tế chạy ổn. Nhưng nếu tôi bất cẩn đảo hai dòng code
+đó:
 
 ``` {.c}
     n -= 1;  // BAD NEWS
     a *= n;
 ```
 
----now we're in trouble. We modified `n` before using it to modify `a`.
-That's Bad because that's not how it works when you call recursively.
-Using the temporary variables avoids this problem even if you're not
-looking out for it. And the compiler likely optimizes them out, anyway.
+giờ ta gặp rắc rối. Ta sửa đổi `n` trước khi dùng nó để sửa `a`. Đó
+là Tệ vì đó không phải cách nó chạy khi bạn gọi đệ quy. Dùng biến
+tạm tránh được vấn đề này kể cả khi bạn không để ý. Và compiler khả
+năng cao tối ưu chúng đi thôi.
 
 [i[`goto` statement-->tail call optimzation]>]
 [i[Tail call optimzation-->with `goto`]>]
 
-## Restarting Interrupted System Calls
+## Khởi động lại system call bị ngắt
 
 [i[`goto` statement-->restarting system calls]<]
 
-This is outside the spec, but commonly seen in Unix-like systems.
+Cái này nằm ngoài spec, nhưng thường thấy ở các hệ Unix-like.
 
-Certain long-lived system calls might return an error if they're
-interrupted by a signal, and `errno` will be set to `EINTR` to indicate
-the syscall was doing fine; it was just interrupted.
+Một số system call lâu có thể trả lỗi nếu bị ngắt bởi signal, và
+`errno` sẽ được set thành `EINTR` để báo rằng syscall vẫn ổn, chỉ là
+bị ngắt.
 
-In those cases, it's really common for the programmer to want to restart
-the call and try it again.
+Trong các trường hợp đó, rất phổ biến việc lập trình viên muốn chạy
+lại lời gọi và thử lại.
 
 ``` {.c}
 retry:
@@ -417,25 +414,25 @@ retry:
         }
 ```
 
-Many Unix-likes have an `SA_RESTART` flag you can pass to `sigaction()`
-to request the OS automatically restart any slow syscalls instead of
-failing with `EINTR`.
+Nhiều hệ Unix-like có cờ `SA_RESTART` bạn có thể truyền cho
+`sigaction()` để yêu cầu OS tự khởi động lại các syscall chậm thay
+vì fail với `EINTR`.
 
-Again, this is Unix-specific and is outside the C standard.
+Lại nữa, cái này đặc thù Unix và nằm ngoài chuẩn C.
 
-That said, it's possible to use a similar technique any time any
-function should be restarted.
+Nói vậy, có thể dùng kỹ thuật tương tự bất cứ khi nào có hàm nào nên
+được khởi động lại.
 
 [i[`goto` statement-->restarting system calls]>]
 
-## `goto` and Thread Preemption
+## `goto` và preempt thread
 
 [i[`goto` statement-->thread preemption]<]
 
-This example is ripped directly from [_Operating Systems: Three Easy
-Pieces_](http://www.ostep.org/), another excellent book from like-minded
-authors who also feel that quality books should be free to download. Not
-that I'm opinionated, or anything.
+Ví dụ này được lấy thẳng từ [_Operating Systems: Three Easy
+Pieces_](http://www.ostep.org/), một cuốn sách tuyệt vời nữa từ các
+tác giả cùng tư tưởng cũng cho rằng sách chất lượng nên được tải
+miễn phí. Không phải tôi có quan điểm gì đâu.
 
 ``` {.c}
 retry:
@@ -453,25 +450,25 @@ retry:
     pthread_mutex_unlock(L1);
 ```
 
-There the thread happily acquires the mutex `L1`, but then potentially
-fails to get the second resource guarded by mutex `L2` (if some other
-uncooperative thread holds it, say). If our thread can't get the `L2`
-lock, it unlocks `L1` and then uses `goto` to cleanly retry.
+Ở đó thread vui vẻ lấy được mutex `L1`, nhưng rồi tiềm năng fail khi
+lấy tài nguyên thứ hai được bảo vệ bởi mutex `L2` (nếu một thread
+khác không hợp tác đang giữ, chẳng hạn). Nếu thread của ta không lấy
+được khoá `L2`, nó mở khoá `L1` rồi dùng `goto` để thử lại sạch sẽ.
 
-We hope our heroic thread eventually manages to acquire both mutexes and
-save the day, all while avoiding evil deadlock.
+Ta hy vọng thread anh hùng của ta rốt cuộc lấy được cả hai mutex và
+cứu cả ngày, tránh được deadlock tà ác.
 
 [i[`goto` statement-->thread preemption]>]
 
-## `goto` and Variable Scope 
+## `goto` và scope của biến
 
 [i[`goto` statement-->variable scope]<]
 
-We've already seen that labels have function scope, but weird things can
-happen if we jump past some variable initialization.
+Ta đã thấy label có function scope, nhưng chuyện lạ có thể xảy ra
+nếu ta nhảy qua phần khởi tạo biến.
 
-Look at this example where we jump from a place where the variable `x`
-is out of scope into the middle of its scope (in the block).
+Xem ví dụ này nơi ta nhảy từ một chỗ mà biến `x` ngoài scope vào
+giữa scope của nó (trong block).
 
 ``` {.c}
     goto label;
@@ -484,20 +481,20 @@ label:
     }
 ```
 
-This will compile and run, but gives me a warning:
+Cái này sẽ compile và chạy, nhưng cho tôi cảnh báo:
 
 ``` {.default}
 warning: ‘x’ is used uninitialized in this function
 ```
 
-And then it prints out `0` when I run it (your mileage may vary).
+Và rồi in ra `0` khi tôi chạy (kết quả có thể khác với bạn).
 
-Basically what has happened is that we jumped into `x`'s scope (so it
-was OK to reference it in the `printf()`) but we jumped over the line
-that actually initialized it to `12345`. So the value was indeterminate.
+Về cơ bản chuyện đã xảy ra là ta nhảy vào scope của `x` (nên ok khi
+tham chiếu nó trong `printf()`) nhưng ta nhảy qua dòng mà thực sự
+khởi tạo nó thành `12345`. Nên giá trị không xác định.
 
-The fix is, of course, to get the initialization _after_ the label one
-way or another.
+Cách sửa dĩ nhiên là đưa phần khởi tạo ra _sau_ label theo cách nào
+đó.
 
 ``` {.c}
     goto label;
@@ -511,7 +508,7 @@ label:
     }
 ```
 
-Let's look at one more example.
+Xem thêm một ví dụ nữa.
 
 ``` {.c}
     {
@@ -525,28 +522,27 @@ label:
     goto label;
 ```
 
-What happens here?
+Chuyện gì xảy ra ở đây?
 
-The first time through the block, we're good. `x` is `10` and that's
-what prints.
+Lần đầu qua block, ta ngon. `x` là `10` và đó là cái được in.
 
-But after the `goto`, we're jumping into the scope of `x`, but past its
-initialization. Which means we can still print it, but the value is
-indeterminate (since it hasn't been reinitialized).
+Nhưng sau `goto`, ta nhảy vào scope của `x`, nhưng qua phần khởi tạo
+của nó. Tức là ta vẫn có thể in nó, nhưng giá trị không xác định (vì
+nó chưa được khởi tạo lại).
 
-On my machine, it prints `10` again (to infinity), but that's just luck.
-It could print any value after the `goto` since `x` is uninitialized.
+Trên máy tôi, nó in `10` lần nữa (mãi mãi), nhưng đó chỉ là may mắn.
+Nó có thể in giá trị bất kỳ sau `goto` vì `x` không được khởi tạo.
 
 [i[`goto` statement-->variable scope]>]
 
-## `goto` and Variable-Length Arrays
+## `goto` và VLA
 
 [i[`goto` statement-->with variable-length arrays]<]
 
-When it comes to VLAs and `goto`, there's one rule: you can't jump from
-outside the scope of a VLA into the scope of that VLA.
+Khi dính tới VLA và `goto`, có một quy tắc: bạn không thể nhảy từ
+ngoài scope của một VLA vào trong scope của VLA đó.
 
-If I try to do this:
+Nếu tôi cố làm vầy:
 
 ``` {.c}
     int x = 10;
@@ -562,13 +558,13 @@ label:
     }
 ```
 
-I get an error:
+Tôi bị lỗi:
 
 ``` {.default}
 error: jump into scope of identifier with variably modified type
 ```
 
-You can jump in ahead of the VLA declaration, like this:
+Bạn có thể nhảy tới trước khai báo VLA, như vầy:
 
 ``` {.c}
     int x = 10;
@@ -583,8 +579,8 @@ label:  ;
     }
 ```
 
-Because that way the VLA gets allocated properly before its inevitable
-deallocation once it falls out of scope.
+Vì cách đó VLA được cấp phát đúng cách trước khi chắc chắn bị giải
+phóng khi ra khỏi scope.
 
 [i[`goto` statement-->with variable-length arrays]>]
 [i[`goto` statement]>]
