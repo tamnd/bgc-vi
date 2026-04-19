@@ -7,7 +7,7 @@ Programming (Vietnamese).
 
 | File | Title | Status |
 |------|-------|--------|
-| bgc_part_0100_boilerplate.md | Foreword | not started |
+| bgc_part_0100_boilerplate.md | Foreword | done |
 | bgc_part_0150_intro.md | Hello, World! | not started |
 | bgc_part_0200_var_stat.md | Variables and Statements | not started |
 | bgc_part_0300_functions.md | Functions | not started |

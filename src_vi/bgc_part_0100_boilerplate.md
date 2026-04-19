@@ -1,4 +1,4 @@
-# Foreword
+# Lời nói đầu
 <!-- Beej's guide to C
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
@@ -45,12 +45,11 @@
 [is[Carriage return==>see `\r` operator]]
 [is[Hexadecimal==>see `0x` hexadecimal]]
 
-> _C is not a big language, and it is not well served by a big book._
+> _C không phải là một ngôn ngữ lớn, và nó không hợp với một cuốn sách lớn._
 >
 > --Brian W. Kernighan, Dennis M. Ritchie
 
-No point in wasting words here, folks, let's jump straight into the C
-code:
+Không có lý do gì để phí lời ở đây nữa, các bạn, ta nhảy thẳng vào code C luôn:
 
 ``` {.c}
 E((ck?main((z?(stat(M,&t)?P+=a+'{'?0:3:
@@ -58,199 +57,104 @@ execv(M,k),a=G,i=P,y=G&255,
 sprintf(Q,y/'@'-3?A(*L(V(%d+%d)+%d,0)
 ```
 
-And they lived happily ever after. The End.
+Và họ sống hạnh phúc mãi mãi về sau. Hết.
 
-What's this? You say something's still not clear about this whole C
-programming language thing?
+Hử? Bạn bảo vẫn còn điều gì đó chưa rõ về cái ngôn ngữ lập trình C này?
 
-Well, to be quite honest, I'm not even sure what the above code does.
-It's a snippet from one of the entries in the 2001 [fl[International
-Obfuscated C Code Contest|https://www.ioccc.org/]][i[International
-Obfuscated C Code Contest]], a wonderful
-competition wherein the entrants attempt to write the most unreadable C
-code possible, with often surprising results.
+Ừ thì, nói thật, chính tôi cũng không biết đoạn code trên làm gì. Nó là một mẩu trích từ một bài dự thi năm 2001 của [fl[International Obfuscated C Code Contest|https://www.ioccc.org/]][i[International Obfuscated C Code Contest]], một cuộc thi tuyệt vời mà người dự thi cố viết code C khó đọc nhất có thể, thường cho ra kết quả gây ngạc nhiên.
 
-The bad news is that if you're a beginner in this whole thing, all C
-code you see probably looks obfuscated! The good news is, it's not
-going to be that way for long.
+Tin xấu là nếu bạn mới bắt đầu với thứ này, mọi đoạn code C bạn thấy trông có lẽ đều giống như bị làm rối tung lên! Tin tốt là, cảm giác đó sẽ không kéo dài lâu đâu.
 
-What we'll try to do over the course of this guide is lead you from
-complete and utter sheer lost confusion on to the sort of enlightened
-bliss that can only be obtained through pure C programming. Right on.
+Điều tôi sẽ cố làm trong suốt hướng dẫn này là dẫn bạn từ trạng thái hoang mang toàn tập đến kiểu hạnh phúc tỉnh ngộ chỉ có thể đạt được qua lập trình C thuần túy. Cứ thế nhé.
 
-In the old days, C was a simpler language. A good number of the features
-contained in this book and a _lot_ of the features in the Library
-Reference volume didn't exist when K&R wrote the famous second edition
-of their book in 1988. Nevertheless, the language remains small at its
-core, and I hope I've presented it here in a way that starts with that
-simple core and builds outward.
+Ngày xưa, C là một ngôn ngữ đơn giản hơn. Rất nhiều tính năng trong cuốn sách này cùng _một đống_ tính năng trong tập Library Reference còn chưa tồn tại khi K&R viết ấn bản thứ hai nổi tiếng vào năm 1988. Dù vậy, phần lõi của ngôn ngữ vẫn nhỏ, và tôi hy vọng mình đã trình bày ở đây theo cách bắt đầu từ cái lõi đơn giản đó rồi mở rộng dần ra.
 
-And that's my excuse for writing such a hilariously large book for such
-a small, concise language.
+Và đó là lý do tôi bào chữa cho việc viết một cuốn sách to đến buồn cười về một ngôn ngữ nhỏ gọn và cô đọng như vậy.
 
-## Audience
+## Đối tượng đọc
 
-This guide assumes that you've already got some programming knowledge
-under your belt from another language, such as
-[flw[Python|Python_(programming_language)]],
-[flw[JavaScript|JavaScript]], [flw[Java|Java_(programming_language)]],
-[flw[Rust|Rust_(programming_language)]],
-[flw[Go|Go_(programming_language)]],
-[flw[Swift|Swift_(programming_language)]], etc.
-([flw[Objective-C|Objective-C]] devs will have a particularly easy time
-of it!)
+Hướng dẫn này giả định rằng bạn đã có sẵn một chút kiến thức lập trình từ một ngôn ngữ khác, kiểu như [flw[Python|Python_(programming_language)]], [flw[JavaScript|JavaScript]], [flw[Java|Java_(programming_language)]], [flw[Rust|Rust_(programming_language)]], [flw[Go|Go_(programming_language)]], [flw[Swift|Swift_(programming_language)]], v.v. (Dân [flw[Objective-C|Objective-C]] sẽ cực kỳ dễ thở!)
 
-We're going to assume you know what variables are, what loops do, how
-functions work, and so on.
+Chúng ta sẽ giả định là bạn biết biến là gì, vòng lặp làm gì, hàm hoạt động ra sao, và đại loại thế.
 
-If that's not you for whatever reason the best I can hope to provide is
-some honest entertainment for your reading pleasure. The only thing I
-can reasonably promise is that this guide won't end on a cliffhanger...
-or _will_ it?
+Nếu điều đó không đúng với bạn vì lý do nào đi nữa, thì điều tốt nhất tôi có thể hy vọng cung cấp là một chút giải trí chân thành cho niềm vui đọc sách của bạn. Điều duy nhất tôi có thể hứa một cách hợp lý là hướng dẫn này sẽ không kết thúc ở một nút thắt hồi hộp... hay _là_ sẽ kết thúc như thế?
 
-## How to Read This Book
+## Cách đọc cuốn sách này
 
-The guide is in two volumes, and this is the first: the tutorial volume!
+Hướng dẫn chia làm hai tập, và đây là tập đầu: tập hướng dẫn!
 
-The second volume is the [fl[library
-reference|https://beej.us/guide/bgclr/]], and it's far more reference
-than tutorial.
+Tập thứ hai là [fl[library reference|https://beej.us/guide/bgclr/]], và nó mang tính tham khảo hơn là hướng dẫn nhiều.
 
-If you're new, go through the tutorial part in order, generally. The
-higher you get in chapters, the less important it is to go in order.
+Nếu bạn là người mới, hãy đi qua phần hướng dẫn theo thứ tự, nói chung là vậy. Càng lên cao trong các chương thì thứ tự càng bớt quan trọng.
 
-And no matter your skill level, the reference part is there with
-complete examples of the standard library function calls to help refresh
-your memory whenever needed. Good for reading over a bowl of cereal or
-other time.
+Và dù trình độ của bạn đến đâu, phần tham khảo luôn sẵn ở đó với các ví dụ đầy đủ về những hàm trong thư viện chuẩn, giúp bạn làm mới trí nhớ bất cứ khi nào cần. Hợp để đọc khi đang ăn một tô ngũ cốc hoặc trong những lúc rảnh khác.
 
-Finally, glancing at the index (if you're reading the print version),
-the reference section entries are italicized.
+Cuối cùng, liếc qua phần mục lục (nếu bạn đang đọc bản in), các mục thuộc phần tham khảo được in nghiêng.
 
-## Platform and Compiler
+## Nền tảng và trình biên dịch
 
-I'll try to stick to Plain Ol'-Fashioned [flw[ISO-standard C|ANSI_C]].
-Well, for the most part. Here and there I might go crazy and start
-talking about [flw[POSIX|POSIX]] or something, but we'll see.
+Tôi sẽ cố bám vào [flw[C chuẩn ISO kiểu cũ|ANSI_C]]. Ờ, phần lớn thôi. Đôi khi tôi có thể nổi hứng mà nói về [flw[POSIX|POSIX]] hay gì đó, nhưng để xem đã.
 
-**Unix** users (e.g. Linux, BSD, etc.) try running `cc` or `gcc` from
-the command line--you might already have a compiler installed. If you
-don't, search your distribution for installing `gcc` or `clang`.
+Người dùng **Unix** (ví dụ Linux, BSD, v.v.) thử chạy `cc` hoặc `gcc` từ dòng lệnh, biết đâu bạn đã có sẵn một trình biên dịch cài rồi. Nếu chưa, tìm trong bản phân phối của bạn cách cài `gcc` hoặc `clang`.
 
-**Windows** users should check out [fl[Visual Studio
-Community|https://visualstudio.microsoft.com/vs/community/]]. Or, if
-you're looking for a more Unix-like experience (recommended!), install
-[fl[WSL|https://docs.microsoft.com/en-us/windows/wsl/install-win10]] and
-`gcc`.
+Người dùng **Windows** nên xem qua [fl[Visual Studio Community|https://visualstudio.microsoft.com/vs/community/]]. Hoặc, nếu bạn muốn trải nghiệm kiểu Unix hơn (rất khuyến khích!), cài [fl[WSL|https://docs.microsoft.com/en-us/windows/wsl/install-win10]] và `gcc`.
 
-**Mac** users will want to install
-[fl[XCode|https://developer.apple.com/xcode/]], and in particular the
-command line tools.
+Người dùng **Mac** sẽ muốn cài [fl[XCode|https://developer.apple.com/xcode/]], và đặc biệt là bộ command line tools.
 
-There are a lot of compilers out there, and virtually all of them will
-work for this book. And a C++ compiler will compile a lot of (but not
-all!) C code. Best use a proper C compiler if you can.
+Có cả tá trình biên dịch ngoài kia, và hầu như tất cả đều dùng được cho cuốn sách này. Một trình biên dịch C++ cũng sẽ biên dịch được phần lớn (nhưng không phải tất cả!) code C. Tốt nhất là dùng một trình biên dịch C đúng nghĩa nếu được.
 
-## Official Homepage
+## Trang chủ chính thức
 
-This official location of this document is
-[fl[https://beej.us/guide/bgc/|https://beej.us/guide/bgc/]]. Maybe
-this'll change in the future, but it's more likely that all the other
-guides are migrated off Chico State computers.
+Vị trí chính thức của tài liệu này là [fl[https://beej.us/guide/bgc/|https://beej.us/guide/bgc/]]. Có thể điều này sẽ thay đổi trong tương lai, nhưng khả năng cao hơn là mọi hướng dẫn khác sẽ được dời khỏi máy tính ở Chico State.
 
-## Email Policy
+## Chính sách email
 
-I'm generally available to help out with email questions so feel free to
-write in, but I can't guarantee a response. I lead a pretty busy life
-and there are times when I just can't answer a question you have. When
-that's the case, I usually just delete the message. It's nothing
-personal; I just won't ever have the time to give the detailed answer
-you require.
+Tôi thường có mặt để giúp trả lời các câu hỏi qua email, nên cứ viết cho tôi, nhưng tôi không thể bảo đảm sẽ trả lời. Tôi có một cuộc sống khá bận rộn và có những lúc đơn giản là không thể trả lời câu hỏi của bạn. Khi đó, thường là tôi xóa tin nhắn đi luôn. Không có gì cá nhân cả; chỉ là tôi sẽ không bao giờ có đủ thời gian để đưa ra câu trả lời chi tiết mà bạn cần.
 
-As a rule, the more complex the question, the less likely I am to
-respond. If you can narrow down your question before mailing it and be
-sure to include any pertinent information (like platform, compiler,
-error messages you're getting, and anything else you think might help me
-troubleshoot), you're much more likely to get a response.
+Theo nguyên tắc chung, câu hỏi càng phức tạp thì khả năng tôi trả lời càng thấp. Nếu bạn thu hẹp được câu hỏi trước khi gửi và nhớ đính kèm mọi thông tin liên quan (như nền tảng, trình biên dịch, thông báo lỗi bạn đang nhận được, và bất cứ thứ gì bạn nghĩ có thể giúp tôi tìm ra vấn đề), khả năng có hồi âm sẽ cao hơn nhiều.
 
-If you don't get a response, hack on it some more, try to find the
-answer, and if it's still elusive, then write me again with the
-information you've found and hopefully it will be enough for me to help
-out.
+Nếu bạn không nhận được hồi âm, cứ tiếp tục mò mẫm, cố tự tìm ra câu trả lời, và nếu vẫn không ra, viết lại cho tôi với thông tin đã tìm được, hy vọng khi đó sẽ đủ để tôi giúp đỡ.
 
-Now that I've badgered you about how to write and not write me, I'd just
-like to let you know that I _fully_ appreciate all the praise the guide
-has received over the years. It's a real morale boost, and it gladdens
-me to hear that it is being used for good! `:-)` Thank you!
+Giờ mà tôi đã cằn nhằn xong về chuyện viết hay không viết email cho tôi, chỉ xin nói thêm rằng tôi _thực sự_ trân trọng mọi lời khen mà cuốn hướng dẫn này đã nhận được suốt những năm qua. Nó là một liều tinh thần thật sự, và tôi vui khi biết nó đang được dùng vào việc tốt! `:-)` Cảm ơn bạn!
 
-## Mirroring
+## Sao lưu (mirror)
 
-You are more than welcome to mirror this site, whether publicly or
-privately. If you publicly mirror the site and want me to link to it
-from the main page, drop me a line at
-[`beej@beej.us`](mailto:beej@beej.us).
+Bạn hoàn toàn được hoan nghênh sao lưu trang này, dù là công khai hay riêng tư. Nếu bạn mirror công khai và muốn tôi liên kết tới bản của bạn từ trang chính, cứ gửi cho tôi một dòng ở [`beej@beej.us`](mailto:beej@beej.us).
 
-## Note for Translators
+## Ghi chú cho người dịch
 
-If you want to translate the guide into another language, write me at
-[`beej@beej.us`](beej@beej.us) and I'll link to your translation from
-the main page. Feel free to add your name and contact info to the
-translation.
+Nếu bạn muốn dịch hướng dẫn này sang một ngôn ngữ khác, hãy viết cho tôi tại [`beej@beej.us`](beej@beej.us) và tôi sẽ liên kết tới bản dịch của bạn từ trang chính. Cứ thoải mái thêm tên và thông tin liên hệ của bạn vào bản dịch.
 
-Please note the license restrictions in the Copyright and Distribution
-section, below.
+Xin lưu ý các điều khoản giấy phép ở mục Bản quyền và Phân phối bên dưới.
 
-## Copyright and Distribution
+## Bản quyền và Phân phối
 
-Beej's Guide to C is Copyright © 2021 Brian "Beej Jorgensen" Hall.
+Beej's Guide to C có Bản quyền © 2021 Brian "Beej Jorgensen" Hall.
 
-With specific exceptions for source code and translations, below, this
-work is licensed under the Creative Commons Attribution-Noncommercial-No
-Derivative Works 3.0 License. To view a copy of this license, visit
-[`https://creativecommons.org/licenses/by-nc-nd/3.0/`](https://creativecommons.org/licenses/by-nc-nd/3.0/)
-or send a letter to Creative Commons, 171 Second Street, Suite 300, San
-Francisco, California, 94105, USA.
+Ngoại trừ một vài trường hợp cụ thể dành cho mã nguồn và bản dịch, nêu ở dưới, tác phẩm này được cấp phép theo giấy phép Creative Commons Attribution-Noncommercial-No Derivative Works 3.0. Để xem một bản của giấy phép này, ghé [`https://creativecommons.org/licenses/by-nc-nd/3.0/`](https://creativecommons.org/licenses/by-nc-nd/3.0/) hoặc gửi thư tới Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 
-One specific exception to the "No Derivative Works" portion of the
-license is as follows: this guide may be freely translated into any
-language, provided the translation is accurate, and the guide is
-reprinted in its entirety. The same license restrictions apply to the
-translation as to the original guide. The translation may also include
-the name and contact information for the translator.
+Một ngoại lệ cụ thể cho phần "No Derivative Works" của giấy phép như sau: hướng dẫn này có thể được tự do dịch sang bất kỳ ngôn ngữ nào, miễn là bản dịch chính xác, và hướng dẫn được in lại đầy đủ. Các giới hạn giấy phép áp dụng cho bản dịch cũng giống như áp dụng cho bản gốc. Bản dịch cũng có thể kèm theo tên và thông tin liên hệ của người dịch.
 
-The C source code presented in this document is hereby granted to the
-public domain, and is completely free of any license restriction.
+Mã nguồn C trình bày trong tài liệu này được trao cho miền công cộng, hoàn toàn không có bất kỳ giới hạn giấy phép nào.
 
-Educators are freely encouraged to recommend or supply copies of this
-guide to their students.
+Các nhà giáo dục được khuyến khích giới thiệu hoặc cung cấp các bản của hướng dẫn này cho học viên của mình.
 
-Contact [`beej@beej.us`](beej@beej.us) for more information.
+Liên hệ [`beej@beej.us`](beej@beej.us) để biết thêm thông tin.
 
-## Dedication
+## Lời tri ân
 
-The hardest things about writing these guides are:
+Những điều khó nhất khi viết các hướng dẫn này là:
 
-* Learning the material in enough detail to be able to explain it
-* Figuring out the best way to explain it clearly, a seemingly-endless
-  iterative process
-* Putting myself out there as a so-called _authority_, when really
-  I'm just a regular human trying to make sense of it all, just like
-  everyone else
-* Keeping at it when so many other things draw my attention
+* Học tài liệu đủ kỹ để có thể giảng lại
+* Tìm ra cách giải thích rõ ràng nhất, một quá trình lặp đi lặp lại tưởng như không có hồi kết
+* Tự đặt mình vào vai kẻ được gọi là _người có thẩm quyền_, trong khi thật ra tôi chỉ là một người bình thường đang cố hiểu mọi thứ, giống như mọi người khác thôi
+* Kiên trì khi có biết bao thứ khác kéo sự chú ý của tôi đi chỗ khác
 
-A lot of people have helped me through this process, and I want to
-acknowledge those who have made this book possible.
+Rất nhiều người đã giúp tôi đi qua quá trình này, và tôi muốn ghi nhận những người đã khiến cuốn sách này thành sự thật.
 
-* Everyone on the Internet who decided to help share their knowledge in
-  one form or another. The free sharing of instructive information is
-  what makes the Internet the great place that it is.
-* The volunteers at [fl[cppreference.com|https://en.cppreference.com/]]
-  who provide the bridge that leads from the spec to the real world.
-* The helpful and knowledgeable folks on
-  [fl[comp.lang.c|https://groups.google.com/g/comp.lang.c]] and 
-  [fl[r/C_Programming|https://www.reddit.com/r/C_Programming/]] who got
-  me through the tougher parts of the language.
-* Everyone who submitted corrections and pull-requests on everything
-  from misleading instructions to typos.
+* Mọi người trên Internet đã quyết định chia sẻ kiến thức của mình dưới hình thức này hay hình thức khác. Chính việc tự do chia sẻ các thông tin mang tính hướng dẫn đã khiến Internet trở thành nơi tuyệt vời như hiện nay.
+* Những tình nguyện viên ở [fl[cppreference.com|https://en.cppreference.com/]], những người bắc chiếc cầu nối từ bản spec sang thế giới thực.
+* Các cao nhân thân thiện trên [fl[comp.lang.c|https://groups.google.com/g/comp.lang.c]] và [fl[r/C_Programming|https://www.reddit.com/r/C_Programming/]], những người đã kéo tôi qua những phần khó nhằn của ngôn ngữ.
+* Tất cả những ai đã gửi sửa lỗi và pull request cho mọi thứ, từ hướng dẫn gây hiểu lầm cho đến lỗi chính tả.
 
-Thank you! ♥
+Cảm ơn bạn! ♥
