@@ -36,7 +36,7 @@ Programming (Vietnamese).
 | bgc_part_2200_unicode.md | Unicode, Wide Characters, and All That | done |
 | bgc_part_2300_exit.md | Exiting a Program | done |
 | bgc_part_2400_signal.md | Signal Handling | done |
-| bgc_part_2500_vla.md | Variable-Length Arrays (VLAs) | not started |
+| bgc_part_2500_vla.md | Variable-Length Arrays (VLAs) | done |
 | bgc_part_2600_goto.md | `goto` | not started |
 | bgc_part_2700_typesv.md | Types Part V: Compound Literals and Generic Selections | not started |
 | bgc_part_2800_arrays_2.md | Arrays Part II | not started |

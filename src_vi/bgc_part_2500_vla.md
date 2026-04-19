@@ -3,24 +3,22 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Variable-Length Arrays (VLAs)
+# Mảng độ dài biến đổi (VLA)
 
 [i[Variable-length array]<]
 
-C provides a way for you to declare an array whose size is determined at
-runtime. This gives you the benefits of dynamic runtime sizing like you
-get with `malloc()`, but without needing to worry about `free()`ing the
-memory after.
+C cung cấp cách khai báo mảng mà kích thước được xác định lúc chạy.
+Cái này cho bạn lợi ích của việc chỉnh kích thước động lúc runtime
+như với `malloc()`, nhưng không cần lo `free()` bộ nhớ sau đó.
 
-Now, a lot of people don't like VLAs. They've been banned from the Linux
-kernel, for example. We'll dig into more of that rationale
-[later](#vla-general-issues).
+Giờ, nhiều người không thích VLA. Chúng bị cấm trong Linux kernel
+chẳng hạn. Ta sẽ đào sâu hơn về lý do đó [ở sau](#vla-general-issues).
 
 [i[`__STDC_NO_VLA__` macro]<]
 
-This is an optional feature of the language. The macro `__STDC_NO_VLA__`
-is set to `1` if VLAs are _not_ present. (They were mandatory in C99,
-and then became optional in C11.)
+Đây là tính năng tuỳ chọn của ngôn ngữ. Macro `__STDC_NO_VLA__` được
+set là `1` nếu VLA _không_ có. (Chúng bắt buộc trong C99, rồi thành
+tuỳ chọn trong C11.)
 
 ``` {.c}
 #if __STDC_NO_VLA__ == 1
@@ -30,15 +28,15 @@ and then became optional in C11.)
 
 [i[`__STDC_NO_VLA__` macro]>]
 
-But since neither GCC nor Clang bother to define this macro, you may get
-limited mileage from this.
+Nhưng vì cả GCC và Clang đều không buồn định nghĩa macro này, bạn có
+thể chẳng đi được mấy với nó.
 
-Let's dive in first with an example, and then we'll look for the devil
-in the details.
+Nhảy vào với một ví dụ trước, rồi ta sẽ đi tìm con quỷ trong chi
+tiết.
 
-## The Basics
+## Cơ bản
 
-A normal array is declared with a constant size, like this:
+Một mảng thường được khai báo với kích thước hằng, như sau:
 
 ``` {.c}
 int v[10];
@@ -46,20 +44,20 @@ int v[10];
 
 [i[Variable-length array-->defining]<]
 
-But with VLAs, we can use a size determined at runtime to set the array,
-like this:
+Nhưng với VLA, ta có thể dùng kích thước xác định lúc runtime để đặt
+mảng, như sau:
 
 ``` {.c}
 int n = 10;
 int v[n];
 ```
 
-Now, that looks like the same thing, and in many ways is, but this gives
-you the flexibility to compute the size you need, and then get an array
-of exactly that size.
+Giờ, trông thì giống y như nhau, và ở nhiều mặt nó giống thật, nhưng
+cái này cho bạn sự linh hoạt để tính kích thước cần, rồi lấy một
+mảng chính xác kích thước đó.
 
-Let's ask the user to input the size of the array, and then store the
-index-times-10 in each of those array elements:
+Ta hãy hỏi người dùng nhập kích thước mảng, rồi lưu chỉ-số-nhân-10
+vào mỗi phần tử mảng:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -83,56 +81,55 @@ int main(void)
 }
 ```
 
-(On line 7, I have an `fflush()` that should force the line to output
-even though I don't have a newline at the end.)
+(Ở dòng 7, tôi có `fflush()` để ép dòng được xuất ra dù tôi không có
+newline ở cuối.)
 
-Line 12 is where we declare the VLA---once execution gets past that
-line, the size of the array is set to whatever `n` was at that moment.
-The array length can't be changed later.
+Dòng 12 là chỗ ta khai báo VLA, một khi thực thi đi qua dòng đó,
+kích thước mảng được set bằng bất cứ giá trị nào `n` có tại thời
+điểm đó. Độ dài mảng không thể đổi sau này.
 
-You can put an expression in the brackets, as well:
+Bạn có thể đặt biểu thức trong ngoặc vuông cũng được:
 
 ``` {.c}
 int v[x * 100];
 ```
 
-Some restrictions:
+Vài hạn chế:
 
-* You can't declare a VLA at file scope, and you can't make a `static`
-  one in block scope^[This is due to how VLAs are typically allocated on
-  the stack, whereas `static` variables are on the heap. And the whole
-  idea with VLAs is they'll be automatically dellocated when the stack
-  frame is popped at the end of the function.].
-* You can't use an initializer list to initialize the array.
+* Bạn không thể khai báo VLA ở file scope, và không thể tạo một VLA
+  `static` trong block scope^[Đây là do VLA thường được cấp phát
+  trên stack, còn biến `static` nằm trên heap. Và cả ý tưởng của VLA
+  là chúng sẽ được giải phóng tự động khi stack frame bị pop ở cuối
+  hàm.].
+* Bạn không thể dùng initializer list để khởi tạo mảng.
 
-Also, entering a negative value for the size of the array invokes
-undefined behavior---in this universe, anyway.
+Ngoài ra, nhập giá trị âm cho kích thước mảng sẽ gây hành vi không
+xác định, dù sao thì cũng trong vũ trụ này.
 
 [i[Variable-length array-->defining]>]
 
-## `sizeof` and VLAs
+## `sizeof` và VLA
 
 [i[Variable-length array-->and `sizeof()`]<]
 
-We're used to `sizeof` giving us the size in bytes of any particular
-object, including arrays. And VLAs are no exception.
+Ta đã quen với việc `sizeof` cho ra kích thước tính bằng byte của
+một object cụ thể, kể cả mảng. Và VLA cũng không ngoại lệ.
 
-The main difference is that `sizeof` on a VLA is executed at _runtime_,
-whereas on a non-variably-sized variable it is computed at _compile
+Khác biệt chính là `sizeof` trên VLA được chạy lúc _runtime_, còn
+trên biến không có kích thước biến đổi thì được tính lúc _compile
 time_.
 
-But the usage is the same.
+Nhưng cách dùng vẫn vậy.
 
-You can even compute the number of elements in a VLA with the usual
-array trick:
+Bạn thậm chí có thể tính số phần tử trong VLA bằng trò mảng quen
+thuộc:
 
 ``` {.c}
 size_t num_elems = sizeof v / sizeof v[0];
 ```
 
-There's a subtle and correct implication from the above line: pointer
-arithmetic works just like you'd expect for a regular array. So go ahead
-and use it to your heart's content:
+Có một hàm ý tinh tế và đúng từ dòng trên: số học con trỏ chạy y như
+bạn kỳ vọng với mảng thường. Nên cứ dùng thoả thích:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -152,8 +149,8 @@ int main(void)
 }
 ```
 
-Like with regular arrays, you can use parentheses with `sizeof()` to get
-the size of a would-be VLA without actually declaring one:
+Giống như với mảng thường, bạn có thể dùng ngoặc với `sizeof()` để
+lấy kích thước của một VLA giả-định mà không thực sự khai báo nó:
 
 ``` {.c}
 int x = 12;
@@ -163,12 +160,12 @@ printf("%zu\n", sizeof(int [x]));  // Prints 48 on my system
 
 [i[Variable-length array-->and `sizeof()`]>]
 
-## Multidimensional VLAs
+## VLA nhiều chiều
 
 [i[Variable-length array-->multidimensional]<]
 
-You can go ahead and make all kinds of VLAs with one or more dimensions
-set to a variable
+Bạn có thể tạo đủ kiểu VLA với một hoặc nhiều chiều được set làm
+biến
 
 ``` {.c}
 int w = 10;
@@ -179,16 +176,16 @@ int y[5][w];
 int z[10][w][20];
 ```
 
-Again, you can navigate these just like you would a regular array.
+Lại nữa, bạn có thể điều hướng chúng y như mảng thường.
 
 [i[Variable-length array-->multidimensional]>]
 
-## Passing One-Dimensional VLAs to Functions
+## Truyền VLA một chiều cho hàm
 
 [i[Variable-length array-->passing to functions]<]
 
-Passing single-dimensional VLAs into a function can be no different than
-passing a regular array in. You just go for it.
+Truyền VLA đơn-chiều vào hàm không khác gì truyền mảng thường. Cứ
+thế mà làm.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -218,9 +215,9 @@ int main(void)
 }
 ```
 
-But there's a bit more to it than that. You can also let C know that the
-array is a specific VLA size by passing that in first and then giving
-that dimension in the parameter list:
+Nhưng còn có thêm chút nữa. Bạn cũng có thể cho C biết rằng mảng là
+VLA cụ thể kích thước nào đó bằng cách truyền kích thước đó trước
+rồi ghi chiều đó vào danh sách tham số:
 
 ``` {.c}
 int sum(int count, int v[count])
@@ -232,34 +229,32 @@ int sum(int count, int v[count])
 [i[Variable-length array-->in function prototypes]<]
 [i[`*` for VLA function prototypes]<]
 
-Incidentally, there are a couple ways of listing a prototype for the
-above function; one of them involves an `*` if you don't want to
-specifically name the value in the VLA. It just indicates that the type
-is a VLA as opposed to a regular pointer.
+Nhân tiện, có vài cách liệt kê prototype cho hàm trên; một trong số
+đó dùng `*` nếu bạn không muốn chỉ cụ thể tên biến giữ giá trị trong
+VLA. Nó chỉ báo rằng kiểu là VLA chứ không phải con trỏ thường.
 
-VLA prototypes:
+Prototype VLA:
 
 ``` {.c}
 void do_something(int count, int v[count]);  // With names
 void do_something(int, int v[*]);            // Without names
 ```
 
-Again, that `*` thing only works with the prototype---in the function
-itself, you'll have to put the explicit size.
+Lại nữa, cái `*` đó chỉ dùng với prototype, trong thân hàm bạn sẽ
+phải đặt kích thước tường minh.
 
 [i[`*` for VLA function prototypes]>]
 [i[Variable-length array-->in function prototypes]>]
 
-Now---_let's get multidimensional_! This is where the fun begins.
+Giờ, _đa chiều thôi_! Đây là chỗ vui bắt đầu.
 
-## Passing Multi-Dimensional VLAs to Functions
+## Truyền VLA đa chiều cho hàm
 
-Same thing as we did with the second form of one-dimensional VLAs,
-above, but this time we're passing in two dimensions and using those.
+Y như ta đã làm với dạng thứ hai của VLA một chiều ở trên, nhưng lần
+này ta truyền vào hai chiều và dùng chúng.
 
-In the following example, we build a multiplication table matrix of a
-variable width and height, and then pass it to a function to print it
-out.
+Trong ví dụ sau, ta dựng một ma trận bảng cửu chương chiều rộng và
+chiều cao biến đổi, rồi truyền cho một hàm để in ra.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -288,11 +283,11 @@ int main(void)
 }
 ```
 
-### Partial Multidimensional VLAs
+### VLA đa chiều một phần
 
-You can have some of the dimensions fixed and some variable. Let's say
-we have a record length fixed at 5 elements, but we don't know how many
-records there are.
+Bạn có thể có một số chiều cố định và một số biến đổi. Giả sử ta có
+một bản ghi độ dài cố định 5 phần tử, nhưng ta không biết có bao
+nhiêu bản ghi.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -322,16 +317,15 @@ int main(void)
 
 [i[Variable-length array-->passing to functions]>]
 
-## Compatibility with Regular Arrays
+## Tương thích với mảng thường
 
 [i[Variable-length array-->with regular arrays]<]
 
-Because VLAs are just like regular arrays in memory, it's perfectly
-permissible to pass them interchangeably... as long as the dimensions
-match.
+Vì VLA y như mảng thường trong bộ nhớ, hoàn toàn cho phép truyền
+chúng lẫn nhau... miễn là các chiều khớp.
 
-For example, if we have a function that specifically wants a $3\times5$
-array, we can still pass a VLA into it.
+Ví dụ, nếu ta có một hàm muốn mảng $3\times5$ cụ thể, ta vẫn có thể
+truyền một VLA vào đó.
 
 ``` {.c}
 int foo(int m[5][3]) {...}
@@ -344,8 +338,7 @@ int matrix[h][w];
 foo(matrix);   // OK!
 ```
 
-Likewise, if you have a VLA function, you can pass a regular array into
-it:
+Tương tự, nếu bạn có một hàm VLA, bạn có thể truyền mảng thường vào:
 
 ``` {.c}
 int foo(int h, int w, int m[h][w]) {...}
@@ -357,22 +350,23 @@ int matrix[3][5];
 foo(3, 5, matrix);   // OK!
 ```
 
-Beware, though: if your dimensions mismatch, you're going to have some
-undefined behavior going on, likely.
+Coi chừng nhé: nếu chiều không khớp, bạn sẽ có hành vi không xác
+định, rất có khả năng.
 
 [i[Variable-length array-->with regular arrays]>]
 
-## `typedef` and VLAs
+## `typedef` và VLA
 
 [i[Variable-length array-->with `typedef`]<]
 
-You can `typedef` a VLA, but the behavior might not be as you expect.
+Bạn có thể `typedef` một VLA, nhưng hành vi có thể không như bạn
+mong đợi.
 
-Basically, `typedef` makes a new type with the values as they existed
-the moment the `typedef` was executed.
+Về cơ bản, `typedef` tạo một kiểu mới với các giá trị như chúng tồn
+tại tại thời điểm `typedef` được chạy.
 
-So it's not a `typedef` of a VLA so much as a new fixed size array type
-of the dimensions at the time.
+Nên nó không hẳn là một `typedef` của VLA mà là một kiểu mảng kích
+thước cố định mới với các chiều tại thời điểm đó.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -403,50 +397,49 @@ int main(void)
 }
 ```
 
-So it acts like an array of fixed size.
+Nên nó hành xử như một mảng kích thước cố định.
 
-But you still can't use an initializer list on it.
+Nhưng bạn vẫn không thể dùng initializer list trên nó.
 
 [i[Variable-length array-->with `typedef`]>]
 
-## Jumping Pitfalls
+## Bẫy nhảy lung tung
 
 [i[Variable-length array-->with `goto`]<]
 
-You have to watch out when using `goto` near VLAs because a lot of
-things aren't legal.
+Bạn phải coi chừng khi dùng `goto` gần VLA vì nhiều thứ không hợp
+lệ.
 
 [i[Variable-length array-->with `goto`]>]
 [i[Variable-length array-->with `longjmp()`]<]
 
-And when you're using `longjmp()` there's a case where you could leak
-memory with VLAs.
+Và khi bạn dùng `longjmp()` có trường hợp bạn có thể leak bộ nhớ với
+VLA.
 
 [i[Variable-length array-->with `longjmp()`]>]
 
-But both of these things we'll cover in their respective chapters.
+Nhưng cả hai thứ này ta sẽ bàn trong chương riêng của chúng.
 
 
-## General Issues {#vla-general-issues}
+## Vấn đề chung {#vla-general-issues}
 
 [i[Variable-length array-->controversy]<]
 
-VLAs have been banned from the Linux kernel for a few reasons:
+VLA đã bị cấm khỏi Linux kernel vì vài lý do:
 
-* Lots of places they were used should have just been fixed-size.
-* The code behind VLAs is slower (to a degree that most people wouldn't
-  notice, but makes a difference in an operating system).
-* VLAs are not supported to the same degree by all C compilers.
-* Stack size is limited, and VLAs go on the stack. If some code
-  accidentally (or maliciously) passes a large value into a kernel
-  function that allocates a VLA, _Bad Things_™ could happen.
+* Nhiều chỗ chúng được dùng lẽ ra nên là kích thước cố định.
+* Code đằng sau VLA chậm hơn (tới mức mà đa số không để ý, nhưng tạo
+  khác biệt trong hệ điều hành).
+* VLA không được hỗ trợ đồng đều bởi mọi trình biên dịch C.
+* Kích thước stack bị giới hạn, và VLA nằm trên stack. Nếu đoạn code
+  nào đó vô tình (hoặc ác ý) truyền giá trị lớn vào một hàm kernel
+  cấp phát VLA, _Chuyện Xấu_™ có thể xảy ra.
 
-Other folks online point out that there's no way to detect a VLA's
-failure to allocate, and programs that suffered such problems would
-likely just crash. While fixed-size arrays also have the same issue,
-it's far more likely that someone accidentally make a _VLA Of Unusual
-Size_ than somehow accidentally declare a fixed-size, say, 30 megabyte
-array.
+Nhiều người khác online chỉ ra rằng không có cách nào phát hiện VLA
+thất bại khi cấp phát, và chương trình dính vấn đề như vậy khả năng
+chỉ có crash. Dù mảng kích thước cố định cũng có vấn đề y vậy, khả
+năng cao hơn nhiều là ai đó lỡ tay làm _VLA Kích Thước Bất Thường_
+hơn là ai đó vô tình khai báo một mảng cố định ví dụ 30 megabyte.
 
 [i[Variable-length array-->controversy]>]
 [i[Variable-length array]>]
