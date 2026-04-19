@@ -3,87 +3,87 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# The C Preprocessor
+# C Preprocessor
 
 [i[Preprocessor]<]
 
-Before your program gets compiled, it actually runs through a phase
-called _preprocessing_. It's almost like there's a language _on top_ of
-the C language that runs first. And it outputs the C code, which then
-gets compiled.
+Trước khi chương trình được biên dịch, nó thật ra chạy qua một pha
+gọi là _preprocessing_. Gần như là có một ngôn ngữ _nằm trên_ ngôn
+ngữ C chạy trước. Và nó xuất ra code C, rồi code đó mới được
+biên dịch.
 
-We've already seen this to an extent with `#include`! That's the C
-Preprocessor! Where it sees that directive, it includes the named file
-right there, just as if you'd typed it in there. And _then_ the compiler
-builds the whole thing.
+Ta đã thấy chuyện này phần nào với `#include`! Đó là C Preprocessor!
+Chỗ nào nó thấy directive đó, nó nhét file được gọi tên ngay vào,
+y như bạn đã gõ vào đó. Và _rồi_ compiler mới build cả mớ.
 
-But it turns out it's a lot more powerful than just being able to
-include things. You can define _macros_ that are substituted... and even
-macros that take arguments!
+Nhưng hóa ra nó mạnh hơn nhiều so với chỉ biết include. Bạn có thể
+định nghĩa _macro_ để được thay thế... và thậm chí cả macro nhận
+tham số!
 
 ## `#include`
 
 [i[`#include` directive]<]
 
-Let's start with the one we've already seen a bunch. This is, of course,
-a way to include other sources in your source. Very commonly used with
-header files.
+Bắt đầu với cái ta đã thấy nhiều lần. Đây dĩ nhiên là một cách để
+include các nguồn khác vào nguồn của bạn. Rất hay dùng với file
+header.
 
-While the spec allows for all kinds of behavior with `#include`, we're
-going to take a more pragmatic approach and talk about the way it works
-on every system I've ever seen.
+Dù spec cho phép `#include` hành xử đủ kiểu, ta sẽ chọn cách thực
+dụng hơn và nói về cách nó hoạt động trên mọi hệ tôi từng gặp.
 
-We can split header files into two categories: system and local. Things
-that are built-in, like `stdio.h`, `stdlib.h`, `math.h`, and so on, you
-can include with angle brackets:
+Ta có thể chia file header thành hai loại: hệ thống và nội bộ. Những
+thứ dựng sẵn như `stdio.h`, `stdlib.h`, `math.h` và v.v., bạn có
+thể include bằng ngoặc nhọn:
 
 ``` {.c}
 #include <stdio.h>
 #include <stdlib.h>
 ```
 
-The angle brackets tell C, "Hey, don't look in the current directory for
-this header file---look in the system-wide include directory instead."
+Ngoặc nhọn nói với C: "Này, đừng tìm file header này ở thư mục hiện
+tại, tìm trong thư mục include chung của hệ thống kìa."
 
 [i[`#include` directive-->local files]<]
 
-Which, of course, implies that there must be a way to include local
-files from the current directory. And there is: with double quotes:
+Cái đó, dĩ nhiên, ngầm bảo rằng phải có cách để include file nội bộ
+từ thư mục hiện tại. Và có: dùng nháy kép:
 
 ``` {.c}
 #include "myheader.h"
 ```
 
-Or you can very probably look in relative directories using forward
-slashes and dots, like this:
+Hoặc rất có thể bạn tìm được ở thư mục tương đối bằng dấu gạch chéo
+xuôi và dấu chấm, kiểu thế này:
 
 ``` {.c}
 #include "mydir/myheader.h"
 #include "../someheader.py"
 ```
 
-Don't use a backslash (`\`) for your path separators in your `#include`!
-It's undefined behavior! Use forward slash (`/`) only, even on Windows.
+Đừng dùng dấu gạch chéo ngược (`\`) làm dấu ngăn đường dẫn trong
+`#include`! Đó là undefined behavior! Chỉ dùng gạch chéo xuôi (`/`),
+ngay cả trên Windows.
 
-In summary, used angle brackets (`<` and `>`) for the system includes,
-and use double quotes (`"`) for your personal includes.
+Tóm lại, dùng ngoặc nhọn (`<` và `>`) cho include hệ thống, và dùng
+nháy kép (`"`) cho include cá nhân của bạn.
 
 [i[`#include` directive-->local files]>]
 [i[`#include` directive]>]
 
-## Simple Macros
+## Macro đơn giản
 
 [i[Preprocessor-->macros]<]
 
-A _macro_ is an identifier that gets _expanded_ to another piece of code
-before the compiler even sees it. Think of it like a placeholder---when
-the preprocessor sees one of those identifiers, it replaces it with
-another value that you've defined.
+_Macro_ là một định danh được _mở rộng_ thành một mẩu code khác
+trước khi compiler thấy được. Hãy coi nó như một chỗ trống, khi
+preprocessor thấy một trong các định danh đó, nó thay bằng giá trị
+mà bạn đã định nghĩa.
 
 [i[`#define` directive]<]
 
-We do this with `#define` (often read "pound define", or perhaps "hash
-define", but rarely, if ever, "octothorpe define"). Here's an example:
+Ta làm chuyện này bằng `#define` (thường đọc là "pound define", hay
+"hash define", và hiếm khi, nếu có, đọc là "octothorpe define"). Ví
+dụ:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -97,12 +97,10 @@ int main(void)
 }
 ```
 
-On lines 3 and 4 we defined a couple macros. Wherever these appear
-elsewhere in the code (line 8), they'll be substituted with the defined
-values.
+Ở dòng 3 và 4 ta định nghĩa vài macro. Ở đâu mà chúng xuất hiện
+trong code (dòng 8), chúng sẽ được thay bằng giá trị đã định nghĩa.
 
-From the C compiler's perspective, it's exactly as if we'd written this,
-instead:
+Từ góc nhìn của compiler C, y hệt như ta đã viết thế này:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -113,60 +111,59 @@ int main(void)
 }
 ```
 
-See how `HELLO` was replaced with `"Hello, world"` and `PI` was replaced
-with `3.14159`? From the compiler's perspective, it's just like those
-values had appeared right there in the code.
+Thấy cách `HELLO` được thay bằng `"Hello, world"` và `PI` được thay
+bằng `3.14159` chứ? Từ góc nhìn compiler, giống như những giá trị
+đó đã có mặt ngay trong code.
 
-Note that the macros don't have a specific type, _per se_. Really all
-that happens is they get replaced wholesale with whatever they're
-`#define`d as. If the resulting C code is invalid, the compiler will
-puke.
+Lưu ý rằng macro không có kiểu cụ thể, _tự thân nó_. Thật ra chỉ là
+chúng được thay nguyên xi bằng bất cứ thứ gì được `#define` thành.
+Nếu code C kết quả không hợp lệ, compiler sẽ phun bậy ra.
 
-You can also define a macro with no value:
+Bạn cũng có thể định nghĩa macro không có giá trị:
 
 ``` {.c}
 #define EXTRA_HAPPY
 ```
 
-in that case, the macro exists and is defined, but is defined to be
-nothing. So anyplace it occurs in the text will just be replaced with
-nothing. We'll see a use for this later.
+trong trường hợp đó, macro tồn tại và được định nghĩa, nhưng định
+nghĩa là không có gì. Nên chỗ nào nó xuất hiện trong văn bản cũng
+sẽ được thay bằng không có gì. Ta sẽ thấy cách dùng của cái này
+sau.
 
-It's conventional to write macro names in `ALL_CAPS` even though that's
-not technically required.
+Theo quy ước, tên macro viết `ALL_CAPS` dù kỹ thuật thì không bắt
+buộc.
 
 [i[`#define` directive-->versus `const`]<]
 
-Overall, this gives you a way to define constant values that are
-effectively global and can be used _any_ place. Even in those places
-where a `const` variable won't work, e.g. in `switch` `case`s and fixed
-array lengths.
+Nhìn chung, cái này cho bạn cách định nghĩa giá trị hằng gần như
+toàn cục và dùng được _bất cứ_ chỗ nào. Kể cả chỗ mà biến `const`
+không dùng được, ví dụ trong `case` của `switch` và độ dài mảng cố
+định.
 
-That said, the debate rages online whether a typed `const` variable is
-better than `#define` macro in the general case.
+Dù vậy, cuộc tranh cãi vẫn nổ ra trên mạng về việc dùng biến `const`
+có kiểu có tốt hơn macro `#define` trong trường hợp chung không.
 
-It can also be used to replace or modify keywords, a concept completely
-foreign to `const`, though this practice should be used sparingly.
+Nó cũng có thể được dùng để thay thế hoặc sửa các từ khóa, một khái
+niệm hoàn toàn xa lạ với `const`, dù chuyện này nên dùng tiết kiệm.
 
 [i[`#define` directive-->versus `const`]>]
 [i[`#define` directive]>]
 [i[Preprocessor-->macros]>]
 
-## Conditional Compilation
+## Biên dịch có điều kiện
 
 [i[Conditional compilation]<]
 
-It's possible to get the preprocessor to decide whether or not to
-present certain blocks of code to the compiler, or just remove them
-entirely before compilation.
+Có thể bắt preprocessor quyết định có đưa một số block code cho
+compiler hay không, hoặc xóa chúng hẳn đi trước khi compile.
 
-We do that by basically wrapping up the code in conditional blocks,
-similar to `if`-`else` statements.
+Ta làm chuyện đó bằng cách bọc code trong các block điều kiện, giống
+như câu lệnh `if`-`else`.
 
-### If Defined, `#ifdef` and `#endif`
+### Nếu đã định nghĩa, `#ifdef` và `#endif`
 
-First of all, let's try to compile specific code depending on whether or
-not a macro is even defined.
+Đầu tiên, thử compile code cụ thể tùy thuộc vào macro có được định
+nghĩa hay không.
 
 [i[`#ifdef` directive]<]
 [i[`#endif` directive]<]
@@ -187,45 +184,44 @@ int main(void)
 }
 ```
 
-In that example, we define `EXTRA_HAPPY` (to be nothing, but it _is_
-defined), then on line 8 we check to see if it is defined with an
-`#ifdef` directive. If it is defined, the subsequent code will be
-included up until the `#endif`.
+Trong ví dụ đó, ta định nghĩa `EXTRA_HAPPY` (thành không gì cả, nhưng
+nó _được_ định nghĩa), rồi ở dòng 8 ta kiểm tra xem nó có được định
+nghĩa hay không bằng directive `#ifdef`. Nếu có, code tiếp sau đó sẽ
+được đưa vào cho đến `#endif`.
 
 [i[`#ifdef` directive]>]
 [i[`#endif` directive]>]
 
-So because it is defined, the code will be included for compilation and
-the output will be:
+Vì nó được định nghĩa, code sẽ được đưa vào để compile và output sẽ
+là:
 
 ``` {.default}
 I'm extra happy!
 OK!
 ```
 
-If we were to comment out the `#define`, like so:
+Nếu ta comment cái `#define` đi, kiểu:
 
 ``` {.c}
 //#define EXTRA_HAPPY
 ```
 
-then it wouldn't be defined, and the code wouldn't be included in
-compilation. And the output would just be:
+thì nó sẽ không được định nghĩa, và code sẽ không được đưa vào
+compile. Và output sẽ chỉ là:
 
 ``` {.default}
 OK!
 ```
 
-It's important to remember that these decisions happen at compile time!
-The code actually gets compiled or removed depending on the condition.
-This is in contrast to a standard `if` statement that gets evaluated
-while the program is running.
+Quan trọng là nhớ rằng những quyết định này xảy ra lúc compile! Code
+thực sự được compile hoặc bị bỏ đi tùy vào điều kiện. Chuyện này
+khác với lệnh `if` tiêu chuẩn được đánh giá lúc chương trình chạy.
 
-### If Not Defined, `#ifndef`
+### Nếu chưa định nghĩa, `#ifndef`
 
-There's also the negative sense of "if defined": "if not defined", or
-`#ifndef`. We could change the previous example to output
-different things based on whether or not something was defined:
+Cũng có nghĩa phủ định của "nếu đã định nghĩa": "nếu chưa định
+nghĩa", hay `#ifndef`. Ta có thể sửa ví dụ trước để in ra thứ khác
+dựa trên việc một thứ có được định nghĩa hay không:
 
 [i[`#ifndef` directive]<]
 [i[`#endif` directive]<]
@@ -240,11 +236,11 @@ different things based on whether or not something was defined:
 #endif
 ```
 
-We'll see a cleaner way to do that in the next section.
+Ta sẽ thấy cách gọn hơn để làm ở phần sau.
 
-Tying it all back in to header files, we've seen how we can cause header
-files to only be included one time by wrapping them in preprocessor
-directives like this:
+Nối lại với file header, ta đã thấy cách khiến file header chỉ được
+include đúng một lần bằng cách bọc chúng trong directive
+preprocessor thế này:
 
 ``` {.c}
 #ifndef MYHEADER_H  // First line of myheader.h
@@ -258,26 +254,25 @@ int x = 12;
 [i[`#ifndef` directive]>]
 [i[`#endif` directive]>]
 
-This demonstrates how a macro persists across files and multiple
-`#include`s. If it's not yet defined, let's define it and compile the
-whole header file.
+Cái này cho thấy cách một macro tồn tại qua các file và qua nhiều
+`#include`. Nếu chưa được định nghĩa, ta định nghĩa nó rồi compile
+cả file header.
 
-But the next time it's included, we see that `MYHEADER_H` _is_ defined,
-so we don't send the header file to the compiler---it gets effectively
-removed.
+Nhưng lần sau khi nó được include, ta thấy `MYHEADER_H` _đã_ được
+định nghĩa, nên ta không gửi file header cho compiler nữa, nó bị
+xóa hẳn đi.
 
 
 ### `#else`
 
 [i[`#else` directive]<]
 
-But that's not all we can do! There's also an `#else` that we can throw
-in the mix.
+Nhưng chưa phải tất cả! Còn có `#else` mà ta có thể quẳng vào mớ đó.
 
 [i[`#ifdef` directive]<]
 [i[`#endif` directive]<]
 
-Let's mod the previous example:
+Sửa ví dụ trước:
 
 ``` {.c .numberLines startFrom="8"}
 #ifdef EXTRA_HAPPY
@@ -291,8 +286,8 @@ Let's mod the previous example:
 [i[`#else` directive]>]
 [i[`#endif` directive]>]
 
-Now if `EXTRA_HAPPY` is not defined, it'll hit the `#else` clause and
-print:
+Giờ nếu `EXTRA_HAPPY` chưa được định nghĩa, nó sẽ trúng nhánh `#else`
+và in:
 
 ``` {.default}
 I'm just regular
@@ -303,13 +298,13 @@ I'm just regular
 [i[`#elifdef` directive]<]
 [i[`#elifndef` directive]<]
 
-This feature is new in C23!
+Tính năng này mới có ở C23!
 
-What if you want something more complex, though? Perhaps you need an
-if-else cascade structure to get your code built right?
+Thế nếu bạn muốn cái gì phức tạp hơn? Có thể bạn cần cấu trúc if-else
+nối tầng để code được build đúng?
 
-Luckily we have these directives at our disposal. We can use `#elifdef`
-for "else if defined":
+May là ta có mấy directive này để xài. Ta có thể dùng `#elifdef` cho
+"else if defined":
 
 ``` {.c}
 #ifdef MODE_1
@@ -325,22 +320,22 @@ for "else if defined":
 
 [i[`#elifdef` directive]>]
 
-On the flipside, you can use `#elifndef` for "else if not defined".
+Ngược lại, bạn có thể dùng `#elifndef` cho "else if not defined".
 
 [i[`#elifndef` directive]>]
 
-### General Conditional: `#if`, `#elif`
+### Điều kiện tổng quát: `#if`, `#elif`
 
 [i[`#if` directive]<]
 [i[`#elif` directive]<]
 
-This works very much like the `#ifdef` and `#ifndef` directives in that
-you can also have an `#else` and the whole thing wraps up with `#endif`.
+Cái này hoạt động rất giống `#ifdef` và `#ifndef` ở chỗ bạn cũng có
+thể có `#else` và cả mớ được khép lại bằng `#endif`.
 
-The only difference is that the constant expression after the `#if` must
-evaluate to true (non-zero) for the code in the `#if` to be compiled. So
-instead of whether or not something is defined, we want an expression
-that evaluates to true.
+Khác biệt duy nhất là biểu thức hằng sau `#if` phải tính ra true
+(khác không) thì code trong `#if` mới được compile. Nên thay vì việc
+một thứ có được định nghĩa hay chưa, ta muốn một biểu thức tính ra
+true.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -364,9 +359,9 @@ int main(void)
 
 [i[`#elif` directive]>]
 
-Again, for the unmatched `#if` clauses, the compiler won't even see
-those lines. For the above code, after the preprocessor gets finished
-with it, all the compiler sees is:
+Lại một lần nữa, với các nhánh `#if` không khớp, compiler sẽ không
+nhìn thấy những dòng đó. Với code trên, sau khi preprocessor làm
+xong, tất cả compiler thấy chỉ là:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -380,14 +375,14 @@ int main(void)
 }
 ```
 
-One hackish thing this is used for is to comment out large numbers of
-lines quickly^[You can't always just wrap the code in `/*` `*/` comments
-because those won't nest.].
+Một cách dùng hơi hacker là để comment nhanh một mớ dòng^[Bạn không
+thể lúc nào cũng bọc code trong comment `/*` `*/` vì chúng không
+lồng được.].
 
 [i[`#if 0` directive]<]
 
-If you put an `#if 0` ("if false") at the front of the block to be
-commented out and an `#endif` at the end, you can get this effect:
+Nếu bạn đặt `#if 0` ("if false") ở đầu block cần comment và `#endif`
+ở cuối, bạn được hiệu quả này:
 
 ``` {.c}
 #if 0
@@ -398,9 +393,9 @@ commented out and an `#endif` at the end, you can get this effect:
 
 [i[`#if 0` directive]>]
 
-What if you're on a pre-C23 compiler and you don't have `#elifdef` or
-`#elifndef` directive support? How can we get the same effect with
-`#if`? That is, what if I wanted this:
+Thế nếu bạn trên compiler cũ hơn C23 và không có hỗ trợ directive
+`#elifdef` hay `#elifndef` thì sao? Làm sao đạt cùng hiệu quả với
+`#if`? Ví dụ, nếu tôi muốn cái này:
 
 ``` {.c}
 #ifdef FOO
@@ -410,12 +405,12 @@ What if you're on a pre-C23 compiler and you don't have `#elifdef` or
 #endif
 ```
 
-How could I do it?
+Làm sao làm được?
 
-Turns out there's a preprocessor operator called `defined` that we can
-use with an `#if` statement.
+Hóa ra có một toán tử preprocessor tên `defined` mà ta có thể dùng
+với lệnh `#if`.
 
-These are equivalent:
+Các thứ sau là tương đương:
 
 [i[`#if defined` directive]<]
 ``` {.c}
@@ -424,7 +419,7 @@ These are equivalent:
 #if defined(FOO)   // Parentheses optional
 ```
 
-As are these:
+Các thứ sau cũng vậy:
 
 ``` {.c}
 #ifndef FOO
@@ -432,12 +427,13 @@ As are these:
 #if !defined(FOO)   // Parentheses optional
 ```
 
-Notice how we can use the standard logical NOT operator (`!`) for "not
-defined".
+Chú ý cách ta dùng toán tử NOT logic tiêu chuẩn (`!`) cho "chưa định
+nghĩa".
 
-So now we're back in `#if` land and we can use `#elif` with impunity!
+Vậy giờ ta quay lại vùng đất `#if` và có thể dùng `#elif` mà không
+phải sợ gì!
 
-This broken code:
+Đoạn code hỏng này:
 
 ``` {.c}
 #ifdef FOO
@@ -447,7 +443,7 @@ This broken code:
 #endif
 ```
 
-can be replaced with:
+có thể được thay bằng:
 
 ``` {.c}
 #if defined FOO
@@ -461,12 +457,12 @@ can be replaced with:
 [i[`#if` directive]>]
 [i[Conditional compilation]>]
 
-### Losing a Macro: `#undef`
+### Vứt macro đi: `#undef`
 
 [i[`#undef` directive]<]
 
-If you've defined something but you don't need it any longer, you can
-undefine it with `#undef`.
+Nếu bạn đã định nghĩa gì đó nhưng không cần nữa, bạn có thể bỏ định
+nghĩa bằng `#undef`.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -489,17 +485,17 @@ int main(void)
 
 [i[`#undef` directive]>]
 
-## Built-in Macros
+## Macro dựng sẵn
 
 [i[Preprocessor-->predefined macros]<]
 
-The standard defines a lot of built-in macros that you can test and use
-for conditional compilation. Let's look at those here.
+Chuẩn định nghĩa một đống macro dựng sẵn mà bạn có thể kiểm tra và
+dùng cho biên dịch có điều kiện. Xem qua ở đây.
 
 
-### Mandatory Macros
+### Macro bắt buộc
 
-These are all defined:
+Tất cả những cái này đều được định nghĩa:
 
 [i[`__DATE__` macro]<]
 [i[`__TIME__` macro]<]
@@ -511,18 +507,18 @@ These are all defined:
 [i[`__STDC__` macro]]
 [i[`__STDC_HOSTED__` macro]]
 
-|Macro|Description|
+|Macro|Mô tả|
 |-----------|----------------------------------------------------|
-|`__DATE__`|The date of compilation---like when you're compiling this file---in `Mmm dd yyyy` format|
-|`__TIME__`|The time of compilation in `hh:mm:ss` format|
-|`__FILE__`|A string containing this file's name|
-|`__LINE__`|The line number of the file this macro appears on|
-|`__func__`|The name of the function this appears in, as a string^[This isn't really a macro---it's technically an identifier. But it's the only predefined identifier and it feels very macro-like, so I'm including it here. Like a rebel.]|
-|`__STDC__`|Defined with `1` if this is a standard C compiler|
-|`__STDC_HOSTED__`|This will be `1` if the compiler is a _hosted implementation_^[A hosted implementation basically means you're running the full C standard, probably on an operating system of some kind. Which you probably are. If you're running on bare metal in some kind of embedded system, you're probably on a _standalone implementation_.], otherwise `0`|
-|`__STDC_VERSION__`|This version of C, a constant `long int` in the form `yyyymmL`, e.g. `201710L`|
+|`__DATE__`|Ngày compile, kiểu lúc bạn đang compile file này, ở định dạng `Mmm dd yyyy`|
+|`__TIME__`|Giờ compile ở định dạng `hh:mm:ss`|
+|`__FILE__`|Một chuỗi chứa tên file này|
+|`__LINE__`|Số dòng của file mà macro này xuất hiện ở đó|
+|`__func__`|Tên hàm mà cái này xuất hiện trong, dưới dạng chuỗi^[Đây không hẳn là macro, về kỹ thuật thì nó là một định danh. Nhưng nó là định danh được định nghĩa trước duy nhất và cảm giác rất giống macro, nên tôi để nó ở đây. Kiểu nổi loạn tí.]|
+|`__STDC__`|Được định nghĩa bằng `1` nếu đây là compiler C chuẩn|
+|`__STDC_HOSTED__`|Sẽ là `1` nếu compiler là _hosted implementation_^[Hosted implementation về cơ bản nghĩa là bạn đang chạy chuẩn C đầy đủ, có lẽ trên một hệ điều hành nào đó. Mà chắc là đúng thế. Nếu bạn đang chạy trên phần cứng trần trong kiểu hệ embedded, bạn chắc đang trên _standalone implementation_.], ngược lại `0`|
+|`__STDC_VERSION__`|Phiên bản của C, một hằng `long int` ở dạng `yyyymmL`, ví dụ `201710L`|
 
-Let's put these together.
+Ghép chúng lại.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -540,7 +536,7 @@ int main(void)
 [i[`__DATE__` macro]>]
 [i[`__TIME__` macro]>]
 
-The output on my system is:
+Output trên hệ của tôi là:
 
 ``` {.default}
 This function: main
@@ -550,33 +546,33 @@ Compiled on: Nov 23 2020 17:16:27
 C Version: 201710
 ```
 
-`__FILE__`, `__func__` and `__LINE__` are particularly useful to report
-error conditions in messages to developers. The `assert()` macro in
-`<assert.h>` uses these to call out where in the code the assertion
-failed.
+`__FILE__`, `__func__` và `__LINE__` đặc biệt hữu ích để báo tình
+trạng lỗi trong thông điệp cho dev. Macro `assert()` trong
+`<assert.h>` dùng chúng để chỉ ra chỗ nào trong code assertion thất
+bại.
 
 [i[`__FILE__` macro]>]
 [i[`__LINE__` macro]>]
 [i[`__func__` identifier]>]
 
-#### `__STDC_VERSION__`s
+#### `__STDC_VERSION__`
 
 [i[Language versions]<]
 
-In case you're wondering, here are the version numbers for different
-major releases of the C Language Spec:
+Nếu bạn tò mò, đây là các số phiên bản cho những bản phát hành lớn
+khác nhau của Spec Ngôn ngữ C:
 
-|Release|ISO/IEC version|`__STDC_VERSION__`|
+|Release|Phiên bản ISO/IEC|`__STDC_VERSION__`|
 |-|-|-|
-|C89|ISO/IEC 9899:1990|undefined|
+|C89|ISO/IEC 9899:1990|không định nghĩa|
 |**C89**|ISO/IEC 9899:1990/Amd.1:1995|`199409L`|
 |**C99**|ISO/IEC 9899:1999|`199901L`|
 |**C11**|ISO/IEC 9899:2011/Amd.1:2012|`201112L`|
 
-Note the macro did not exist originally in C89.
+Chú ý macro này ban đầu không tồn tại trong C89.
 
-Also note that the plan is that the version numbers will strictly
-increase, so you could always check for, say, "at least C99" with:
+Cũng chú ý rằng kế hoạch là số phiên bản sẽ tăng nghiêm ngặt, nên
+bạn luôn có thể kiểm tra, chẳng hạn "ít nhất C99" bằng:
 
 ``` {.c}
 #if __STDC_VERSION__ >= 1999901L
@@ -585,9 +581,10 @@ increase, so you could always check for, say, "at least C99" with:
 [i[Language versions]>]
 [i[`__STDC_VERSION__` macro]>]
 
-### Optional Macros
+### Macro tùy chọn
 
-Your implementation might define these, as well. Or it might not.
+Implementation của bạn có thể cũng định nghĩa những cái này. Hoặc
+không.
 
 [i[`__STDC_ISO_10646__` macro]]
 [i[`__STDC_MB_MIGHT_NEQ_WC__` macro]]
@@ -602,39 +599,39 @@ Your implementation might define these, as well. Or it might not.
 [i[`__STDC_NO_THREADS__` macro]]
 [i[`__STDC_NO_VLA__` macro]]
 
-|Macro|Description|
+|Macro|Mô tả|
 |----------------|--------------------------------------------------|
-|`__STDC_ISO_10646__`|If defined, `wchar_t` holds Unicode values, otherwise something else|
-|`__STDC_MB_MIGHT_NEQ_WC__`|A `1` indicates that the values in multibyte characters might not map equally to values in wide characters|
-|`__STDC_UTF_16__`|A `1` indicates that the system uses UTF-16 encoding in type `char16_t`|
-|`__STDC_UTF_32__`|A `1` indicates that the system uses UTF-32 encoding in type `char32_t`|
-|`__STDC_ANALYZABLE__`|A `1` indicates the code is analyzable^[OK, I know that was a cop-out answer. Basically there's an optional extension compilers can implement wherein they agree to limit certain types of undefined behavior so that the C code is more amenable to static code analysis. It is unlikely you'll need to use this.]|
-|`__STDC_IEC_559__`|`1` if IEEE-754 (aka IEC 60559) floating point is supported|
-|`__STDC_IEC_559_COMPLEX__`|`1` if IEC 60559 complex floating point is supported|
-|`__STDC_LIB_EXT1__`|`1` if this implementation supports a variety of "safe" alternate standard library functions (they have `_s` suffixes on the name)|
-|`__STDC_NO_ATOMICS__`|`1` if this implementation does **not** support `_Atomic` or `<stdatomic.h>`|
-|`__STDC_NO_COMPLEX__`|`1` if this implementation does **not** support complex types or `<complex.h>`|
-|`__STDC_NO_THREADS__`|`1` if this implementation does **not** support `<threads.h>`|
-|`__STDC_NO_VLA__`|`1` if this implementation does **not** support variable-length arrays|
+|`__STDC_ISO_10646__`|Nếu được định nghĩa, `wchar_t` chứa giá trị Unicode, ngược lại thì chứa gì khác|
+|`__STDC_MB_MIGHT_NEQ_WC__`|Giá trị `1` báo rằng các giá trị trong ký tự đa byte có thể không ánh xạ bằng với giá trị trong ký tự wide|
+|`__STDC_UTF_16__`|Giá trị `1` báo rằng hệ thống dùng mã hóa UTF-16 trong kiểu `char16_t`|
+|`__STDC_UTF_32__`|Giá trị `1` báo rằng hệ thống dùng mã hóa UTF-32 trong kiểu `char32_t`|
+|`__STDC_ANALYZABLE__`|Giá trị `1` báo code có thể phân tích được^[Được, tôi biết đó là câu trả lời né tránh. Về cơ bản có một phần mở rộng tùy chọn mà compiler có thể cài, trong đó chúng đồng ý giới hạn vài kiểu undefined behavior để code C dễ làm static code analysis hơn. Ít khả năng bạn cần dùng cái này.]|
+|`__STDC_IEC_559__`|`1` nếu hỗ trợ floating point IEEE-754 (còn gọi là IEC 60559)|
+|`__STDC_IEC_559_COMPLEX__`|`1` nếu hỗ trợ floating point phức IEC 60559|
+|`__STDC_LIB_EXT1__`|`1` nếu implementation này hỗ trợ nhiều hàm thư viện chuẩn "an toàn" thay thế (chúng có hậu tố `_s` trong tên)|
+|`__STDC_NO_ATOMICS__`|`1` nếu implementation này **không** hỗ trợ `_Atomic` hay `<stdatomic.h>`|
+|`__STDC_NO_COMPLEX__`|`1` nếu implementation này **không** hỗ trợ kiểu complex hay `<complex.h>`|
+|`__STDC_NO_THREADS__`|`1` nếu implementation này **không** hỗ trợ `<threads.h>`|
+|`__STDC_NO_VLA__`|`1` nếu implementation này **không** hỗ trợ mảng có độ dài thay đổi|
 
 [i[Preprocessor-->predefined macros]>]
 
-## Macros with Arguments
+## Macro có tham số
 
 [i[Preprocessor-->macros with arguments]<]
 
-Macros are more powerful than simple substitution, though. You can set
-them up to take arguments that are substituted in, as well.
+Macro mạnh hơn là chỉ thay thế đơn giản. Bạn có thể cài chúng nhận
+tham số để thay vào.
 
-A question often arises for when to use parameterized macros versus
-functions. Short answer: use functions. But you'll see lots of macros in
-the wild and in the standard library. People tend to use them for short,
-mathy things, and also for features that might change from platform to
-platform. You can define different keywords for one platform or another.
+Câu hỏi thường nảy ra là khi nào dùng macro có tham số thay cho hàm.
+Trả lời ngắn: dùng hàm. Nhưng bạn sẽ thấy vô số macro ngoài đời và
+trong thư viện chuẩn. Người ta hay dùng chúng cho mấy thứ ngắn, tính
+toán, và cho các tính năng có thể thay đổi tùy nền tảng. Bạn có thể
+định nghĩa các từ khóa khác nhau cho nền tảng này hay nền tảng khác.
 
-### Macros with One Argument
+### Macro có một tham số
 
-Let's start with a simple one that squares a number:
+Bắt đầu với cái đơn giản bình phương một số:
 
 [i[`#define` directive]<]
 
@@ -649,101 +646,98 @@ int main(void)
 }
 ```
 
-What that's saying is "everywhere you see `SQR` with some value, replace
-it with that value times itself".
+Cái đó nói "ở đâu thấy `SQR` với giá trị nào đó, thay bằng giá trị
+đó nhân với chính nó".
 
-So line 7 will be changed to:
+Nên dòng 7 sẽ đổi thành:
 
 ``` {.c .numberLines startFrom="7"}
     printf("%d\n", 12 * 12);  // 144
 ```
 
-which C comfortably converts to 144.
+C thoải mái chuyển thành 144.
 
-But we've made an elementary error in that macro, one that we need to
-avoid.
+Nhưng ta đã phạm lỗi sơ đẳng trong macro đó, lỗi mà ta cần tránh.
 
-Let's check it out. What if we wanted to compute `SQR(3 + 4)`? Well,
-$3+4=7$, so we must want to compute $7^2=49$. That's it; `49`---final
-answer.
+Cùng xem. Nếu ta muốn tính `SQR(3 + 4)`? Ừ, $3+4=7$, nên ta chắc
+muốn tính $7^2=49$. Đấy, `49`, câu trả lời cuối cùng.
 
-Let's drop it in our code and see that we get... 19?
+Cho vào code và ta được... 19?
 
 ``` {.c .numberLines startFrom="7"}
     printf("%d\n", SQR(3 + 4));  // 19!!??
 ```
 
-What happened?
+Có chuyện gì?
 
-If we follow the macro expansion, we get 
+Nếu ta theo dõi mở rộng macro, ta có 
 
 ``` {.c .numberLines startFrom="7"}
     printf("%d\n", 3 + 4 * 3 + 4);  // 19!
 ```
 
-Oops! Since multiplication takes precedence, we do the $4\times3=12$
-first, and get $3+12+4=19$. Not what we were after.
+Ối! Vì nhân có độ ưu tiên cao hơn, ta làm $4\times3=12$ trước, rồi
+được $3+12+4=19$. Không phải thứ ta muốn.
 
-So we have to fix this to make it right.
+Nên ta phải sửa cho nó đúng.
 
-**This is so common that you should automatically do it every time you
-make a parameterized math macro!**
+**Cái này phổ biến tới mức cứ tự động làm mỗi khi bạn tạo macro tính
+toán có tham số!**
 
-The fix is easy: just add some parentheses!
+Sửa thì dễ: thêm vài cặp ngoặc đơn!
 
 ``` {.c .numberLines startFrom="3"}
 #define SQR(x) (x) * (x)   // Better... but still not quite good enough!
 ```
 
-And now our macro expands to:
+Và giờ macro của ta mở rộng thành:
 
 ``` {.c .numberLines startFrom="7"}
     printf("%d\n", (3 + 4) * (3 + 4));  // 49! Woo hoo!
 ```
 
-But we actually still have the same problem which might manifest if we
-have a higher-precedence operator than multiply (`*`) nearby.
+Nhưng thật ra ta vẫn còn cùng vấn đề, có thể thò ra nếu quanh đó có
+toán tử ưu tiên cao hơn nhân (`*`).
 
-So the safe, proper way to put the macro together is to wrap the whole
-thing in additional parentheses, like so:
+Nên cách an toàn, đúng bài để ghép macro là bọc cả cục trong thêm
+cặp ngoặc đơn, thế này:
 
 ``` {.c .numberLines startFrom="3"}
 #define SQR(x) ((x) * (x))   // Good!
 ```
 
-Just make it a habit to do that when you make a math macro and you can't
-go wrong.
+Cứ biến nó thành thói quen khi tạo macro tính toán là không sai
+được.
 
-### Macros with More than One Argument
+### Macro có nhiều hơn một tham số
 
-You can stack these things up as much as you want:
+Bạn có thể xếp chồng mấy thứ này lên bao nhiêu tùy ý:
 
 ``` {.c}
 #define TRIANGLE_AREA(w, h) (0.5 * (w) * (h))
 ```
 
-Let's do some macros that solve for $x$ using the quadratic formula.
-Just in case you don't have it on the top of your head, it says for
-equations of the form:
+Làm vài macro giải $x$ dùng công thức nghiệm bậc hai. Phòng khi bạn
+không còn nhớ nằm lòng, với phương trình dạng:
 
 $ax^2+bx+c=0$
 
-you can solve for $x$ with the quadratic formula:
+bạn có thể giải $x$ bằng công thức nghiệm bậc hai:
 
 $x=\displaystyle\frac{-b\pm\sqrt{b^2-4ac}}{2a}$
 
-Which is crazy. Also notice the plus-or-minus ($\pm$) in there,
-indicating that there are actually two solutions.
+Cái đó điên rồ. Để ý cả cái dấu cộng-trừ ($\pm$) trong đó, báo rằng
+thật ra có hai nghiệm.
 
-So let's make macros for both:
+Nên ta làm macro cho cả hai:
 
 ``` {.c}
 #define QUADP(a, b, c) ((-(b) + sqrt((b) * (b) - 4 * (a) * (c))) / (2 * (a)))
 #define QUADM(a, b, c) ((-(b) - sqrt((b) * (b) - 4 * (a) * (c))) / (2 * (a)))
 ```
 
-So that gets us some math. But let's define one more that we can use as
-arguments to `printf()` to print both answers.
+Vậy là có được tí tính toán. Nhưng ta định nghĩa thêm một cái nữa
+để dùng làm tham số cho `printf()` in cả hai đáp án.
 
 ``` {.c}
 //          macro              replacement
@@ -751,14 +745,14 @@ arguments to `printf()` to print both answers.
 #define QUAD(a, b, c) QUADP(a, b, c), QUADM(a, b, c)
 ```
 
-That's just a couple values separated by a comma---and we can use that
-as a "combined" argument of sorts to `printf()` like this:
+Đó chỉ là vài giá trị ngăn cách bởi dấu phẩy, và ta có thể dùng cái
+đó như tham số "ghép" của `printf()` thế này:
 
 ``` {.c}
 printf("x = %f or x = %f\n", QUAD(2, 10, 5));
 ```
 
-Let's put it together into some code:
+Ghép lại thành code:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -775,27 +769,26 @@ int main(void)
 }
 ```
 
-And this gives us the output:
+Và cái này cho output:
 
 ``` {.default}
 2*x^2 + 10*x + 5 = 0
 x = -0.563508 or x = -4.436492
 ```
 
-Plugging in either of those values gives us roughly zero (a bit off
-because the numbers aren't exact):
+Thế giá trị nào vào cũng cho xấp xỉ không (hơi lệch vì các số không
+chính xác):
 
 $2\times-0.563508^2+10\times-0.563508+5\approx0.000003$
 
-### Macros with Variable Arguments
+### Macro với tham số biến
 
 [i[Preprocessor-->macros with variable arguments]<]
 
-There's also a way to have a variable number of arguments passed to a
-macro, using ellipses (`...`) after the known, named arguments. When the
-macro is expanded, all of the extra arguments will be in a
-comma-separated list in the `__VA_ARGS__` macro, and can be replaced
-from there:
+Cũng có cách truyền số lượng tham số biến đổi vào macro, dùng dấu
+ba chấm (`...`) sau các tham số có tên đã biết. Khi macro mở rộng,
+mọi tham số thừa sẽ ở trong danh sách ngăn bởi dấu phẩy trong macro
+`__VA_ARGS__`, và có thể được thay từ đó:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -811,19 +804,19 @@ int main(void)
 }
 ```
 
-The substitution that takes place on line 10 would be:
+Việc thay thế diễn ra ở dòng 10 sẽ là:
 
 ``` {.c .numberLines startFrom="10"}
     printf("%d %f %s %d\n", (10*(5) + 20*(4)), 3.14, "Hi!", 12);
 ```
 
-for output:
+cho output:
 
 ``` {.default}
 130 3.140000 Hi! 12
 ```
 
-You can also "stringify" `__VA_ARGS__` by putting a `#` in front of it:
+Bạn cũng có thể "stringify" `__VA_ARGS__` bằng cách đặt `#` ở trước:
 
 ``` {.c}
 #define X(...) #__VA_ARGS__
@@ -839,10 +832,10 @@ printf("%s\n", X(1,2,3));  // Prints "1, 2, 3"
 
 [i[`#` stringification]<]
 
-Already mentioned, just above, you can turn any argument into a string
-by preceding it with a `#` in the replacement text.
+Như vừa nhắc ở trên, bạn có thể biến tham số thành chuỗi bằng cách
+đặt `#` phía trước nó trong phần thay thế.
 
-For example, we could print anything as a string with this macro and
+Ví dụ, ta có thể in bất cứ thứ gì dưới dạng chuỗi với macro này và
 `printf()`:
 
 ``` {.c}
@@ -851,15 +844,14 @@ For example, we could print anything as a string with this macro and
 printf("%s\n", STR(3.14159));
 ```
 
-In that case, the substitution leads to:
+Trong trường hợp đó, phép thay thế dẫn đến:
 
 ``` {.c}
 printf("%s\n", "3.14159");
 ```
 
-Let's see if we can use this to greater effect so that we can pass any
-`int` variable name into a macro, and have it print out it's name and
-value.
+Xem ta có thể dùng cái này hiệu quả hơn không bằng cách truyền bất
+kỳ tên biến `int` nào vào macro, rồi cho nó in ra tên và giá trị.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -874,7 +866,7 @@ int main(void)
 }
 ```
 
-On line 9, we get the following macro replacement:
+Ở dòng 9, ta có phép thay thế macro sau:
 
 ``` {.c .numberLines startFrom="9"}
     printf("%s = %d\n", "a", a);
@@ -882,11 +874,11 @@ On line 9, we get the following macro replacement:
 
 [i[`#` stringification]>]
 
-### Concatenation
+### Nối chuỗi
 
 [i[`##` concatenation]<]
 
-We can concatenate two arguments together with `##`, as well. Fun times!
+Ta cũng có thể nối hai tham số với nhau bằng `##`. Vui quá đi!
 
 ``` {.c}
 #define CAT(a, b) a ## b
@@ -896,15 +888,15 @@ printf("%f\n", CAT(3.14, 1592));   // 3.141592
 
 [i[`##` concatenation]>]
 
-## Multiline Macros
+## Macro nhiều dòng
 
 [i[Preprocessor-->multiline macros]<]
 
-It's possible to continue a macro to multiple lines if you escape the
-newline with a backslash (`\`).
+Có thể kéo dài macro qua nhiều dòng nếu bạn escape ký tự xuống dòng
+bằng gạch chéo ngược (`\`).
 
-Let's write a multiline macro that prints numbers from `0` to the
-product of the two arguments passed in.
+Hãy viết một macro nhiều dòng in các số từ `0` đến tích của hai tham
+số truyền vào.
 
 [i[`do`-`while` statement-->in multiline macros]<]
 
@@ -924,19 +916,18 @@ int main(void)
 }
 ```
 
-A couple things to note there:
+Vài điều chú ý:
 
-* Escapes at the end of every line except the last one to indicate that
-  the macro continues.
-* The whole thing is wrapped in a `do`-`while(0)` loop with squirrley
-  braces.
+* Escape ở cuối mỗi dòng trừ dòng cuối để báo macro còn tiếp.
+* Cả mớ được bọc trong vòng `do`-`while(0)` với ngoặc xoắn xoắn
+  xuýt.
 
-The latter point might be a little weird, but it's all about absorbing
-the trailing `;` the coder drops after the macro.
+Điểm thứ hai có thể hơi lạ, nhưng tất cả là để nuốt dấu `;` mà coder
+quăng vào sau macro.
 
-At first I thought that just using squirrely braces would be enough, but
-there's a case where it fails if the coder puts a semicolon after the
-macro. Here's that case:
+Lúc đầu tôi tưởng chỉ cần ngoặc xoắn là đủ, nhưng có một tình huống
+nó hỏng nếu coder đặt dấu chấm phẩy sau macro. Đây là tình huống
+đó:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -956,15 +947,15 @@ int main(void)
 }
 ```
 
-Looks simple enough, but it won't build without a syntax error:
+Trông có vẻ đơn giản, nhưng nó không build được vì lỗi cú pháp:
 
 ``` {.default}
 foo.c:11:5: error: ‘else’ without a previous ‘if’  
 ```
 
-Do you see it?
+Bạn thấy chưa?
 
-Let's look at the expansion:
+Xem đoạn mở rộng:
 
 ``` {.c}
 
@@ -976,38 +967,36 @@ Let's look at the expansion:
         printf(":-(\n");
 ```
 
-The `;` puts an end to the `if` statement, so the `else` is just
-floating out there illegally^[_Breakin' the law... breakin' the
-law..._].
+Dấu `;` kết thúc câu lệnh `if`, nên `else` cứ lơ lửng ngoài đó một
+cách bất hợp pháp^[_Breakin' the law... breakin' the law..._].
 
-So wrap that multiline macro with a `do`-`while(0)`.
+Nên hãy bọc macro nhiều dòng đó trong `do`-`while(0)`.
 
 [i[`do`-`while` statement-->in multiline macros]>]
 [i[Preprocessor-->multiline macros]>]
 
-## Example: An Assert Macro {#my-assert}
+## Ví dụ: Macro Assert {#my-assert}
 
-Adding asserts to your code is a good way to catch conditions that you
-think shouldn't happen. C provides `assert()` functionality. It checks a
-condition, and if it's false, the program bombs out telling you the
-file and line number on which the assertion failed.
+Thêm assert vào code là cách hay để bắt các tình trạng mà bạn nghĩ
+không nên xảy ra. C có sẵn chức năng `assert()`. Nó kiểm tra một
+điều kiện, và nếu là false, chương trình nổ tung báo cho bạn biết
+file và số dòng mà assertion thất bại.
 
-But this is wanting.
+Nhưng cái này còn thiếu.
 
-1. First of all, you can't specify an additional message with the
-   assert.
-2. Secondly, there's no easy on-off switch for all the asserts.
+1. Trước hết, bạn không thể đặc tả thêm thông điệp đi kèm assert.
+2. Thứ hai, không có công tắc bật/tắt dễ dàng cho toàn bộ assert.
 
-We can address the first with macros.
+Ta có thể giải quyết cái đầu bằng macro.
 
-Basically, when I have this code:
+Về cơ bản, khi tôi có code này:
 
 ``` {.c}
 ASSERT(x < 20, "x must be under 20");
 ```
 
-I want something like this to happen (assuming the `ASSERT()` is on line
-220 of `foo.c`):
+Tôi muốn cái gì đó như thế này xảy ra (giả sử `ASSERT()` ở dòng
+220 của `foo.c`):
 
 ``` {.c}
 if (!(x < 20)) {
@@ -1017,10 +1006,10 @@ if (!(x < 20)) {
 }
 ```
 
-We can get the filename out of the `__FILE__` macro, and the line number
-from `__LINE__`. The message is already a string, but `x < 20` is not,
-so we'll have to stringify it with `#`. We can make a multiline macro by
-using backslash escapes at the end of the line.
+Ta có thể lấy tên file từ macro `__FILE__`, và số dòng từ `__LINE__`.
+Thông điệp đã là chuỗi, còn `x < 20` thì không, nên ta phải
+stringify nó bằng `#`. Ta có thể làm macro nhiều dòng bằng cách
+escape gạch chéo ngược ở cuối dòng.
 
 ``` {.c}
 #define ASSERT(c, m) \
@@ -1033,12 +1022,11 @@ do { \
 } while(0)
 ```
 
-(It looks a little weird with `__FILE__` out front like that, but
-remember it is a string literal, and string literals next to each other
-are automagically concatenated. `__LINE__` on the other hand, it's just
-an `int`.)
+(Nó trông hơi lạ với `__FILE__` ở đầu như vậy, nhưng nhớ rằng nó là
+string literal, và các string literal nằm cạnh nhau sẽ tự động nối
+lại. `__LINE__` thì ngược lại, nó chỉ là `int`.)
 
-And that works! If I run this:
+Và nó chạy! Nếu tôi chạy cái này:
 
 ``` {.c}
 int x = 30;
@@ -1046,18 +1034,18 @@ int x = 30;
 ASSERT(x < 20, "x must be under 20");
 ```
 
-I get this output:
+Tôi được output này:
 
 ```
 foo.c:23: assertion x < 20 failed: x must be under 20
 ```
 
-Very nice!
+Ngon lành!
 
-The only thing left is a way to turn it on and off, and we could do that
-with conditional compilation.
+Cái còn lại là cách bật/tắt, và ta có thể làm với biên dịch có điều
+kiện.
 
-Here's the complete example:
+Đây là ví dụ hoàn chỉnh:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -1086,20 +1074,20 @@ int main(void)
 }
 ```
 
-This has the output:
+Cái này có output:
 
 ``` {.default}
 foo.c:23: assertion x < 20 failed: x must be under 20
 ```
 
-## The `#error` Directive
+## Directive `#error`
 
 [i[`#error` directive]<]
 
-This directive causes the compiler to error out as soon as it sees it.
+Directive này bắt compiler báo lỗi ngay khi nó thấy.
 
-Commonly, this is used inside a conditional to prevent compilation
-unless some prerequisites are met:
+Thường thì dùng trong một điều kiện để ngăn biên dịch trừ khi vài
+điều kiện tiên quyết được thỏa mãn:
 
 ``` {.c}
 #ifndef __STDC_IEC_559__
@@ -1110,28 +1098,28 @@ unless some prerequisites are met:
 [i[`#error` directive]>]
 [i[`#warning` directive]<]
 
-Some compilers have a non-standard complementary `#warning` directive
-that will output a warning but not stop compilation, but this is not in
-the C11 spec.
+Vài compiler có directive `#warning` không chuẩn bổ sung sẽ xuất cảnh
+báo nhưng không dừng biên dịch, nhưng cái này không có trong spec
+C11.
 
 [i[`#warning` directive]>]
 
-## The `#embed` Directive
+## Directive `#embed`
 
 [i[`#embed` directive]<]
 
 <!-- Godbolt demo: https://godbolt.org/z/Kb3ejE7q5 -->
 
-New in C23!
+Mới ở C23!
 
-And currently not yet working with any of my compilers, so take this
-section with a grain of salt!
+Và hiện chưa chạy với bất kỳ compiler nào của tôi, nên hãy đọc phần
+này với một hạt muối!
 
-The gist of this is that you can include bytes of a file as integer
-constants as if you'd typed them in.
+Ý là bạn có thể include các byte của một file dưới dạng hằng số
+nguyên y như là bạn đã gõ chúng vào.
 
-For example, if you have a binary file named `foo.bin` that contains
-four bytes with decimal values 11, 22, 33, and 44, and you do this:
+Ví dụ, nếu bạn có file nhị phân tên `foo.bin` chứa bốn byte với giá
+trị thập phân 11, 22, 33, và 44, và bạn làm cái này:
 
 ``` {.c}
 int a[] = {
@@ -1139,20 +1127,19 @@ int a[] = {
 };
 ```
 
-It'll be just as if you'd typed this:
+Thì y như bạn đã gõ:
 
 ``` {.c}
 int a[] = {11,22,33,44};
 ```
 
-This is a really powerful way to initialize an array with binary data
-without needing to convert it all to code first---the preprocessor does
-it for you!
+Đây là cách rất mạnh để khởi tạo mảng với dữ liệu nhị phân mà không
+cần chuyển tất cả sang code trước, preprocessor làm giùm bạn!
 
-A more typical use case might be a file containing a small image to be
-displayed that you don't want to load at runtime.
+Trường hợp dùng điển hình hơn có thể là một file chứa hình ảnh nhỏ
+để hiển thị mà bạn không muốn nạp lúc runtime.
 
-Here's another example:
+Đây là ví dụ khác:
 
 ``` {.c}
 int a[] = {
@@ -1160,15 +1147,14 @@ int a[] = {
 };
 ```
 
-If you use angle brackets, the preprocessor looks in a series of
-implementation-defined places to locate the file, just like `#include`
-would do. If you use double quotes and the resource is not found, the
-compiler will try it as if you'd used angle brackets in a last desperate
-attempt to find the file.
+Nếu bạn dùng ngoặc nhọn, preprocessor tìm trong một loạt vị trí do
+implementation định nghĩa để tìm file, giống như `#include` làm. Nếu
+bạn dùng nháy kép mà tài nguyên không tìm thấy, compiler sẽ thử như
+là bạn đã dùng ngoặc nhọn, như một nỗ lực tuyệt vọng cuối cùng để
+tìm file.
 
-`#embed` works like `#include` in that it effectively pastes values in
-before the compiler sees them. This means you can use it in all kinds of
-places:
+`#embed` hoạt động như `#include` ở chỗ nó dán giá trị vào trước khi
+compiler thấy. Tức là bạn có thể dùng nó ở đủ loại chỗ:
 
 ```
 return
@@ -1176,7 +1162,7 @@ return
 ;
 ```
 
-or
+hoặc
 
 ```
 int x =
@@ -1184,29 +1170,28 @@ int x =
 ;
 ```
 
-Now---are these always bytes? Meaning they'll have values from 0 to 255,
-inclusive? The answer is definitely by default "yes", except when it is
-"no".
+Giờ, đây có luôn là byte không? Nghĩa là giá trị sẽ từ 0 đến 255,
+bao gồm cả? Câu trả lời mặc định chắc chắn là "có", trừ khi là
+"không".
 
-Technically, the elements will be `CHAR_BIT` bits wide. And this is very
-likely 8 on your system, so you'd get that 0-255 range in your values.
-(They'll always be non-negative.)
+Về kỹ thuật, các phần tử sẽ rộng `CHAR_BIT` bit. Và rất có thể là 8
+trên hệ của bạn, nên bạn sẽ có khoảng 0-255 trong các giá trị.
+(Chúng sẽ luôn không âm.)
 
-Also, it's possible that an implementation might allow this to be
-overridden in some way, e.g. on the command line or with parameters.
+Cũng có thể một implementation cho phép ghi đè cái này theo cách nào
+đó, ví dụ trên dòng lệnh hay với tham số.
 
-The size of the file in bits must be a multiple of the element size.
-That is, if each element is 8 bits, the file size (in bits) must be a
-multiple of 8. In regular everyday usage, this is a confusing way of
-saying that each file needs to be an integer number of bytes... which of
-course it is. Honestly, I'm not even sure why I bothered with this
-paragraph. Read the spec if you're really that curious.
+Kích thước file tính bằng bit phải là bội của kích thước phần tử.
+Tức là, nếu mỗi phần tử là 8 bit, kích thước file (tính bằng bit)
+phải là bội của 8. Trong sử dụng hằng ngày, đây là cách nói vòng vo
+rằng mỗi file phải là số nguyên lần byte... dĩ nhiên là vậy rồi.
+Thành thật mà nói, tôi cũng chẳng biết sao mình lại bận tâm viết
+đoạn này. Đọc spec nếu bạn thật sự tò mò.
 
-### `#embed` Parameters
+### Tham số cho `#embed`
 
-There are all kinds of parameters you can specify to the `#embed`
-directive. Here's an example with the yet-unintroduced `limit()`
-parameter:
+Có đủ loại tham số bạn có thể chỉ định cho directive `#embed`. Đây
+là ví dụ với tham số `limit()` còn chưa giới thiệu:
 
 ``` {.c}
 int a[] = {
@@ -1214,8 +1199,8 @@ int a[] = {
 };
 ```
 
-But what if you already have `limit` defined somewhere else? Luckily you
-can put `__` around the keyword and it will work the same way:
+Nhưng nếu bạn đã định nghĩa `limit` ở chỗ khác thì sao? May là bạn
+có thể đặt `__` quanh từ khóa và nó sẽ hoạt động y vậy:
 
 ``` {.c}
 int a[] = {
@@ -1223,34 +1208,32 @@ int a[] = {
 };
 ```
 
-Now... what's this `limit` thing?
+Giờ... cái `limit` này là gì?
 
-### The `limit()` Parameter
+### Tham số `limit()`
 
-You can specify a limit on the number of elements to embed with this
-parameter.
+Bạn có thể đặt giới hạn số phần tử để embed bằng tham số này.
 
-This is a maximum value, not an absolute value. If the file that's
-embedded is shorter than the specified limit, only that many bytes will
-be imported.
+Đây là giá trị tối đa, không phải tuyệt đối. Nếu file được embed
+ngắn hơn giới hạn chỉ định, chỉ bấy nhiêu byte sẽ được nhập vào.
 
-The `/dev/random` example above is an example of the motivation for
-this---in Unix, that's a _character device file_ that will return an
-infinite stream of pretty-random numbers.
+Ví dụ `/dev/random` ở trên là ví dụ cho động lực của chuyện này,
+trong Unix, đó là một _character device file_ sẽ trả về dòng số
+ngẫu nhiên vô hạn.
 
-Embedding an infinite number of bytes is hard on your RAM, so the
-`limit` parameter gives you a way to stop after a certain number.
+Embed vô hạn byte thì ác với RAM, nên tham số `limit` cho bạn cách
+dừng sau một số nhất định.
 
-Finally, you are allowed to use `#define` macros in your `limit`, in
-case you were curious.
+Cuối cùng, bạn được phép dùng macro `#define` trong `limit`, phòng
+khi bạn tò mò.
 
-### The `if_empty` Parameter
+### Tham số `if_empty`
 
 [i[`if_empty()` embed parameter]<]
 
-This parameter defines what the embed result should be if the file
-exists but contains no data. Let's say that the file `foo.dat` contains
-a single byte with the value 123. If we do this:
+Tham số này định nghĩa kết quả embed phải là gì nếu file tồn tại
+nhưng không chứa dữ liệu. Giả sử file `foo.dat` chứa một byte duy
+nhất với giá trị 123. Nếu ta làm:
 
 ``` {.c}
 int x = 
@@ -1258,23 +1241,23 @@ int x =
 ;
 ```
 
-we'll get:
+ta sẽ có:
 
 ``` {.c}
 int x = 123;   // When foo.dat contains a 123 byte
 ```
 
-But what if the file `foo.dat` is zero bytes long (i.e. contains no
-data and is empty)? If that's the case, it would expand to:
+Nhưng nếu `foo.dat` dài 0 byte (tức là không chứa dữ liệu và rỗng)?
+Nếu vậy, nó sẽ mở rộng thành:
 
 ``` {.c}
 int x = 999;   // When foo.dat is empty
 ```
 
-Notably if the `limit` is set to `0`, then the `if_empty` will always be
-substituted. That is, a zero limit effectively means the file is empty.
+Đáng chú ý là nếu `limit` đặt thành `0`, thì `if_empty` sẽ luôn được
+thay vào. Tức là, giới hạn bằng không có nghĩa là file rỗng.
 
-This will always emit `x = 999` no matter what's in `foo.dat`:
+Cái này sẽ luôn phát ra `x = 999` bất kể trong `foo.dat` có gì:
 
 ``` {.c}
 int x = 
@@ -1284,18 +1267,18 @@ int x =
 
 [i[`if_empty()` embed parameter]>]
 
-### The `prefix()` and `suffix()` Parameters
+### Tham số `prefix()` và `suffix()`
 
 [i[`prefix()` embed parameter]<]
 [i[`suffix()` embed parameter]<]
 
-This is a way to prepend some data on the embed.
+Đây là cách để thêm dữ liệu vào trước/sau embed.
 
-Note that these only affect non-empty data! If the file is empty,
-neither `prefix` nor `suffix` has any effect.
+Chú ý rằng các tham số này chỉ ảnh hưởng dữ liệu không rỗng! Nếu
+file rỗng, cả `prefix` lẫn `suffix` đều không có tác dụng.
 
-Here's an example where we embed three random numbers, but prefix the
-numbers with `11,` and suffix them with `,99`:
+Ví dụ ta embed ba số ngẫu nhiên, nhưng thêm tiền tố `11,` và hậu tố
+`,99`:
 
 ``` {.c}
 int x[] = {
@@ -1303,24 +1286,22 @@ int x[] = {
 };
 ```
 
-Example result:
+Ví dụ kết quả:
 
 ``` {.c}
 int x[] = {11,135,116,220,99};
 ```
 
-There's no requirement that you use both `prefix` and `suffix`. You can
-use both, one, the other, or neither.
+Không bắt buộc phải dùng cả `prefix` và `suffix`. Bạn có thể dùng cả
+hai, một cái, cái kia, hay không cái nào.
 
-We can make use of the characteristic that these are only applied to
-non-empty files to neat effect, as shown in the following example
-shamelessly stolen from the spec.
+Ta có thể tận dụng đặc tính chỉ áp dụng với file không rỗng này để
+có hiệu quả hay ho, như trong ví dụ sau ăn cắp trắng trợn từ spec.
 
-Let's say we have a file `foo.dat` that has some data it in. And we want
-to use this to initialize an array, and then we want a suffix on the
-array that is a zero element.
+Giả sử có file `foo.dat` có dữ liệu trong đó. Và ta muốn dùng nó để
+khởi tạo một mảng, rồi muốn hậu tố của mảng là một phần tử không.
 
-No problem, right?
+Không vấn đề, đúng không?
 
 ``` {.c}
 int x[] = {
@@ -1328,21 +1309,21 @@ int x[] = {
 };
 ```
 
-If `foo.dat` has 11, 22, and 33 in it, we'd get:
+Nếu `foo.dat` chứa 11, 22, và 33, ta sẽ có:
 
 ``` {.c}
 int x[] = {11,22,33,0};
 ```
 
-But wait! What if `foo.dat` is empty? Then we get:
+Nhưng khoan! Nếu `foo.dat` rỗng thì sao? Ta có:
 
 ``` {.c}
 int x[] = {};
 ```
 
-and that's not good.
+và cái đó không tốt.
 
-But we can fix it like this:
+Nhưng ta có thể sửa thế này:
 
 ``` {.c}
 int x[] = {
@@ -1351,31 +1332,30 @@ int x[] = {
 };
 ```
 
-Since the `suffix` parameter is omitted if the file is empty, this would
-just turn into:
+Vì tham số `suffix` bị bỏ đi nếu file rỗng, cái này sẽ biến thành:
 
 ``` {.c}
 int x[] = {0};
 ```
 
-which is fine.
+thế là ổn.
 
 [i[`prefix()` embed parameter]>]
 [i[`suffix()` embed parameter]>]
 
-### The `__has_embed()` Identifier
+### Định danh `__has_embed()`
 
 [i[`__has_embed()` identifier]<]
 
-This is a great way to test to see if a particular file is available to
-be embedded, and also whether or not it's empty.
+Đây là cách hay để kiểm tra xem một file cụ thể có sẵn sàng để embed
+không, và cũng xem nó có rỗng hay không.
 
-You use it with the `#if` directive.
+Bạn dùng nó với directive `#if`.
 
-Here's a chunk of code that will get 5 random numbers from the random
-number generator character device. If that doesn't exist, it tries to
-get them from a file `myrandoms.dat`. If that doesn't exist, it uses
-some hard-coded values:
+Đây là một đoạn code lấy 5 số ngẫu nhiên từ character device sinh số
+ngẫu nhiên. Nếu cái đó không tồn tại, nó thử lấy từ file
+`myrandoms.dat`. Nếu cái đó không tồn tại, nó dùng vài giá trị
+cứng:
 
 ``` {.c}
     int random_nums[] = {
@@ -1389,59 +1369,59 @@ some hard-coded values:
     };
 ```
 
-Technically, the `__has_embed()` identifier resolves to one of three
-values:
+Về kỹ thuật, định danh `__has_embed()` phân giải ra một trong ba giá
+trị:
 
-|`__has_embed()` Result|Description|
+|Kết quả `__has_embed()`|Mô tả|
 |-|-|
-|`__STDC_EMBED_NOT_FOUND__`|If the file isn't found.|
-|`__STDC_EMBED_FOUND__`|If the file is found and is not empty.|
-|`__STDC_EMBED_EMPTY__`|If the file is found and is empty.|
+|`__STDC_EMBED_NOT_FOUND__`|Nếu file không tìm thấy.|
+|`__STDC_EMBED_FOUND__`|Nếu file tìm thấy và không rỗng.|
+|`__STDC_EMBED_EMPTY__`|Nếu file tìm thấy và rỗng.|
 
-I have good reason to believe that `__STDC_EMBED_NOT_FOUND__` is `0` and
-the others aren't zero (because it's implied in the proposal and it
-makes logical sense), but I'm having trouble finding that in this
-version of the draft spec.
+Tôi có lý do chính đáng để tin rằng `__STDC_EMBED_NOT_FOUND__` là
+`0` và mấy cái còn lại khác không (vì điều đó được ngầm chỉ trong
+đề xuất và hợp logic), nhưng tôi đang vất vả tìm chỗ đó trong bản
+dự thảo spec này.
 
 [i[`__has_embed()` identifier]>]
 
 TODO
 
-### Other Parameters
+### Tham số khác
 
-A compiler implementation can define other embed parameters all it
-wants---look for these non-standard parameters in your compiler's
-documentation.
+Một implementation của compiler có thể định nghĩa các tham số embed
+khác tùy ý, tìm các tham số không chuẩn này trong tài liệu của
+compiler.
 
-For instance:
+Ví dụ:
 
 ``` {.c}
 #embed "foo.bin" limit(12) frotz(lamp)
 ```
 
-These might commonly have a prefix on them to help with namespacing:
+Chúng thường có tiền tố để giúp namespace:
 
 ``` {.c}
 #embed "foo.bin" limit(12) fmc::frotz(lamp)
 ```
 
-It might be sensible to try to detect if these are available before you
-use them, and luckily we can use `__has_embed` to help us here.
+Có lẽ hợp lý là thử phát hiện xem những cái này có sẵn không trước
+khi dùng, và may là ta có thể dùng `__has_embed` để giúp.
 
-Normally, `__has_embed()` will just tell us if the file is there or not.
-But---and here's the fun bit---it will also return false if any
-additional parameters are also not supported!
+Thường, `__has_embed()` sẽ chỉ báo file có ở đó hay không. Nhưng,
+và đây là phần vui, nó cũng sẽ trả false nếu thêm bất kỳ tham số
+nào không được hỗ trợ!
 
-So if we give it a file that we _know_ exists as well as a parameter
-that we want to test for the existence of, it will effectively tell us
-if that parameter is supported.
+Vậy nếu ta đưa nó một file mà ta _biết_ tồn tại cùng với tham số mà
+ta muốn test sự tồn tại, nó sẽ hiệu quả báo tham số đó có được hỗ
+trợ không.
 
-What file _always_ exists, though? Turns out we can use the `__FILE__`
-macro, which expands to the name of the source file that references it!
-That file _must_ exist, or something is seriously wrong in the
-chicken-and-egg department.
+Nhưng file nào _luôn_ tồn tại? Hóa ra ta có thể dùng macro
+`__FILE__`, mở rộng thành tên file nguồn tham chiếu đến nó! File đó
+_phải_ tồn tại, không thì có chuyện cực kỳ nghiêm trọng trong mảng
+con gà đẻ trứng.
 
-Let's test that `frotz` parameter to see if we can use it:
+Test tham số `frotz` xem có dùng được không:
 
 ``` {.c}
 #if __has_embed(__FILE__ fmc::frotz(lamp))
@@ -1451,71 +1431,71 @@ Let's test that `frotz` parameter to see if we can use it:
 #endif
 ```
 
-### Embedding Multi-Byte Values
+### Embed giá trị nhiều byte
 
-What about getting some `int`s in there instead of individual bytes?
-What about multi-byte values in the embedded file?
+Thế còn việc nhét vài `int` vào thay vì byte đơn thì sao? Thế còn giá
+trị nhiều byte trong file embed?
 
-This is not something supported by the C23 standard, but there could be
-implementation extensions defined for it in the future.
+Đây không phải cái được chuẩn C23 hỗ trợ, nhưng có thể có các
+extension implementation định nghĩa cho nó trong tương lai.
 
 [i[`#embed` directive]>]
 
-## The `#pragma` Directive {#pragma}
+## Directive `#pragma` {#pragma}
 
 [i[`#pragma` directive]<]
 
-This is one funky directive, short for "pragmatic". You can use it to
-do... well, anything your compiler supports you doing with it.
+Đây là một directive kỳ cục, viết tắt của "pragmatic". Bạn có thể
+dùng để làm... ờ, bất cứ gì mà compiler của bạn hỗ trợ bạn làm với
+nó.
 
-Basically the only time you're going to add this to your code is if some
-documentation tells you to do so.
+Về cơ bản, lần duy nhất bạn thêm cái này vào code là khi tài liệu
+nào đó bảo bạn làm vậy.
 
-### Non-Standard Pragmas
+### Pragma không chuẩn
 
 [i[`#pragma` directive-->nonstandard pragmas]<]
 
-Here's one non-standard example of using `#pragma` to cause the compiler
-to execute a `for` loop in parallel with multiple threads (if the
-compiler supports the [fl[OpenMP|https://www.openmp.org/]] extension):
+Đây là một ví dụ không chuẩn dùng `#pragma` để bắt compiler chạy
+vòng lặp `for` song song trên nhiều thread (nếu compiler hỗ trợ
+extension [fl[OpenMP|https://www.openmp.org/]]):
 
 ``` {.c}
 #pragma omp parallel for
 for (int i = 0; i < 10; i++) { ... }
 ```
 
-There are all kinds of `#pragma` directives documented across all four
-corners of the globe.
+Có đủ loại directive `#pragma` được ghi chép ở khắp bốn góc của địa
+cầu.
 
-All unrecognized `#pragma`s are ignored by the compiler.
+Mọi `#pragma` không nhận diện được đều bị compiler bỏ qua.
 
 [i[`#pragma` directive-->nonstandard pragmas]>]
 
-### Standard Pragmas
+### Pragma chuẩn
 
-There are also a few standard ones, and these start with `STDC`, and
-follow the same form:
+Cũng có vài cái chuẩn, và chúng bắt đầu bằng `STDC`, theo cùng dạng:
 
 ``` {.c}
 #pragma STDC pragma_name on-off
 ```
 
-The `on-off` portion can be either `ON`, `OFF`, or `DEFAULT`.
+Phần `on-off` có thể là `ON`, `OFF`, hoặc `DEFAULT`.
 
-And the `pragma_name` can be one of these:
+Và `pragma_name` có thể là một trong các cái sau:
 
 [i[`FP_CONTRACT` pragma]<]
 [i[`CX_LIMITED_RANGE` pragma]<]
 
 [i[`FENV_ACCESS` pragma]]
 
-|Pragma Name|Description|
+|Tên Pragma|Mô tả|
 |-------------|--------------------------------------------------|
-|`FP_CONTRACT`|Allow floating point expressions to be contracted into a single operation to avoid rounding errors that might occur from multiple operations.|
-|`FENV_ACCESS`|Set to `ON` if you plan to access the floating point status flags. If `OFF`, the compiler might perform optimizations that cause the values in the flags to be inconsistent or invalid.|
-|`CX_LIMITED_RANGE`|Set to `ON` to allow the compiler to skip overflow checks when performing complex arithmetic. Defaults to `OFF`.|
+|`FP_CONTRACT`|Cho phép biểu thức floating point được rút gọn thành một phép toán duy nhất để tránh lỗi làm tròn có thể xảy ra từ nhiều phép toán.|
+|`FENV_ACCESS`|Đặt `ON` nếu bạn định truy cập các cờ trạng thái floating point. Nếu `OFF`, compiler có thể thực hiện tối ưu gây ra giá trị trong cờ không nhất quán hoặc không hợp lệ.|
+|`CX_LIMITED_RANGE`|Đặt `ON` để compiler bỏ qua kiểm tra tràn khi làm số học phức. Mặc định là `OFF`.|
 
-For example:
+Ví dụ:
 
 ``` {.c}
 #pragma STDC FP_CONTRACT OFF
@@ -1524,10 +1504,9 @@ For example:
 
 [i[`FP_CONTRACT` pragma]>]
 
-As for `CX_LIMITED_RANGE`, the spec points out:
+Về `CX_LIMITED_RANGE`, spec chỉ ra:
 
-> The purpose of the pragma is to allow the implementation to use the
-> formulas:
+> Mục đích của pragma là cho implementation dùng các công thức:
 >
 > $(x+iy)\times(u+iv) = (xu-yv)+i(yu+xv)$
 >
@@ -1535,17 +1514,18 @@ As for `CX_LIMITED_RANGE`, the spec points out:
 >
 > $|x+iy|=\sqrt{x^2+y^2}$
 >
-> where the programmer can determine they are safe.
+> khi lập trình viên có thể xác định rằng chúng an toàn.
 
 [i[`CX_LIMITED_RANGE` pragma]>]
 
-### `_Pragma` Operator
+### Toán tử `_Pragma`
 
 [i[`_Pragma` operator]<]
 
-This is another way to declare a pragma that you could use in a macro.
+Đây là cách khác để khai báo pragma mà bạn có thể dùng trong một
+macro.
 
-These are equivalent:
+Hai thứ sau là tương đương:
 
 ``` {.c}
 #pragma "Unnecessary" quotes
@@ -1554,7 +1534,7 @@ _Pragma("\"Unnecessary\" quotes")
 
 [i[`_Pragma` operator-->in a macro]<]
 
-This can be used in a macro, if need be:
+Cái này có thể dùng trong macro, khi cần:
 
 ``` {.c}
 #define PRAGMA(x) _Pragma(#x)
@@ -1564,31 +1544,31 @@ This can be used in a macro, if need be:
 [i[`_Pragma` operator]>]
 [i[`#pragma` directive]>]
 
-## The `#line` Directive
+## Directive `#line`
 
 [i[`#line` directive]<]
 [i[`__LINE__` macro]<]
 
-This allows you to override the values for `__LINE__` and `__FILE__`. If
-you want.
+Cái này cho phép bạn ghi đè giá trị cho `__LINE__` và `__FILE__`.
+Nếu bạn muốn.
 
-I've never wanted to do this, but in K&R2, they write:
+Tôi chưa bao giờ muốn làm chuyện này, nhưng trong K&R2, họ viết:
 
-> For the benefit of other preprocessors that generate C programs [...]
+> Để hữu ích cho các preprocessor khác sinh ra chương trình C [...]
 
-So maybe there's that.
+Vậy có khi có chỗ cho nó.
 
-To override the line number to, say 300:
+Để ghi đè số dòng thành, chẳng hạn, 300:
 
 ``` {.c}
 #line 300
 ```
 
-and `__LINE__` will keep counting up from there.
+và `__LINE__` sẽ tiếp tục đếm lên từ đó.
 
 [i[`__LINE__` macro]>]
 
-To override the line number and the filename:
+Để ghi đè số dòng và tên file:
 
 ``` {.c}
 #line 300 "newfilename"
@@ -1596,14 +1576,14 @@ To override the line number and the filename:
 
 [i[`#line` directive]>]
 
-## The Null Directive
+## Directive Null
 
 [i[`#` null directive]<]
 
-A `#` on a line by itself is ignored by the preprocessor. Now, to be
-entirely honest, I don't know what the use case is for this.
+Một ký tự `#` trên một dòng đứng một mình sẽ bị preprocessor bỏ qua.
+Thành thật mà nói, tôi không biết ca dùng cho chuyện này là gì.
 
-I've seen examples like this:
+Tôi đã thấy ví dụ kiểu này:
 
 ``` {.c}
 #ifdef FOO
@@ -1613,10 +1593,10 @@ I've seen examples like this:
 #endif
 ```
 
-which is just cosmetic; the line with the solitary `#` can be deleted
-with no ill effect.
+đó chỉ là về mặt thẩm mỹ; dòng với `#` đơn độc có thể bị xóa đi mà
+không có tác động gì xấu.
 
-Or maybe for cosmetic consistency, like this:
+Hay có lẽ vì tính nhất quán thẩm mỹ, thế này:
 
 ``` {.c}
 #
@@ -1630,14 +1610,14 @@ Or maybe for cosmetic consistency, like this:
 #
 ```
 
-But, with respect to cosmetics, that's just ugly.
+Nhưng, về mặt thẩm mỹ, cái đó chỉ là xấu.
 
-Another post mentions elimination of comments---that in GCC, a comment
-after a `#` will not be seen by the compiler. Which I don't doubt, but
-the specification doesn't seem to say this is standard behavior.
+Một bài đăng khác nhắc đến chuyện xóa comment, rằng trong GCC, một
+comment sau `#` sẽ không được compiler nhìn thấy. Cái đó tôi không
+nghi ngờ, nhưng spec dường như không nói đây là hành vi chuẩn.
 
-My searches for rationale aren't bearing much fruit. So I'm going to
-just say this is some good ol' fashioned C esoterica.
+Mấy tìm kiếm của tôi cho nguyên do không mang về nhiều quả. Nên tôi
+đành nói đây là một thứ C esoterica kiểu cổ điển.
 
 [i[`#` null directive]>]
 [i[Preprocessor]>]
