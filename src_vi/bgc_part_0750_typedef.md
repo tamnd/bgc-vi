@@ -3,19 +3,19 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# `typedef`: Making New Types
+# `typedef`: Tạo kiểu mới
 
 [i[`typedef` keyword]<]
-Well, not so much making _new_ types as getting new names for existing
-types. Sounds kinda pointless on the surface, but we can really use this
-to make our code cleaner.
+Thực ra không hẳn là tạo kiểu _mới_, mà là đặt tên mới cho kiểu đã có.
+Thoạt nghe hơi vô nghĩa, nhưng ta có thể dùng nó để làm code gọn gàng
+hơn hẳn.
 
-## `typedef` in Theory
+## `typedef` về lý thuyết
 
-Basically, you take an existing type and you make an alias for it with
+Đại khái, bạn lấy một kiểu đã có rồi tạo alias (bí danh) cho nó bằng
 `typedef`.
 
-Like this:
+Như này:
 
 ``` {.c}
 typedef int antelope;  // Make "antelope" an alias for "int"
@@ -23,37 +23,37 @@ typedef int antelope;  // Make "antelope" an alias for "int"
 antelope x = 10;       // Type "antelope" is the same as type "int"
 ```
 
-You can take any existing type and do it. You can even make a number of
-types with a comma list:
+Bạn có thể làm thế với bất kỳ kiểu có sẵn nào. Còn có thể tạo nhiều
+kiểu bằng list ngăn bởi dấu phẩy:
 
 ``` {.c}
 typedef int antelope, bagel, mushroom;  // These are all "int"
 ```
 
-That's really useful, right? That you can type `mushroom` instead of
-`int`? You must be _super excited_ about this feature!
+Tiện ghê, nhỉ? Đánh máy được `mushroom` thay cho `int`? Chắc bạn đang
+_phấn khích lắm_ với tính năng này!
 
-OK, Professor Sarcasm---we'll get to some more common applications of
-this in a moment.
+Được rồi Giáo sư Chế Giễu, chút nữa sẽ tới những cách dùng phổ biến
+hơn.
 
 ### Scoping
 
 [i[`typedef` keyword-->scoping rules]<]
-`typedef` follows regular [scoping rules](#scope).
+`typedef` tuân theo [quy tắc scope](#scope) thông thường.
 
-For this reason, it's quite common to find `typedef` at file scope
-("global") so that all functions can use the new types at will.
+Vì vậy, rất hay gặp `typedef` ở file scope ("global") để mọi hàm đều
+dùng được kiểu mới thoải mái.
 
-## `typedef` in Practice
+## `typedef` trong thực tế
 
-So renaming `int` to something else isn't that exciting. Let's see where
-`typedef` commonly makes an appearance.
+Đổi tên `int` thành cái khác thì cũng không thú vị lắm. Xem `typedef`
+thường xuất hiện ở đâu.
 
-### `typedef` and `struct`s {#typedef-struct}
+### `typedef` và `struct` {#typedef-struct}
 
 [i[`typedef` keyword-->with `struct`s]<]
-Sometimes a `struct` will be `typedef`'d to a new name so you don't have
-to type the word `struct` over and over.
+Đôi khi một `struct` sẽ được `typedef` ra tên mới để khỏi phải gõ từ
+`struct` đi `struct` lại.
 
 ``` {.c}
 struct animal {
@@ -71,13 +71,12 @@ struct animal y;  // This works
 animal z;         // This also works because "animal" is an alias
 ```
 
-Personally, I don't care for this practice. I like the clarity the code
-has when you add the word `struct` to the type; programmers know what
-they're getting. But it's really common so I'm including it here.
+Cá nhân tôi không thích kiểu này lắm. Tôi thích sự rõ ràng mà code có
+được khi thêm chữ `struct` vào trước kiểu, lập trình viên biết ngay
+mình đang xử lý cái gì. Nhưng vì nó phổ biến nên tôi đưa vào đây.
 
-Now I want to run the exact same example in a way that you might
-commonly see. We're going to put the `struct animal` _in_ the `typedef`.
-You can mash it all together like this:
+Giờ tôi muốn chạy lại đúng ví dụ đó theo cách bạn hay thấy. Ta sẽ đặt
+`struct animal` _vào bên trong_ `typedef`. Có thể gộp hết vào như này:
 
 ``` {.c}
 //  original name
@@ -93,15 +92,15 @@ struct animal y;  // This works
 animal z;         // This also works because "animal" is an alias
 ```
 
-That's exactly the same as the previous example, just more concise.
+Y chang ví dụ trước, chỉ ngắn gọn hơn.
 
 [i[`typedef` keyword-->with anonymous `struct`s]<]
-But that's not all! There's another common shortcut that you might see
-in code using what are called _anonymous structures_^[We'll talk more
-about these later.]. It turns out you don't actually need to name the
-structure in a variety of places, and with `typedef` is one of them.
+Nhưng chưa hết! Còn một kiểu rút gọn phổ biến nữa bạn có thể thấy
+trong code, dùng cái gọi là _anonymous structure_ (cấu trúc vô danh)^[
+Ta sẽ nói thêm về chúng sau.]. Hoá ra ở nhiều chỗ bạn không cần đặt
+tên cho structure, và dùng với `typedef` là một trong những chỗ đó.
 
-Let's do the same example with an anonymous structure:
+Làm lại ví dụ với anonymous structure:
 
 ``` {.c}
 //  Anonymous struct! It has no name!
@@ -117,7 +116,7 @@ typedef struct {
 animal z;           // This works because "animal" is an alias
 ```
 
-As another example, we might find something like this:
+Một ví dụ khác, có thể gặp thứ kiểu như:
 
 ``` {.c}
 typedef struct {
@@ -132,17 +131,16 @@ printf("%d, %d\n", p.x, p.y);  // 20, 40
 [i[`typedef` keyword-->with `struct`s]>]
 [i[`typedef` keyword-->scoping rules]>]
 
-### `typedef` and Other Types
+### `typedef` và các kiểu khác
 
-It's not that using `typedef` with a simple type like `int` is
-completely useless... it helps you abstract the types to make it easier
-to change them later.
+Không phải dùng `typedef` với một kiểu đơn giản như `int` là hoàn toàn
+vô ích, nó giúp bạn trừu tượng hoá các kiểu để dễ đổi sau này.
 
-For example, if you have `float` all over your code in 100 zillion
-places, it's going to be painful to change them all to `double` if you
-find you have to do that later for some reason.
+Ví dụ, nếu `float` rải khắp code của bạn ở 100 tỉ chỗ, sẽ rất đau đầu
+nếu đổi hết sang `double` khi sau này vì lý do nào đó bạn phải làm
+thế.
 
-But if you prepared a little with:
+Nhưng nếu bạn chuẩn bị một chút:
 
 ``` {.c}
 typedef float app_float;
@@ -152,8 +150,8 @@ typedef float app_float;
 app_float f1, f2, f3;
 ```
 
-Then if later you want to change to another type, like `long double`,
-you just need to change the `typedef`:
+Thì sau này muốn đổi sang kiểu khác, chẳng hạn `long double`, bạn chỉ
+cần đổi `typedef`:
 
 ``` {.c}
 //        voila!
@@ -165,10 +163,10 @@ typedef long double app_float;
 app_float f1, f2, f3;  // Now these are all long doubles
 ```
 
-### `typedef` and Pointers
+### `typedef` và con trỏ
 
 [i[`typedef` keyword-->with pointers]<]
-You can make a type that is a pointer.
+Bạn có thể tạo một kiểu là con trỏ.
 
 ``` {.c}
 typedef int *intptr;
@@ -177,19 +175,19 @@ int a = 10;
 intptr x = &a;  // "intptr" is type "int*"
 ```
 
-I really don't like this practice. It hides the fact that `x` is a
-pointer type because you don't see a `*` in the declaration.
+Tôi rất không thích kiểu này. Nó giấu đi chuyện `x` là kiểu con trỏ vì
+bạn không thấy dấu `*` nào trong khai báo.
 
-IMHO, it's better to explicitly show that you're declaring a pointer
-type so that other devs can clearly see it and don't mistake `x` for
-having a non-pointer type.
+IMHO, tốt hơn là thể hiện rõ bạn đang khai báo kiểu con trỏ để các dev
+khác nhìn thấy rõ và không nhầm `x` là kiểu không phải con trỏ.
 
-But at last count, say, 832,007 people had a different opinion.
+Nhưng lần đếm gần nhất thì có chừng 832.007 người không đồng ý với
+tôi.
 [i[`typedef` keyword-->with pointers]>]
 
-### `typedef` and Capitalization
+### `typedef` và cách viết hoa
 
-I've seen all kinds of capitalization on `typedef`.
+Tôi đã thấy đủ loại cách viết hoa cho `typedef`.
 
 ``` {.c}
 typedef struct {
@@ -209,20 +207,20 @@ typedef struct {
 } MY_POINT;          // UPPER SNAKE CASE
 ```
 
-The C11 specification doesn't dictate one way or another, and shows
-examples in all uppercase and all lowercase.
+Đặc tả C11 không ép theo cách nào, và có ví dụ cả viết hoa hết lẫn
+viết thường hết.
 
-K&R2 uses leading uppercase predominantly, but show some examples in
-uppercase and snake case (with `_t`).
+K&R2 chủ yếu dùng leading uppercase, nhưng cũng có vài ví dụ viết hoa
+hết và snake case (với hậu tố `_t`).
 
-If you have a style guide in use, stick with it. If you don't, grab one
-and stick with it.
+Nếu bạn đang có style guide, theo nó. Nếu chưa, vớ lấy một cái rồi
+theo.
 
-## Arrays and `typedef`
+## Mảng và `typedef`
 
 [i[`typedef` keyword-->with arrays]<]
-The syntax is a little weird, and this is rarely seen in my experience,
-but you can `typedef` an array of some number of items.
+Cú pháp hơi kỳ, và theo kinh nghiệm của tôi thì hiếm gặp, nhưng bạn
+có thể `typedef` một mảng với số phần tử xác định.
 
 ``` {.c}
 // Make type five_ints an array of 5 ints
@@ -231,7 +229,6 @@ typedef int five_ints[5];
 five_ints x = {11, 22, 33, 44, 55};
 ```
 
-I don't like it because it hides the array nature of the variable, but
-it's possible to do.
+Tôi không thích vì nó giấu đi bản chất mảng của biến, nhưng làm được.
 [i[`typedef` keyword-->with arrays]>]
 [i[`typedef` keyword]>]
