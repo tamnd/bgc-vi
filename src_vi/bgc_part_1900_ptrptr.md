@@ -3,44 +3,45 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Pointers III: Pointers to Pointers and More
+# Pointer III: Pointer tới pointer và hơn thế
 
-Here's where we cover some intermediate and advanced pointer usage. If
-you don't have pointers down well, review the previous chapters on
-[pointers](#pointers) and [pointer arithmetic](#pointers2) before
-starting on this stuff.
+Đây là chỗ ta nói về cách dùng pointer ở mức trung cấp và nâng cao.
+Nếu bạn chưa nắm chắc pointer, xem lại các chương trước về
+[pointer](#pointers) và [pointer arithmetic](#pointers2) trước khi
+bắt đầu mấy thứ này.
 
-## Pointers to Pointers
+## Pointer tới pointer
 
 [i[Pointers-->to pointers]<]
 
-If you can have a pointer to a variable, and a variable can be a
-pointer, can you have a pointer to a variable that it itself a pointer?
+Nếu bạn có thể có pointer tới một biến, và một biến có thể là
+pointer, thì bạn có thể có pointer tới một biến mà bản thân nó là
+pointer không?
 
-Yes! This is a pointer to a pointer, and it's held in variable of type
-pointer-pointer. 
+Có chứ! Cái này là pointer tới pointer, và nó được giữ trong biến
+kiểu pointer-pointer.
 
-Before we tear into that, I want to try for a _gut feel_ for how
-pointers to pointers work.
+Trước khi mổ xẻ, tôi muốn cố tạo _cảm giác trực giác_ về cách
+pointer tới pointer hoạt động.
 
-Remember that a pointer is just a number. It's a number that represents
-an index in computer memory, typically one that holds a value we're
-interested in for some reason.
+Nhớ là pointer chỉ là một con số. Nó là con số đại diện cho một chỉ
+số trong bộ nhớ máy tính, thường là chỉ số giữ một giá trị mà ta
+đang quan tâm vì lý do nào đó.
 
-That pointer, which is a number, has to be stored somewhere. And that
-place is memory, just like everything else^[There's some devil in the
-details with values that are stored in registers only, but we can safely
-ignore that for our purposes here. Also the C spec makes no stance on
-these "register" things beyond the `register` keyword, the description
-for which doesn't mention registers.].
+Cái pointer đó, là một con số, thì cũng phải được lưu ở đâu đó. Và
+chỗ đó là bộ nhớ, như mọi thứ khác^[Có chút lắt léo với giá trị được
+lưu chỉ trong thanh ghi, nhưng ở đây ta có thể bỏ qua an toàn. Với
+lại spec C không có quan điểm gì về mấy chuyện "thanh ghi" đó ngoài
+từ khóa `register`, mà phần mô tả của nó cũng không nhắc tới thanh
+ghi.].
 
-But because it's stored in memory, it must have an index it's stored at,
-right? The pointer must have an index in memory where it is stored. And
-that index is a number. It's the address of the pointer. It's a pointer
-to the pointer.
+Nhưng vì nó được lưu trong bộ nhớ, nó phải có một chỉ số nơi nó được
+lưu, đúng không? Cái pointer đó phải có một chỉ số trong bộ nhớ nơi
+nó nằm. Và chỉ số đó là một con số. Đó là địa chỉ của pointer. Đó là
+pointer tới pointer.
 
-Let's start with a regular pointer to an `int`, back from the earlier
-chapters:
+Hãy bắt đầu với một pointer thường tới `int`, trở lại từ các chương
+trước:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -54,14 +55,14 @@ int main(void)
 }
 ```
 
-Straightforward enough, right? We have two types represented: `int` and
-`int*`, and we set up `p` to point to `x`. Then we can dereference `p`
-on line 8 and print out the value `3490`.
+Khá đơn giản, nhỉ? Ta có hai kiểu được đại diện: `int` và `int*`, và
+ta dựng `p` để trỏ tới `x`. Rồi ta có thể dereference `p` ở dòng 8
+và in ra giá trị `3490`.
 
-But, like we said, we can have a pointer to any variable... so does that
-mean we can have a pointer to `p`?
+Nhưng, như ta đã nói, ta có thể có pointer tới bất kỳ biến nào, vậy
+có phải nghĩa là ta có thể có pointer tới `p` không?
 
-In other words, what type is this expression?
+Nói cách khác, biểu thức này có kiểu gì?
 
 
 ``` {.c}
@@ -71,16 +72,16 @@ int *p = &x;   // Type: pointer to an int
 &p  // <-- What type is the address of p? AKA a pointer to p?
 ```
 
-If `x` is an `int`, then `&x` is a pointer to an `int` that we've stored
-in `p` which is type `int*`. Follow? (Repeat this paragraph until you
-do!)
+Nếu `x` là `int`, thì `&x` là pointer tới `int` mà ta đã lưu trong
+`p` có kiểu `int*`. Theo được chứ? (Đọc lại đoạn này cho đến khi
+hiểu!)
 
-And therefore `&p` is a pointer to an `int*`, AKA a "pointer to a
-pointer to an `int`". AKA "`int`-pointer-pointer".
+Và do đó `&p` là pointer tới `int*`, hay còn gọi là "pointer tới
+pointer tới `int`". Hay là "`int`-pointer-pointer".
 
-Got it? (Repeat the previous paragraph until you do!)
+Hiểu rồi chứ? (Đọc lại đoạn trước cho đến khi hiểu!)
 
-We write this type with two asterisks: `int **`. Let's see it in action.
+Ta viết kiểu này với hai dấu sao: `int **`. Xem nó trong hành động.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -95,88 +96,85 @@ int main(void)
 }
 ```
 
-Let's make up some pretend addresses for the above values as examples
-and see what these three variables might look like in memory. The
-address values, below are just made up by me for example purposes:
+Ta bịa ra vài địa chỉ giả cho các giá trị trên làm ví dụ và xem ba
+biến đó có thể trông thế nào trong bộ nhớ. Các giá trị địa chỉ dưới
+đây do tôi bịa cho có ví dụ:
 
-|Variable|Stored at Address|Value Stored There|
+|Biến|Lưu tại địa chỉ|Giá trị lưu ở đó|
 |-|-|-|
-|`x`|`28350`|`3490`---the value from the code|
-|`p`|`29122`|`28350`---the address of `x`!|
-|`q`|`30840`|`29122`---the address of `p`!|
+|`x`|`28350`|`3490`, giá trị từ code|
+|`p`|`29122`|`28350`, địa chỉ của `x`!|
+|`q`|`30840`|`29122`, địa chỉ của `p`!|
 
-Indeed, let's try it for real on my computer^[You're very likely to get
-different numbers on yours.] and print out the pointer values with `%p`
-and I'll do the same table again with actual references (printed in
-hex).
+Thật vậy, hãy thử thật trên máy tôi^[Trên máy bạn rất có thể ra số
+khác.] và in các giá trị pointer bằng `%p` và tôi sẽ lập bảng đó lại
+với tham chiếu thật (in bằng hex).
 
-|Variable|Stored at Address|Value Stored There|
+|Biến|Lưu tại địa chỉ|Giá trị lưu ở đó|
 |-|-|-|
-|`x`|`0x7ffd96a07b94`|`3490`---the value from the code|
-|`p`|`0x7ffd96a07b98`|`0x7ffd96a07b94`---the address of `x`!|
-|`q`|`0x7ffd96a07ba0`|`0x7ffd96a07b98`---the address of `p`!|
+|`x`|`0x7ffd96a07b94`|`3490`, giá trị từ code|
+|`p`|`0x7ffd96a07b98`|`0x7ffd96a07b94`, địa chỉ của `x`!|
+|`q`|`0x7ffd96a07ba0`|`0x7ffd96a07b98`, địa chỉ của `p`!|
 
-You can see those addresses are the same except the last byte, so just
-focus on those.
+Bạn có thể thấy mấy địa chỉ này giống nhau trừ byte cuối, nên chỉ
+cần để ý byte đó.
 
-On my system, `int`s are 4 bytes, which is why we're seeing the address
-go up by 4 from `x` to `p`^[There is absolutely nothing in the spec that
-says this will always work this way, but it happens to work this way on
-my system.] and then goes up by 8 from `p` to `q`. On my system, all
-pointers are 8 bytes.
+Trên hệ của tôi, `int` chiếm 4 byte, vì vậy ta thấy địa chỉ tăng
+thêm 4 từ `x` sang `p`^[Spec không nói gì chuyện cái này sẽ luôn
+hoạt động kiểu này, nhưng tình cờ trên máy tôi nó vậy.] rồi tăng
+thêm 8 từ `p` sang `q`. Trên hệ của tôi, mọi pointer chiếm 8 byte.
 
-Does it matter if it's an `int*` or an `int**`? Is one more bytes than
-the other? Nope! Remember that all pointers are addresses, that is
-indexes into memory. And on my machine you can represent an index with 8
-bytes... doesn't matter what's stored at that index.
+Có quan trọng chuyện nó là `int*` hay `int**` không? Cái nào nhiều
+byte hơn cái nào? Không hề! Nhớ rằng mọi pointer đều là địa chỉ, tức
+là chỉ số vào bộ nhớ. Và trên máy tôi ta có thể biểu diễn một chỉ số
+bằng 8 byte, chẳng liên quan cái gì được lưu ở chỉ số đó.
 
-Now check out what we did there on line 9 of the previous example: we
-_double dereferenced_ `q` to get back to our `3490`.
+Giờ để ý xem ta đã làm gì ở dòng 9 của ví dụ trước: ta _dereference
+hai lần_ `q` để quay lại được `3490`.
 
-This is the important bit about pointers and pointers to pointers:
+Đây là điểm quan trọng về pointer và pointer tới pointer:
 
-* You can get a pointer to anything with `&` (including to a pointer!)
-* You can get the thing a pointer points to with `*` (including a
+* Bạn có thể lấy pointer tới bất cứ thứ gì bằng `&` (kể cả tới một
   pointer!)
+* Bạn có thể lấy thứ mà một pointer đang trỏ tới bằng `*` (kể cả
+  một pointer!)
 
-So you can think of `&` as being used to make pointers, and `*` being
-the inverse---it goes the opposite direction of `&`---to get to the
-thing pointed to.
+Vậy bạn có thể nghĩ `&` được dùng để tạo pointer, còn `*` thì ngược
+lại, đi theo chiều ngược với `&`, để tới được thứ được trỏ tới.
 
-In terms of type, each time you `&`, that adds another pointer level to
-the type.
+Về kiểu, mỗi lần bạn `&`, cái đó thêm một mức pointer vào kiểu.
 
-|If you have|Then you run|The result type is|
+|Nếu bạn có|Rồi bạn chạy|Kiểu kết quả là|
 |:-|:-:|:-|
 |`int x`|`&x`|`int *`|
 |`int *x`|`&x`|`int **`|
 |`int **x`|`&x`|`int ***`|
 |`int ***x`|`&x`|`int ****`|
 
-And each time you use dereference (`*`), it does the opposite:
+Và mỗi lần bạn dereference (`*`), nó làm ngược lại:
 
-|If you have|Then you run|The result type is|
+|Nếu bạn có|Rồi bạn chạy|Kiểu kết quả là|
 |:-|:-:|:-|
 |`int ****x`|`*x`|`int ***`|
 |`int ***x`|`*x`|`int **`|
 |`int **x`|`*x`|`int *`|
 |`int *x`|`*x`|`int`|
 
-Note that you can use multiple `*`s in a row to quickly dereference,
-just like we saw in the example code with `**q`, above. Each one strips
-away one level of indirection.
+Lưu ý bạn có thể dùng nhiều `*` liên tiếp để dereference nhanh, y
+như trong ví dụ code với `**q` ở trên. Mỗi cái bóc đi một lớp gián
+tiếp.
 
-|If you have|Then you run|The result type is|
+|Nếu bạn có|Rồi bạn chạy|Kiểu kết quả là|
 |:-|:-:|:-|
 |`int ****x`|`***x`|`int *`|
 |`int ***x`|`**x`|`int *`|
 |`int **x`|`**x`|`int`|
 
-In general, `&*E == E`^[Even if `E` is `NULL`, it turns out, weirdly.].
-The dereference "undoes" the address-of.
+Tổng quát, `&*E == E`^[Kể cả khi `E` là `NULL`, lạ thay.].
+Dereference "hoàn tác" address-of.
 
-But `&` doesn't work the same way---you can only do those one at a time,
-and have to store the result in an intermediate variable:
+Nhưng `&` thì không chạy kiểu đó, bạn chỉ làm từng cái một được, và
+phải lưu kết quả vào một biến trung gian:
 
 ``` {.c}
 int x = 3490;     // Type: int
@@ -189,25 +187,24 @@ int *****t = &s;  // Type: int *****
 
 [i[Pointers-->to pointers]>]
 
-### Pointer Pointers and `const`
+### Pointer-pointer và `const`
 
 [i[Pointers-->to pointers, `const`]<]
 
-If you recall, declaring a pointer like this:
+Nếu bạn còn nhớ, khai báo pointer kiểu vầy:
 
 ``` {.c}
 int *const p;
 ```
 
-means that you can't modify `p`. Trying to `p++` would give you a
-compile-time error.
+nghĩa là bạn không thể sửa `p`. Cố `p++` sẽ cho lỗi lúc compile.
 
-But how does that work with `int **` or `int ***`? Where does the
-`const` go, and what does it mean?
+Nhưng nó hoạt động ra sao với `int **` hay `int ***`? `const` đi đâu
+và nghĩa là gì?
 
-Let's start with the simple bit. The `const` right next to the variable
-name refers to that variable. So if you want an `int***` that you can't
-change, you can do this:
+Bắt đầu từ phần đơn giản. `const` ngay cạnh tên biến ám chỉ chính
+biến đó. Vậy nếu bạn muốn một `int***` mà không thể đổi, bạn có thể
+làm vầy:
 
 ``` {.c}
 int ***const p;
@@ -215,9 +212,9 @@ int ***const p;
 p++;  // Not allowed
 ```
 
-But here's where things get a little weird.
+Nhưng đây là chỗ mọi thứ hơi lạ.
 
-What if we had this situation:
+Lỡ ta gặp tình huống này thì sao:
 
 ``` {.c .numberLines}
 int main(void)
@@ -228,7 +225,7 @@ int main(void)
 }
 ```
 
-When I build that, I get a warning:
+Khi tôi build cái đó, tôi nhận được cảnh báo:
 
 ``` {.default}
 warning: initialization discards ‘const’ qualifier from pointer target type
@@ -236,19 +233,19 @@ warning: initialization discards ‘const’ qualifier from pointer target type
       |               ^
 ```
 
-What's going on? The compiler is telling us here that we had a variable
-that was `const`, and we're assigning its value into another
-variable that is not `const` in the same way. The "`const`ness" is
-discarded, which probably isn't what we wanted to do.
+Chuyện gì vậy? Compiler đang báo ta rằng ta có một biến `const`, và
+ta đang gán giá trị của nó vào biến khác không `const` theo cùng
+cách. Tính "`const`" bị bỏ đi, mà có lẽ đó không phải thứ ta muốn.
 
-The type of `p` is `int *const p`, and so `&p` is type `int *const *`.
-And we try to assign that into `q`.
+Kiểu của `p` là `int *const p`, nên `&p` có kiểu `int *const *`. Và
+ta cố gán cái đó vào `q`.
 
-But `q` is `int **`! A type with different `const`ness on the first
-`*`! So we get a warning that the `const` in `p`'s `int *const *` is
-being ignored and thrown away.
+Nhưng `q` là `int **`! Một kiểu với tính `const` khác ở dấu `*` đầu
+tiên! Nên ta nhận cảnh báo là `const` trong `int *const *` của `p`
+đang bị bỏ qua và vứt đi.
 
-We can fix that by making sure `q`'s type is at least as `const` as `p`.
+Ta có thể sửa bằng cách đảm bảo kiểu của `q` ít nhất cũng `const`
+bằng `p`.
 
 ``` {.c}
 int x = 3490;
@@ -256,11 +253,11 @@ int *const p = &x;
 int *const *q = &p;
 ```
 
-And now we're happy.
+Và giờ ta vui rồi.
 
-We could make `q` even more `const`. As it is, above, we're saying, "`q`
-isn't itself `const`, but the thing it points to is `const`." But we
-could make them both `const`:
+Ta có thể làm `q` `const` hơn nữa. Hiện tại ở trên, ta đang nói,
+"`q` bản thân không `const`, nhưng thứ nó trỏ tới là `const`." Nhưng
+ta có thể làm cả hai `const`:
 
 ``` {.c}
 int x = 3490;
@@ -268,32 +265,32 @@ int *const p = &x;
 int *const *const q = &p;  // More const!
 ```
 
-And that works, too. Now we can't modify `q`, or the pointer `q` points
-to.
+Và chạy ngon. Giờ ta không thể sửa `q`, hay cái pointer mà `q` trỏ
+tới.
 
 [i[Pointers-->to pointers, `const`]>]
 
-## Multibyte Values {#multibyte-values}
+## Giá trị nhiều byte {#multibyte-values}
 
 [i[Pointers-->to multibyte values]<]
 
-We kinda hinted at this in a variety of places earlier, but clearly not
-every value can be stored in a single byte of memory. Things take up
-multiple bytes of memory (assuming they're not `char`s). You can tell
-how many bytes by using `sizeof`. And you can tell which address in
-memory is the _first_ byte of the object by using the standard `&`
-operator, which always returns the address of the first byte.
+Ta đã bóng gió chuyện này ở vài chỗ trước đây, nhưng rõ ràng không
+phải mọi giá trị đều lưu vừa trong một byte bộ nhớ. Mọi thứ chiếm
+nhiều byte bộ nhớ (giả sử chúng không phải `char`). Bạn có thể biết
+chiếm bao nhiêu byte bằng `sizeof`. Và bạn có thể biết địa chỉ nào
+trong bộ nhớ là byte _đầu tiên_ của đối tượng bằng toán tử chuẩn
+`&`, luôn trả về địa chỉ của byte đầu.
 
-And here's another fun fact! If you iterate over the bytes of any
-object, you get its _object representation_. Two things with the same
-object representation in memory are equal.
+Và đây là sự thật thú vị khác! Nếu bạn duyệt qua các byte của bất kỳ
+đối tượng nào, bạn nhận được _biểu diễn đối tượng_ của nó. Hai thứ
+có cùng biểu diễn đối tượng trong bộ nhớ thì bằng nhau.
 
-If you want to iterate over the object representation, you should do it
-with pointers to `unsigned char`.
+Nếu bạn muốn duyệt biểu diễn đối tượng, bạn nên làm với pointer tới
+`unsigned char`.
 
-Let's make our own version of
+Hãy làm phiên bản riêng của
 [fl[`memcpy()`|https://beej.us/guide/bgclr/html/split/stringref.html#man-memcpy]]
-that does exactly this:
+làm đúng chuyện này:
 
 ``` {.c}
 void *my_memcpy(void *dest, const void *src, size_t n)
@@ -313,19 +310,20 @@ void *my_memcpy(void *dest, const void *src, size_t n)
 }
 ```
 
-(There are some good examples of post-increment and post-decrement in
-there for you to study, as well.)
+(Trong đó cũng có ví dụ post-increment và post-decrement hay để bạn
+nghiên cứu.)
 
-It's important to note that the version, above, is probably less
-efficient than the one that comes with your system.
+Quan trọng mà lưu ý là phiên bản ở trên có lẽ kém hiệu quả hơn cái
+đi kèm với hệ của bạn.
 
-But you can pass pointers to anything into it, and it'll copy those
-objects. Could be `int*`, `struct animal*`, or anything.
+Nhưng bạn có thể truyền pointer tới bất cứ thứ gì vào nó, và nó sẽ
+copy các đối tượng đó. Có thể là `int*`, `struct animal*`, hay bất
+cứ gì.
 
-Let's do another example that prints out the object representation bytes
-of a `struct` so we can see if there's any padding in there and what
-values it has^[Your C compiler is not required to add padding bytes, and
-the values of any padding bytes that are added are indeterminate.].
+Làm thêm ví dụ nữa in ra các byte biểu diễn đối tượng của một
+`struct` để ta xem có padding trong đó không và nó có giá trị
+gì^[Compiler C không bị bắt buộc phải chèn byte padding, và giá trị
+của bất cứ byte padding nào được chèn là không xác định.].
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -346,16 +344,15 @@ int main(void)
 }
 ```
 
-What we have there is a `struct foo` that's built in such a way that
-should encourage a compiler to inject padding bytes (though it doesn't
-have to). And then we get an `unsigned char *` to the first byte of the
-`struct foo` variable `x`.
+Cái ta có đó là `struct foo` được dựng sao cho khuyến khích compiler
+chèn byte padding vào (dù nó không phải làm). Rồi ta lấy `unsigned
+char *` tới byte đầu của biến `struct foo` tên `x`.
 
-From there, all we need to know is the `sizeof x` and we can loop
-through that many bytes, printing out the values (in hex for ease).
+Từ đó, ta chỉ cần biết `sizeof x` là có thể lặp qua từng ấy byte, in
+các giá trị ra (bằng hex cho dễ đọc).
 
-Running this gives a bunch of numbers as output. I've annotated it below
-to identify where the values were stored:
+Chạy cái này cho ra một đống số. Tôi chú thích bên dưới để chỉ ra
+các giá trị được lưu ở đâu:
 
 ``` {.default}
 12  | x.a == 0x12
@@ -370,126 +367,124 @@ BF  | padding bytes with "random" value
 12  |
 ```
 
-On all systems, `sizeof(char)` is 1, and we see that first byte at the
-top of the output holding the value `0x12` that we stored there.
+Trên mọi hệ, `sizeof(char)` là 1, và ta thấy byte đầu tiên ở đầu
+output giữ giá trị `0x12` mà ta đã lưu ở đó.
 
-Then we have some padding bytes---for me, these varied from run to run.
+Rồi ta có vài byte padding, với tôi, mấy cái này thay đổi giữa các
+lần chạy.
 
-Finally, on my system, `sizeof(int)` is 4, and we can see those 4 bytes
-at the end. Notice how they're the same bytes as are in the hex value
-`0x12345678`, but strangely in reverse order^[This will vary depending
-on the architecture, but my system is _little endian_, which means the
-least-significant byte of the number is stored first. _Big endian_
-systems will have the `12` first and the `78` last. But the spec doesn't
-dictate anything about this representation.].
+Cuối cùng, trên hệ của tôi, `sizeof(int)` là 4, và ta thấy 4 byte đó
+ở cuối. Chú ý chúng chính là các byte trong giá trị hex `0x12345678`,
+nhưng kỳ lạ là ngược thứ tự^[Cái này sẽ khác nhau tùy kiến trúc,
+nhưng hệ của tôi _little endian_, nghĩa là byte nhỏ nhất của số được
+lưu trước. Hệ _big endian_ sẽ có `12` trước và `78` sau. Nhưng spec
+không ra lệnh gì về biểu diễn này.].
 
-So that's a little peek under the hood at the bytes of a more complex
-entity in memory.
+Vậy đó là một cái nhìn hé lộ vào các byte của một thực thể phức tạp
+hơn trong bộ nhớ.
 
 [i[Pointers-->to multibyte values]>]
 
-## The `NULL` Pointer and Zero
+## Pointer `NULL` và số 0
 
 [i[`NULL` pointer-->zero equivalence]<]
 
-These things can be used interchangeably:
+Mấy thứ này có thể dùng thay qua lại:
 
 * `NULL`
 * `0`
 * `'\0'`
 * `(void *)0`
 
-Personally, I always use `NULL` when I mean `NULL`, but you might see
-some other variants from time to time. Though `'\0'` (a byte with all
-bits set to zero) will also compare equal, it's _weird_ to compare it to
-a pointer; you should compare `NULL` against the pointer. (Of course,
-lots of times in string processing, you're comparing _the thing the
-pointer points to_ to `'\0'`, and that's right.)
+Cá nhân tôi, tôi luôn dùng `NULL` khi tôi muốn nói `NULL`, nhưng bạn
+có thể thỉnh thoảng thấy các biến thể khác. Dù `'\0'` (byte với mọi
+bit bằng 0) cũng so sánh ra bằng, nhưng đem so nó với một pointer
+thì _kỳ cục_, bạn nên so `NULL` với pointer. (Dĩ nhiên, nhiều lần
+khi xử lý chuỗi, bạn so sánh _cái mà pointer đang trỏ tới_ với
+`'\0'`, và cái đó thì đúng.)
 
-`0` is called the _null pointer constant_, and, when compared to or
-assigned into another pointer, it is converted to a null pointer of the
-same type.
+`0` được gọi là _null pointer constant_, và khi so sánh hay gán vào
+một pointer khác, nó được chuyển thành null pointer cùng kiểu.
 
 [i[`NULL` pointer-->zero equivalence]>]
 
-## Pointers as Integers
+## Pointer như số nguyên
 
 [i[Pointers-->as integers]<]
 
-You can cast pointers to integers and vice-versa (since a pointer is
-just an index into memory), but you probably only ever need to do this
-if you're doing some low-level hardware stuff. The results of such
-machinations are implementation-defined, so they aren't portable. And
-_weird things_ could happen.
+Bạn có thể cast pointer thành số nguyên và ngược lại (vì pointer chỉ
+là chỉ số vào bộ nhớ), nhưng có lẽ bạn chỉ cần làm điều này nếu đang
+làm mấy thứ phần cứng mức thấp. Kết quả của những trò như vậy là
+implementation-defined, nên không portable. Và _chuyện lạ_ có thể
+xảy ra.
 
-C does make one guarantee, though: you can convert a pointer to a
-`uintptr_t` type and you'll be able to convert it back to a pointer
-without losing any data.
+Tuy nhiên, C có đảm bảo một chuyện: bạn có thể chuyển một pointer
+sang kiểu `uintptr_t` và bạn sẽ có thể chuyển nó về lại pointer mà
+không mất dữ liệu.
 
-`uintptr_t` is defined in `<stdint.h>`^[It's an optional feature, so it
-might not be there---but it probably is.].
+`uintptr_t` được định nghĩa trong `<stdint.h>`^[Đây là tính năng tùy
+chọn, nên nó có thể không có, nhưng có lẽ có.].
 
-Additionally, if you feel like being signed, you can use `intptr_t` to
-the same effect.
+Thêm nữa, nếu bạn muốn có dấu, bạn có thể dùng `intptr_t` với tác
+dụng y vậy.
 
 [i[Pointers-->as integers]>]
 
-## Casting Pointers to other Pointers
+## Cast pointer sang pointer khác
 
 [i[Pointers-->casting]<]
 
-There's only one safe pointer conversion:
+Chỉ có một cách chuyển pointer an toàn:
 
-1. Converting to `intptr_t` or `uintptr_t`.
-2. Converting to and from `void*`.
+1. Chuyển sang `intptr_t` hoặc `uintptr_t`.
+2. Chuyển sang và từ `void*`.
 
-TWO! Two safe pointer conversions.
+HAI! Có hai cách chuyển pointer an toàn.
 
-3. Converting to and from `char*` (or `signed char*`/`unsigned char*`).
+3. Chuyển sang và từ `char*` (hoặc `signed char*`/`unsigned char*`).
 
-THREE! Three safe conversions!
+BA! Có ba cách chuyển an toàn!
 
-4. Converting to and from a pointer to a `struct` and a pointer to its
-   first member, and vice-versa.
+4. Chuyển sang và từ pointer tới `struct` và pointer tới thành viên
+   đầu tiên của nó, và ngược lại.
 
-FOUR! Four safe conversions!
+BỐN! Có bốn cách chuyển an toàn!
 
-If you cast to a pointer of another type and then access the object it
-points to, the behavior is undefined due to something called _strict
-aliasing_.
+Nếu bạn cast sang pointer kiểu khác rồi truy cập đối tượng nó trỏ
+tới, hành vi là không xác định do một thứ gọi là _strict aliasing_.
 
-Plain old _aliasing_ refers to the ability to have more than one way to
-access the same object. The access points are aliases for each other.
+_Aliasing_ thuần túy nghĩa là khả năng có nhiều hơn một cách để truy
+cập cùng một đối tượng. Các điểm truy cập là alias của nhau.
 
-_Strict aliasing_ says you are only allowed to access an object via
-pointers to _compatible types_ to that object.
+_Strict aliasing_ nói bạn chỉ được phép truy cập một đối tượng qua
+pointer tới _kiểu tương thích_ với đối tượng đó.
 
-For example, this is definitely allowed:
+Ví dụ, cái này chắc chắn được phép:
 
 ``` {.c}
 int a = 1;
 int *p = &a;
 ```
 
-`p` is a pointer to an `int`, and it points to a compatible
-type---namely `int`---so we're golden.
+`p` là pointer tới `int`, và nó trỏ tới một kiểu tương thích, cụ thể
+là `int`, nên ta ngon.
 
-But the following isn't good because `int` and `float` are not
-compatible types:
+Nhưng cái dưới không ổn vì `int` và `float` không phải là các kiểu
+tương thích:
 
 ``` {.c}
 int a = 1;
 float *p = (float *)&a;
 ```
 
-Here's a demo program that does some aliasing. It takes a variable `v`
-of type `int32_t` and aliases it to a pointer to a `struct words`. That
-`struct` has two `int16_t`s in it. These types are incompatible, so
-we're in violation of strict aliasing rules. The compiler will assume
-that these two pointers never point to the same object... but we're
-making it so they do. Which is naughty of us.
+Đây là chương trình demo làm chút aliasing. Nó lấy biến `v` kiểu
+`int32_t` và alias nó thành pointer tới một `struct words`. `struct`
+đó có hai `int16_t`. Các kiểu này không tương thích, nên ta đang vi
+phạm luật strict aliasing. Compiler sẽ giả định rằng hai pointer này
+không bao giờ trỏ tới cùng một đối tượng, nhưng ta đang làm cho
+chúng trỏ tới. Điều đó thật hư của ta.
 
-Let's see if we can break something.
+Hãy xem có làm vỡ được gì không.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -520,23 +515,23 @@ int main(void)
 }
 ```
 
-See how I pass in the two incompatible pointers to `fun()`? One of the
-types is `int32_t*` and the other is `struct words*`.
+Thấy cách tôi truyền hai pointer không tương thích vào `fun()` chứ?
+Một kiểu là `int32_t*` và cái kia là `struct words*`.
 
-But they both point to the same object: the 32-bit value initialized to
-`0x12345678`.
+Nhưng cả hai trỏ tới cùng đối tượng: giá trị 32-bit được khởi tạo
+bằng `0x12345678`.
 
-So if we look at the fields in the `struct words`, we should see the two
-16-bit halves of that number. Right?
+Vậy nếu ta nhìn các field trong `struct words`, ta sẽ thấy hai nửa
+16-bit của con số đó. Đúng không?
 
-And in the `fun()` loop, we increment the pointer to the `int32_t`.
-That's it. But since the `struct` points to that same memory, it, too,
-should be updated to the same value.
+Và trong vòng lặp `fun()`, ta tăng pointer tới `int32_t`. Chỉ vậy.
+Nhưng vì `struct` trỏ tới cùng bộ nhớ đó, nó cũng sẽ được cập nhật
+thành cùng giá trị.
 
-So let's run it and get this, with the 32-bit value on the left and the
-two 16-bit portions on the right. It should match^[I'm printing out the
-16-bit values reversed since I'm on a little-endian machine and it makes
-it easier to read here.]:
+Vậy chạy thử và ta nhận được cái này, với giá trị 32-bit bên trái và
+hai phần 16-bit bên phải. Phải khớp nhau^[Tôi in hai giá trị 16-bit
+theo thứ tự đảo vì tôi đang ở máy little-endian và làm vậy dễ đọc
+hơn ở đây.]:
 
 ``` {.default}
 12345679, 1234-5679
@@ -546,9 +541,9 @@ it easier to read here.]:
 1234567d, 1234-567d
 ```
 
-and it does... _UNTIL TOMORROW!_
+và nó có khớp... _CHO TỚI NGÀY MAI!_
 
-Let's try it compiling GCC with `-O3` and `-fstrict-aliasing`:
+Thử compile bằng GCC với `-O3` và `-fstrict-aliasing`:
 
 ``` {.default}
 12345679, 1234-5678
@@ -558,49 +553,50 @@ Let's try it compiling GCC with `-O3` and `-fstrict-aliasing`:
 1234567d, 1234-567c
 ```
 
-They're off by one! But they point to the same memory! How could this
-be? Answer: it's undefined behavior to alias memory like that. _Anything
-is possible_, except not in a good way.
+Lệch nhau một đơn vị! Mà chúng trỏ tới cùng bộ nhớ! Sao có thể?
+Giải đáp: aliasing bộ nhớ kiểu đó là hành vi không xác định. _Bất cứ
+chuyện gì cũng có thể xảy ra_, nhưng không phải theo nghĩa tốt.
 
-If your code violates strict aliasing rules, whether it works or not
-depends on how someone decides to compile it. And that's a bummer since
-that's beyond your control. Unless you're some kind of omnipotent deity.
+Nếu code của bạn vi phạm luật strict aliasing, việc nó chạy hay
+không phụ thuộc vào cách ai đó quyết định compile nó. Và đó là điều
+đáng tiếc vì nó ngoài tầm kiểm soát của bạn. Trừ khi bạn là một thứ
+thần thánh toàn năng nào đó.
 
-Unlikely, sorry.
+Khó có khả năng vậy, tiếc.
 
-GCC can be forced to not use the strict aliasing rules with
-`-fno-strict-aliasing`. Compiling the demo program, above, with `-O3`
-and this flag causes the output to be as expected.
+GCC có thể bị ép không dùng luật strict aliasing bằng
+`-fno-strict-aliasing`. Compile chương trình demo ở trên với `-O3`
+và cờ này khiến output đúng như mong đợi.
 
-Lastly, _type punning_ is using pointers of different types to look at
-the same data. Before strict aliasing, this kind of things was fairly
-common:
+Cuối cùng, _type punning_ là dùng pointer của các kiểu khác nhau để
+nhìn cùng dữ liệu. Trước khi có strict aliasing, mấy chuyện kiểu này
+khá phổ biến:
 
 ``` {.c}
 int a = 0x12345678;
 short b = *((short *)&a);   // Violates strict aliasing
 ```
 
-If you want to do type punning (relatively) safely, see the section on
-[Unions and Type Punning](#union-type-punning).
+Nếu bạn muốn làm type punning (tương đối) an toàn, xem phần
+[Union và Type Punning](#union-type-punning).
 
 [i[Pointers-->casting]>]
 
-## Pointer Differences {#ptr_differences}
+## Hiệu của pointer {#ptr_differences}
 
 [i[Pointers-->subtracting]<]
 
-As you know from the section on pointer arithmetic, you can subtract one
-pointer from another^[Assuming they point to the same array object.] to
-get the difference between them in count of array elements.
+Như bạn đã biết từ phần pointer arithmetic, bạn có thể trừ một
+pointer từ pointer khác^[Giả sử chúng trỏ tới cùng một đối tượng
+mảng.] để có hiệu giữa chúng theo số phần tử mảng.
 
-Now the _type of that difference_ is something that's up to the
-implementation, so it could vary from system to system.
+Giờ _kiểu của cái hiệu đó_ tùy implementation quyết định, nên có thể
+khác nhau giữa các hệ.
 
 [i[`ptrdiff_t` type]<]
 
-To be more portable, you can store the result in a variable of type
-`ptrdiff_t` defined in `<stddef.h>`.
+Để portable hơn, bạn có thể lưu kết quả vào biến kiểu `ptrdiff_t`
+định nghĩa trong `<stddef.h>`.
 
 ``` {.c}
 int cats[100];
@@ -612,7 +608,8 @@ ptrdiff_t d = g - f;  // difference is 40
 ```
 
 [i[`ptrdiff_t` type-->printing]<]
-And you can print it by prefixing the integer format specifier with `t`:
+Và bạn có thể in nó bằng cách thêm `t` đầu format specifier cho số
+nguyên:
 
 ``` {.c}
 printf("%td\n", d);  // Print decimal: 40
@@ -623,32 +620,30 @@ printf("%tX\n", d);  // Print hex:     28
 [i[`ptrdiff_t` type]>]
 [i[Pointers-->subtracting]>]
 
-## Pointers to Functions
+## Pointer tới hàm
 
 [i[Pointers-->to functions]<]
 
-Functions are just collections of machine instructions in memory, so
-there's no reason we can't get a pointer to the first instruction of the
-function.
+Hàm chỉ là tập hợp lệnh máy trong bộ nhớ, nên không có lý do gì ta
+không lấy được pointer tới lệnh đầu tiên của hàm.
 
-And then call it.
+Và rồi gọi nó.
 
-This can be useful for passing a pointer to a function into another
-function as an argument. Then the second one could call whatever was
-passed in.
+Điều này có thể hữu ích khi truyền một pointer tới hàm vào một hàm
+khác như đối số. Rồi hàm thứ hai có thể gọi bất cứ cái gì được truyền
+vào.
 
-The tricky part with these, though, is that C needs to know the type of
-the variable that is the pointer to the function.
+Tuy nhiên, phần khó với mấy cái này là C cần biết kiểu của biến là
+pointer tới hàm.
 
-And it would really like to know all the details.
+Và nó thật sự muốn biết mọi chi tiết.
 
-Like "this is a pointer to a function that takes two `int` arguments and
-returns `void`".
+Kiểu như "đây là pointer tới hàm nhận hai đối số `int` và trả về
+`void`".
 
-How do you write all that down so you can declare a variable?
+Viết hết mớ đó ra sao để khai báo được biến?
 
-Well, it turns out it looks very much like a function prototype, except
-with some extra parentheses:
+Hóa ra nó trông rất giống function prototype, chỉ thêm vài cặp ngoặc:
 
 ``` {.c}
 // Declare p to be a pointer to a function.
@@ -657,8 +652,8 @@ with some extra parentheses:
 float (*p)(int, int);
 ```
 
-Also notice that you don't have to give the parameters names. But you
-can if you want; they're just ignored.
+Lưu ý bạn không cần đặt tên cho tham số. Nhưng bạn có thể nếu muốn,
+chúng chỉ bị bỏ qua.
 
 ``` {.c}
 // Declare p to be a pointer to a function.
@@ -667,21 +662,20 @@ can if you want; they're just ignored.
 float (*p)(int a, int b);
 ```
 
-So now that we know how to declare a variable, how do we know what to
-assign into it? How do we get the address of a function?
+Giờ ta đã biết cách khai báo biến, làm sao biết gán gì vào? Làm sao
+lấy địa chỉ của một hàm?
 
-Turns out there's a shortcut just like with getting a pointer to an
-array: you can just refer to the bare function name without parens. (You
-can put an `&` in front of this if you like, but it's unnecessary and
-not idiomatic.)
+Hóa ra có lối tắt y như lấy pointer tới mảng: bạn có thể chỉ viết
+tên hàm trần không có ngoặc. (Bạn có thể thêm `&` đằng trước nếu
+thích, nhưng không cần và không idiomatic.)
 
-Once you have a pointer to a function, you can call it just by adding
-parens and an argument list.
+Một khi có pointer tới hàm, bạn có thể gọi nó bằng cách thêm ngoặc
+và danh sách đối số.
 
-Let's do a simple example where I effectively make an alias for a
-function by setting a pointer to it. Then we'll call it.
+Làm ví dụ đơn giản tôi đặt hẳn alias cho hàm bằng cách dựng một
+pointer tới nó. Rồi ta gọi nó.
 
-This code prints out `3490`:
+Code này in ra `3490`:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -701,16 +695,15 @@ int main(void)
 }
 ```
 
-Notice how the type of `p` represents the return value and parameter
-types of `print_int`. It has to, or else C will complain about
-incompatible pointer types.
+Lưu ý cách kiểu của `p` đại diện cho giá trị trả về và kiểu tham số
+của `print_int`. Bắt buộc phải thế, không thì C sẽ phàn nàn về kiểu
+pointer không tương thích.
 
-One more example here shows how we might pass a pointer to a function as
-an argument to another function.
+Thêm một ví dụ nữa cho thấy ta có thể truyền pointer tới hàm như đối
+số cho hàm khác thế nào.
 
-We'll write a function that takes a couple integer arguments, plus a
-pointer to a function that operates on those two arguments. Then it
-prints the result.
+Ta sẽ viết hàm nhận vài đối số số nguyên, cộng với pointer tới hàm
+nào đó thao tác trên hai đối số đó. Rồi nó in kết quả.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -739,22 +732,21 @@ int main(void)
 }
 ```
 
-Take a moment to digest that. The idea here is that we're going to pass
-a pointer to a function to `print_math()`, and it's going to call that
-function to do some math.
+Dành tí thời gian tiêu hóa chuyện đó. Ý ở đây là ta sẽ truyền một
+pointer tới hàm vào `print_math()`, và nó sẽ gọi hàm đó để làm vài
+phép toán.
 
-This way we can change the behavior of `print_math()` by passing another
-function into it. You can see we do that on lines 22-23 when we pass in
-pointers to functions `add` and `mult`, respectively.
+Bằng cách này ta có thể đổi hành vi của `print_math()` bằng cách
+truyền hàm khác vào. Bạn thấy ta làm thế ở dòng 22-23 khi truyền vào
+pointer tới hàm `add` và `mult`, theo thứ tự.
 
-Now, on line 13, I think we can all agree the function signature of
-`print_math()` is a sight to behold. And, if you can believe it, this
-one is actually pretty straight-forward compared to some things you can
-construct^[The Go Programming Language drew its type declaration syntax
-inspiration from the opposite of what C does.].
+Giờ, ở dòng 13, tôi nghĩ ai cũng đồng ý signature của `print_math()`
+là một cảnh ngoạn mục. Và, tin hay không, cái này thực ra còn khá
+thẳng thớm so với vài thứ bạn có thể dựng ra^[Ngôn ngữ Go lấy cảm
+hứng cú pháp khai báo kiểu từ điều ngược lại với cái C làm.].
 
-But let's digest it. Turns out there are only three parameters, but
-they're a little hard to see:
+Nhưng hãy tiêu hóa nó. Hóa ra chỉ có ba tham số, nhưng chúng hơi
+khó thấy:
 
 ``` {.c}
 //                      op             x      y
@@ -762,19 +754,16 @@ they're a little hard to see:
 void print_math(int (*op)(int, int), int x, int y)
 ```
 
-The first, `op`, is a pointer to a function that takes two `int`s as
-arguments and returns an `int`. This matches the signatures for both
-`add()` and `mult()`.
+Cái đầu, `op`, là pointer tới hàm nhận hai `int` làm đối số và trả
+về `int`. Cái này khớp signature của cả `add()` lẫn `mult()`.
 
-The second and third, `x` and `y`, are just standard `int` parameters.
+Cái thứ hai và ba, `x` và `y`, chỉ là tham số `int` chuẩn.
 
-Slowly and deliberately let your eyes play over the signature while you
-identify the working parts. One thing that always stands out for me is
-the sequence `(*op)(`, the parens and the asterisk. That's the giveaway
-it's a pointer to a function.
+Chậm và có chủ đích, hãy để mắt bạn đi qua signature rồi xác định
+các phần. Một thứ luôn nhảy ra với tôi là chuỗi `(*op)(`, cặp ngoặc
+và dấu sao. Đó là dấu hiệu nó là pointer tới hàm.
 
-Finally, jump back to the _Pointers II_ chapter for a
-pointer-to-function [example using the built-in
-`qsort()`](#qsort-example).
+Cuối cùng, nhảy lại chương _Pointer II_ để xem ví dụ
+pointer-tới-hàm [dùng `qsort()` có sẵn](#qsort-example).
 
 [i[Pointers-->to functions]>]
