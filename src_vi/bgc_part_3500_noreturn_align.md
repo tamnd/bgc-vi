@@ -3,24 +3,24 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Function Specifiers, Alignment Specifiers/Operators
+# Function Specifier, Alignment Specifier/Operator
 
-These don't see a heck of a lot of use in my experience, but we'll
-cover them here for the sake of completeness.
+Theo kinh nghiệm của tôi, mấy thứ này không được dùng nhiều lắm,
+nhưng cứ trình bày cho đủ.
 
-## Function Specifiers
+## Function Specifier
 
 [i[Function specifiers]<]
 
-When you declare a function, you can give the compiler a couple tips
-about how the functions could or will be used. This enables or encourages
-the compiler to make certain optimizations.
+Khi bạn khai báo một hàm, bạn có thể cho compiler vài gợi ý về cách
+hàm đó có thể hay sẽ được dùng. Điều này cho phép hoặc khuyến khích
+compiler thực hiện một số tối ưu hoá.
 
-### `inline` for Speed---Maybe
+### `inline` để tăng tốc, có lẽ
 
 [i[`inline` function specifier]<]
 
-You can declare a function to be inline like this:
+Bạn có thể khai báo hàm là inline như vầy:
 
 ``` {.c}
 static inline int add(int x, int y) {
@@ -28,28 +28,26 @@ static inline int add(int x, int y) {
 }
 ```
 
-This is meant to encourage the compiler to make this function call as
-fast as possible. And, historically, one way to do this was _inlining_,
-which means that the body of the function would be embedded in its
-entirety where the call was made. This would avoid all the overhead of
-setting up the function call and tearing it down at the expense of
-larger code size as the function was copied all over the place instead
-of being reused.
+Ý nghĩa là khuyến khích compiler làm lời gọi hàm này nhanh nhất có
+thể. Và trong lịch sử, một cách để làm điều đó là _inlining_, tức là
+thân hàm sẽ được nhúng nguyên vẹn tại nơi gọi. Cái này tránh tất cả
+overhead set up lời gọi hàm và tháo dỡ nó, đổi lại kích thước code
+lớn hơn vì hàm được copy khắp nơi thay vì tái sử dụng.
 
-The quick-and-dirty things to remember are:
+Những điều nhanh-gọn cần nhớ:
 
-1. You probably don't need to use `inline` for speed. Modern compilers
-   know what's best.
+1. Bạn có lẽ không cần dùng `inline` để tăng tốc. Compiler hiện đại
+   biết cái gì tốt nhất.
 
-2. If you do use it for speed, use it with file scope, i.e. `static
-   inline`. This avoids the messy rules of external linkage and inline
-   functions.
+2. Nếu bạn dùng nó để tăng tốc, dùng với phạm vi file, tức là
+   `static inline`. Cái này tránh quy tắc lộn xộn của external
+   linkage và hàm inline.
 
-Stop reading this section now.
+Đừng đọc phần này nữa.
 
-Glutton for punishment, eh?
+Kẻ thèm bị trừng phạt hả?
 
-Let's try leaving the `static` off.
+Thử bỏ `static` đi nào.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -65,51 +63,51 @@ int main(void)
 }
 ```
 
-`gcc` gives a linker error on `add()`^[Unless you compile with
-optimizations on (probably)! But I think when it does this, it's not
-behaving to spec.]. The spec requires that if you have a non-`extern`
-inline function you must also provide a version with external linkage.
+`gcc` báo lỗi linker trên `add()`^[Trừ khi bạn compile có bật
+optimization (có lẽ)! Nhưng tôi nghĩ khi nó làm vậy, nó không tuân
+spec.]. Spec yêu cầu nếu bạn có một hàm inline không-`extern` thì
+bạn cũng phải cung cấp một phiên bản có external linkage.
 
-So you'd have to have an `extern` version somewhere else for this to
-work. If the compiler has both an `inline` function in the current file
-and an external version of the same function elsewhere, it gets to
-choose which one to call. So I highly recommend they be the same.
+Nên bạn sẽ phải có phiên bản `extern` ở đâu đó khác để cái này chạy.
+Nếu compiler có cả hàm `inline` trong file hiện tại và phiên bản
+external của cùng hàm ở nơi khác, nó được chọn gọi cái nào. Nên tôi
+khuyên mạnh là chúng giống nhau.
 
-Another thing you can do is to declare the function as `extern inline`.
-This will attempt to inline in the same file (for speed), but will also
-create a version with external linkage.
+Một cách khác bạn có thể làm là khai báo hàm là `extern inline`.
+Cái này sẽ thử inline trong cùng file (để tăng tốc), nhưng cũng tạo
+phiên bản có external linkage.
 
 [i[`inline` function specifier]>]
 
-### `noreturn` and `_Noreturn` {#noreturn}
+### `noreturn` và `_Noreturn` {#noreturn}
 
 [i[`noreturn` function specifier]<]
 [i[`_Noreturn` function specifier]<]
 
-This indicates to the compiler that a particular function will not ever
-return to its caller, i.e. the program will exit by some mechanism
-before the function returns.
+Cái này báo cho compiler rằng một hàm cụ thể sẽ không bao giờ
+return về chỗ gọi, tức là chương trình sẽ thoát bằng cơ chế nào đó
+trước khi hàm return.
 
-It allows the compiler to perhaps perform some optimizations around the
-function call.
+Nó cho phép compiler có thể thực hiện một số tối ưu quanh lời gọi
+hàm.
 
-It also allows you to indicate to other devs that some program logic
-depends on a function _not_ returning.
+Nó cũng cho phép bạn báo cho các dev khác rằng có logic chương
+trình phụ thuộc vào một hàm _không_ return.
 
-You'll likely never need to use this, but you'll see it on some library
-calls like
+Có lẽ bạn sẽ không bao giờ cần dùng cái này, nhưng bạn sẽ thấy nó
+trên một số lời gọi thư viện như
 [fl[`exit()`|https://beej.us/guide/bgclr/html/split/stdlib.html#man-exit]]
-and
+và
 [fl[`abort()`|https://beej.us/guide/bgclr/html/split/stdlib.html#man-abort]].
 
-The built-in keyword is `_Noreturn`, but if it doesn't break your
-existing code, everyone would recommend including `<stdnoreturn.h>` and
-using the easier-to-read `noreturn` instead.
+Từ khoá có sẵn là `_Noreturn`, nhưng nếu nó không làm hỏng code sẵn
+có của bạn, mọi người đều khuyên include `<stdnoreturn.h>` và dùng
+`noreturn` dễ đọc hơn.
 
-It's undefined behavior if a function specified as `noreturn` actually
-does return. It's computationally dishonest, see.
+Là hành vi không xác định nếu một hàm được chỉ định là `noreturn`
+thực sự return. Cái đó không trung thực về mặt tính toán, thấy đó.
 
-Here's an example of using `noreturn` correctly:
+Đây là ví dụ dùng `noreturn` đúng:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -129,10 +127,10 @@ int main(void)
 }
 ```
 
-If the compiler detects that a `noreturn` function could return, it
-might warn you, helpfully.
+Nếu compiler phát hiện một hàm `noreturn` có thể return, nó có thể
+cảnh báo bạn, hữu ích.
 
-Replacing the `foo()` function with this:
+Thay thế hàm `foo()` bằng cái này:
 
 ``` {.c}
 noreturn void foo(void)
@@ -141,7 +139,7 @@ noreturn void foo(void)
 }
 ```
 
-gets me a warning:
+cho tôi một cảnh báo:
 
 ``` {.default}
 foo.c:7:1: warning: function declared 'noreturn' should not return
@@ -151,76 +149,75 @@ foo.c:7:1: warning: function declared 'noreturn' should not return
 [i[`_Noreturn` function specifier]>]
 [i[Function specifiers]>]
 
-## Alignment Specifiers and Operators
+## Alignment Specifier và Operator
 
 [i[Alignment]<]
 
-[flw[_Alignment_|Data_structure_alignment]] is all about multiples of
-addresses on which objects can be stored. Can you store this at any
-address? Or must it be a starting address that's divisible by 2? Or 8?
-Or 16?
+[flw[_Alignment_|Data_structure_alignment]] là về các bội số của
+địa chỉ mà các đối tượng có thể được lưu. Bạn có thể lưu cái này ở
+địa chỉ bất kỳ? Hay phải là địa chỉ bắt đầu chia hết cho 2? Hay 8?
+Hay 16?
 
-If you're coding up something low-level like a memory allocator that
-interfaces with your OS, you might need to consider this. Most devs go
-their careers without using this functionality in C.
+Nếu bạn đang code thứ gì đó thấp cấp như bộ cấp phát bộ nhớ giao
+tiếp với OS, bạn có thể cần nghĩ đến điều này. Phần lớn dev đi hết
+sự nghiệp mà không dùng chức năng này trong C.
 
-### `alignas` and `_Alignas`
+### `alignas` và `_Alignas`
 
 [i[`alignas` alignment specifier]<]
 [i[`_Alignas` alignment specifier]<]
 
-This isn't a function. Rather, it's an _alignment specifier_ that you
-can use with a variable declaration.
+Cái này không phải hàm. Đây là một _alignment specifier_ bạn có thể
+dùng với một khai báo biến.
 
-The built-in specifier is `_Alignas`, but the header `<stdalign.h>`
-defines it as `alignas` for something better looking.
+Specifier có sẵn là `_Alignas`, nhưng header `<stdalign.h>` định
+nghĩa nó là `alignas` cho đẹp hơn.
 
-If you need your `char` to be aligned like an `int`, you can force it
-like this when you declare it:
+Nếu bạn cần `char` của mình được căn chỉnh như `int`, bạn có thể ép
+như vầy khi khai báo:
 
 ``` {.c}
 char alignas(int) c;
 ```
 
-You can also pass a constant value or expression in for the alignment.
-This has to be something supported by the system, but the spec stops
-short of dictating what values you can put in there. Small powers of 2
-(1, 2, 4, 8, and 16) are generally safe bets.
+Bạn cũng có thể truyền giá trị hằng hay biểu thức vào làm alignment.
+Cái này phải là thứ được hệ thống hỗ trợ, nhưng spec ngừng trước
+chuyện quy định bạn có thể đưa giá trị nào vào. Các luỹ thừa nhỏ
+của 2 (1, 2, 4, 8, và 16) nhìn chung là đặt cược an toàn.
 
 ``` {.c}
 char alignas(8) c;   // align on 8-byte boundaries
 ```
 
-If you want to align at the maximum used alignment by your system,
-include `<stddef.h>` and use the type `max_align_t`, like so:
+Nếu bạn muốn căn chỉnh ở alignment lớn nhất hệ thống bạn dùng,
+include `<stddef.h>` và dùng kiểu `max_align_t`, như sau:
 
 ``` {.c}
 char alignas(max_align_t) c;
 ```
 
-You could potentially _over-align_ by specifying an alignment more than
-that of `max_align_t`, but whether or not such things are allowed is
-system dependent.
+Bạn có thể _over-align_ bằng cách chỉ định alignment lớn hơn của
+`max_align_t`, nhưng chuyện đó có được phép hay không phụ thuộc hệ
+thống.
 
 [i[`alignas` alignment specifier]>]
 [i[`_Alignas` alignment specifier]>]
 
-### `alignof` and `_Alignof`
+### `alignof` và `_Alignof`
 
 [i[`alignof` operator]<]
 [i[`_Alignof` operator]<]
 
-This operator will return the address multiple a particular type uses
-for alignment on this system. For example, maybe `char`s are aligned
-every 1 address, and `int`s are aligned every 4 addresses.
+Toán tử này sẽ trả về bội số địa chỉ mà một kiểu cụ thể dùng cho
+alignment trên hệ thống này. Ví dụ, có thể `char` được căn chỉnh
+mỗi 1 địa chỉ, và `int` được căn chỉnh mỗi 4 địa chỉ.
 
-The built-in operator is `_Alignof`, but the header `<stdalign.h>`
-defines it as `alignof` if you want to look cooler.
+Toán tử có sẵn là `_Alignof`, nhưng header `<stdalign.h>` định
+nghĩa nó là `alignof` nếu bạn muốn trông chất hơn.
 
-Here's a program that will print out the alignments of a variety of
-different types. Again, these will vary from system to system. Note that
-the type `max_align_t` will give you the maximum alignment used by the
-system.
+Đây là chương trình sẽ in ra alignment của nhiều kiểu khác nhau.
+Lại nữa, chúng sẽ thay đổi từ hệ thống này sang hệ thống khác. Chú
+ý kiểu `max_align_t` sẽ cho bạn alignment lớn nhất hệ thống dùng.
 
 ``` {.c .numberLines}
 #include <stdalign.h>
@@ -247,7 +244,7 @@ int main(void)
 }
 ```
 
-Output on my system:
+Output trên hệ của tôi:
 
 ``` {.default}
 char       : 1
@@ -264,34 +261,34 @@ max_align_t: 16
 [i[`alignof` operator]>]
 [i[`_Alignof` operator]>]
 
-## `memalignment()` Function
+## Hàm `memalignment()`
 
 [i[`memalignment()` function]<]
 
-New in C23!
+Mới trong C23!
 
-(Caveat: none of my compilers support this function yet, so the code is
-largely untested.)
+(Lưu ý: không compiler nào của tôi hỗ trợ hàm này chưa, nên code
+chủ yếu chưa được test.)
 
-`alignof` is great if you know the type of your data. But what if you're
-_woefully ignorant_ of the type, and only have a pointer to the data?
+`alignof` hay nếu bạn biết kiểu dữ liệu. Nhưng nếu bạn _ngu dốt
+đáng thương_ về kiểu, và chỉ có con trỏ tới dữ liệu?
 
-How could that even happen?
+Sao điều đó xảy ra được?
 
-Well, with our good friend the `void*`, of course. We can't pass that to
-`alignof`, but what if we need to know the alignment of the thing it
-points to?
+À, với người bạn tốt `void*` của ta, tất nhiên. Ta không thể truyền
+cái đó cho `alignof`, nhưng nếu ta cần biết alignment của thứ nó
+trỏ tới?
 
-We might want to know this if we're about to use the memory for
-something that has significant alignment needs. For example, atomic and
-floating types often behave badly if misaligned.
+Ta có thể muốn biết điều này nếu ta sắp dùng bộ nhớ cho thứ gì đó
+có nhu cầu alignment đáng kể. Ví dụ, kiểu atomic và floating thường
+hành xử xấu nếu không căn chỉnh đúng.
 
-So with this function we can check the alignment of some data as long as
-we have a pointer to that data, even if it's a `void*`.
+Với hàm này ta có thể kiểm tra alignment của một số dữ liệu miễn là
+có con trỏ tới dữ liệu đó, ngay cả khi là `void*`.
 
-Let's do a quick test to see if a void pointer is well-aligned for use
-as an atomic type, and, if so, let's get a variable to use it as that
-type:
+Hãy làm một test nhanh xem một void pointer có được căn chỉnh tốt
+để dùng như kiểu atomic hay không, và nếu có, lấy một biến dùng
+như kiểu đó:
 
 ``` {.c}
 void foo(void *p)
@@ -305,11 +302,11 @@ void foo(void *p)
 ...
 ```
 
-I suspect you will rarely (to the point of never, likely) need to use
-this function unless you're doing some low-level stuff.
+Tôi ngờ bạn sẽ hiếm khi (đến mức không bao giờ, có lẽ) cần dùng hàm
+này trừ khi bạn đang làm thứ gì đó thấp cấp.
 
 [i[`memalignment()` function]>]
 
-And there you have it. Alignment!
+Và xong! Alignment!
 
 [i[Alignment]>]
