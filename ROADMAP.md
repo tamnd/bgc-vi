@@ -23,7 +23,7 @@ Programming (Vietnamese).
 | bgc_part_1000_types_2.md | Types II: Way More Types! | done |
 | bgc_part_1100_types_3.md | Types III: Conversions | done |
 | bgc_part_1200_types_4.md | Types IV: Qualifiers and Specifiers | done |
-| bgc_part_1300_multifile.md | Multifile Projects | not started |
+| bgc_part_1300_multifile.md | Multifile Projects | done |
 | bgc_part_1400_env.md | The Outside Environment | not started |
 | bgc_part_1500_cpp.md | The C Preprocessor | not started |
 | bgc_part_1600_structs2.md | `struct`s II: More Fun with `struct`s | not started |
