@@ -3,30 +3,30 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Multifile Projects
+# Dự án nhiều file
 
 [i[Multifile projects]<]
 
-So far we've been looking at toy programs that for the most part fit in
-a single file. But complex C programs are made up of many files that are
-all compiled and linked together into a single executable.
+Từ đầu đến giờ ta chỉ xem mấy chương trình đồ chơi mà phần lớn đều
+nhét vừa trong một file. Nhưng chương trình C phức tạp được tạo từ
+nhiều file, tất cả được biên dịch và link lại thành một file thực
+thi.
 
-In this chapter we'll check out some of the common patterns and
-practices for putting together larger projects.
+Chương này ta sẽ xem vài mẫu và lối làm thường gặp khi ghép các dự
+án lớn hơn lại với nhau.
 
-## Includes and Function Prototypes  {#includes-func-protos}
+## Include và function prototype  {#includes-func-protos}
 
 [i[Multifile projects-->includes]<]
 [i[Multifile projects-->function prototypes]<]
 
-A really common situation is that some of your functions are defined in
-one file, and you want to call them from another.
+Một tình huống rất phổ biến là vài hàm của bạn được định nghĩa trong
+một file, và bạn muốn gọi chúng từ file khác.
 
-This actually works out of the box with a warning... let's first try it
-and then look at the right way to fix the warning.
+Chuyện này thực ra chạy được ngay với một cảnh báo, cứ thử trước rồi
+ta xem cách đúng để dẹp cảnh báo đó.
 
-To compile them, you'll need to specify all the sources on the command
-line:
+Để biên dịch, bạn cần chỉ định mọi file nguồn trên dòng lệnh:
 
 ``` {.zsh}
 # output file   source files
@@ -35,11 +35,11 @@ line:
 gcc -o foo foo.c bar.c
 ```
 
-In that example, `foo.c` and `bar.c` get built into the executable
-named `foo`.
+Trong ví dụ đó, `foo.c` và `bar.c` được build thành file thực thi
+tên `foo`.
 
-For these examples, we'll put the filename as the first comment in the
-source. Let's take a look at the source file `bar.c`:
+Với mấy ví dụ này, ta để tên file như comment đầu tiên trong nguồn.
+Xem file nguồn `bar.c`:
 
 ``` {.c .numberLines}
 // File bar.c
@@ -50,7 +50,7 @@ int add(int x, int y)
 }
 ```
 
-And the file `foo.c` with main in it:
+Và file `foo.c` có main trong đó:
 
 ``` {.c .numberLines}
 // File foo.c
@@ -63,37 +63,36 @@ int main(void)
 }
 ```
 
-See how from `main()` we call `add()`---but `add()` is in a completely
-different source file! It's in `bar.c`, while the call to it is in
-`foo.c`!
+Thấy cách từ `main()` ta gọi `add()` chứ, mà `add()` lại nằm trong
+một file nguồn hoàn toàn khác! Nó ở `bar.c`, còn lời gọi tới nó nằm
+trong `foo.c`!
 
-If we build this with:
+Nếu build cái này bằng:
 
 ``` {.zsh}
 gcc -o foo foo.c bar.c
 ```
 
-we get this error:
+ta sẽ nhận được lỗi này:
 
 ``` {.default}
 error: implicit declaration of function 'add' is invalid in C99
 ```
 
-(Or you might get a warning. Which you should not ignore. Never ignore
-warnings in C; address them all.)
+(Hoặc bạn có thể nhận được cảnh báo. Mà thứ bạn không nên bỏ qua.
+Đừng bao giờ bỏ qua cảnh báo trong C, xử lý hết đi.)
 
-If you recall from the [section on prototypes](#prototypes), implicit
-declarations are banned in modern C and there's no legitimate reason to
-introduce them into new code. We should fix it.
+Nếu bạn còn nhớ từ [phần về prototype](#prototypes), khai báo ngầm
+bị cấm trong C hiện đại và không có lý do chính đáng nào để đưa
+chúng vào code mới. Ta nên sửa nó.
 
-What `implicit declaration` means is that we're using a function, namely
-`add()` in this case, without letting C know anything about it ahead of
-time. C wants to know what it returns, what types it takes as arguments,
-and things such as that.
+`implicit declaration` nghĩa là ta đang dùng một hàm, ở đây là
+`add()`, mà không cho C biết trước cái gì về nó cả. C muốn biết nó
+trả về gì, nhận kiểu gì làm đối số, và các thứ kiểu vậy.
 
-We saw how to fix that earlier with a _function prototype_. Indeed, if
-we add one of those to `foo.c` before we make the call, everything works
-well:
+Ta đã thấy cách sửa chuyện đó từ trước với _function prototype_.
+Đúng thế, nếu ta thêm một cái vào `foo.c` trước khi gọi, mọi thứ sẽ
+ổn:
 
 ``` {.c .numberLines}
 // File foo.c
@@ -108,24 +107,24 @@ int main(void)
 }
 ```
 
-No more error!
+Hết lỗi!
 
-But that's a pain---needing to type in the prototype every time you want
-to use a function. I mean, we used `printf()` right there and didn't
-need to type in a prototype; what gives?
+Nhưng chuyện đó cũng nhọc, phải gõ prototype mỗi khi muốn dùng một
+hàm. Ủa kìa, ta vừa dùng `printf()` ngay đó mà đâu cần gõ prototype,
+vậy là sao?
 
-_We actually did include the prototype for `printf()`_! It's in
-the file `stdio.h`! And we included that with `#include`!
+_Thật ra ta đã include prototype cho `printf()` rồi_! Nó ở trong file
+`stdio.h`! Và ta đã include file đó bằng `#include`!
 
-Can we do the same with our `add()` function? Make a prototype for it
-and put it in a header file?
+Ta làm tương tự với hàm `add()` của mình được không? Làm prototype
+cho nó và nhét vào một file header?
 
-Sure!
+Dĩ nhiên được!
 
-Header files in C have a `.h` extension by convention. And they often, but
-not always, have the same name as their corresponding `.c` file. So
-let's make a `bar.h` file for our `bar.c` file, and we'll stick the
-prototype in it:
+Header file trong C theo quy ước có phần mở rộng `.h`. Và chúng
+thường, dù không phải luôn luôn, có cùng tên với file `.c` tương
+ứng. Vậy ta tạo file `bar.h` cho file `bar.c`, và nhét prototype vào
+đó:
 
 ``` {.c .numberLines}
 // File bar.h
@@ -133,9 +132,8 @@ prototype in it:
 int add(int, int);
 ```
 
-And now let's modify `foo.c` to include that file. Assuming it's in the
-same directory, we include it inside double quotes (as opposed to angle
-brackets):
+Giờ sửa `foo.c` để include file đó. Giả sử nó ở cùng thư mục, ta
+include nó bên trong dấu nháy kép (thay vì dấu ngoặc nhọn):
 
 ``` {.c .numberLines}
 // File foo.c
@@ -150,72 +148,68 @@ int main(void)
 }
 ```
 
-Notice how we don't have the prototype in `foo.c` anymore---we included
-it from `bar.h`. Now _any_ file that wants that `add()` functionality
-can just `#include "bar.h"` to get it, and you don't need to worry about
-typing in the function prototype.
+Chú ý ta không còn prototype trong `foo.c` nữa, ta include nó từ
+`bar.h`. Giờ _bất cứ_ file nào muốn dùng chức năng `add()` chỉ cần
+`#include "bar.h"` là có, không cần lo chuyện gõ prototype của hàm.
 
-As you might have guessed, `#include` literally includes the named file
-_right there_ in your source code, just as if you'd typed it in.
+Như bạn có thể đoán, `#include` theo đúng nghĩa đen đưa file được
+gọi tên _ngay vào đó_ trong mã nguồn của bạn, y như là bạn đã gõ
+vào.
 
-And building and running:
+Rồi build và chạy:
 
 ``` {.zsh}
 ./foo
 5
 ```
 
-Indeed, we get the result of $2+3$! Yay!
+Đúng rồi, ta nhận được kết quả $2+3$! Hú hồn!
 
-But don't crack open your drink of choice quite yet. We're almost there!
-There's just one more piece of boilerplate we have to add.
+Nhưng đừng vội khui chai đồ uống yêu thích. Gần xong thôi! Còn một
+mẩu boilerplate nữa phải thêm.
 
 [i[Multifile projects-->function prototypes]>]
 
-## Dealing with Repeated Includes
+## Xử lý include bị lặp
 
-It's not uncommon that a header file will itself `#include` other
-headers needed for the functionality of its corresponding C files. I
-mean, why not?
+Cũng không hiếm chuyện một file header lại `#include` các header
+khác cần cho chức năng của các file C tương ứng. Kiểu, sao không?
 
-And it could be that you have a header `#include`d multiple times from
-different places. Maybe that's no problem, but maybe it would cause
-compiler errors. And we can't control how many places `#include` it!
+Và có thể bạn có một header được `#include` nhiều lần từ nhiều chỗ
+khác nhau. Có khi chẳng sao, có khi lại gây lỗi compiler. Và ta
+không kiểm soát được có bao nhiêu chỗ `#include` nó!
 
-Even, worse we might get into a crazy situation where header `a.h`
-includes header `b.h`, and `b.h` includes `a.h`! It's an `#include`
-infinite cycle!
+Tệ hơn, có khi ta rơi vào tình huống điên rồ kiểu header `a.h`
+include header `b.h`, và `b.h` lại include `a.h`! Đúng là chu kỳ
+`#include` vô hạn!
 
-Trying to build such a thing gives an error:
+Thử build một thứ như vậy sẽ báo lỗi:
 
 ``` {.default}
 error: #include nested depth 200 exceeds maximum of 200
 ```
 
-Maybe it would have resolved the cycle on the 201st step...
+Biết đâu bước thứ 201 nó đã giải được chu kỳ...
 
-What we need to do is make it so that if a file gets included once,
-subsequent `#include`s for that file are ignored.
+Việc ta cần làm là nếu một file đã được include một lần rồi, các
+`#include` sau cho cùng file đó sẽ bị lờ đi.
 
-**The stuff that we're about to do is so common that you should just
-automatically do it every time you make a header file!**
+**Mấy thứ ta sắp làm phổ biến đến mức mà bạn cứ tự động làm mỗi lần
+tạo file header!**
 
-And the common way to do this is with a preprocessor variable that we
-set the first time we `#include` the file. And then for subsequent
-`#include`s, we first check to make sure that the variable isn't
-defined.
+Và cách phổ biến để làm chuyện này là một biến preprocessor mà ta
+đặt vào lần đầu tiên `#include` file. Rồi với các `#include` sau, ta
+kiểm tra trước để chắc rằng biến đó chưa được định nghĩa.
 
-For that variable name, it's super common to take the name of the header
-file, like `bar.h`, make it uppercase, and replace the period with an
-underscore: `BAR_H`.
+Về tên biến, cực kỳ phổ biến việc lấy tên file header, như `bar.h`,
+viết hoa lên, và thay dấu chấm bằng gạch dưới: `BAR_H`.
 
-So put a check at the very, very top of the file where you see if it's
-already been included, and effectively comment the whole thing out if it
-has.
+Vậy đặt một kiểm tra ở sát đầu file xem nó đã được include chưa, và
+coi như comment cả file đi nếu rồi.
 
-(Don't put a leading underscore (because a leading underscore followed
-by a capital letter is reserved) or a double leading underscore (because
-that's also reserved.))
+(Đừng đặt gạch dưới ở đầu (vì gạch dưới đầu theo sau là chữ hoa đã
+được reserved) hay hai gạch dưới ở đầu (vì cái đó cũng được
+reserved).)
 
 ``` {.c .numberLines}
 #ifndef BAR_H   // If BAR_H isn't defined...
@@ -228,91 +222,94 @@ int add(int, int);
 #endif          // End of the #ifndef BAR_H
 ```
 
-This will effectively cause the header file to be included only a single
-time, no matter how many places try to `#include` it.
+Cái này sẽ khiến file header chỉ được include đúng một lần, bất kể
+bao nhiêu chỗ cố `#include` nó.
 
 [i[Multifile projects-->includes]>]
 
-## `static` and `extern`
+## `static` và `extern`
 
 [i[`static` storage class]<]
 [i[`extern` storage class]<]
 [i[Multifile projects-->`static` storage class]<]
 [i[Multifile projects-->`extern` storage class]<]
 
-You can refer to objects in other files with `extern`.
+Bạn có thể tham chiếu đến các đối tượng ở file khác bằng `extern`.
 
-You can make sure file-scope variables and functions are _not_ visible from other source files (even if `extern` is used) with the `static` keyword.
+Bạn có thể đảm bảo biến và hàm ở file scope _không_ nhìn thấy được
+từ các file nguồn khác (dù có `extern`) bằng từ khóa `static`.
 
-For more info, check out the sections in the book on the
-[`static`](#static) and [`extern`](#extern) storage-class specifiers.
+Thêm thông tin, xem các phần trong sách về storage-class specifier
+[`static`](#static) và [`extern`](#extern).
 
 [i[`static` storage class]>]
 [i[`extern` storage class]>]
 [i[Multifile projects-->`static` storage class]>]
 [i[Multifile projects-->`extern` storage class]>]
 
-## Compiling with Object Files
+## Biên dịch với object file
 
 [i[Object files]<]
 
-This isn't part of the spec, but it's 99.999% common in the C world.
+Chuyện này không có trong spec, nhưng nó là 99.999% phổ biến trong
+thế giới C.
 
-You can compile C files into intermediate representations called _object
-files_. These hold the machine code (that is, 1s and 0s of the actual
-instructions) that haven't been built into an executable yet. 
+Bạn có thể biên dịch file C thành dạng biểu diễn trung gian gọi là
+_object file_. Chúng chứa mã máy (tức là các bit 1 và 0 của các lệnh
+thực sự) nhưng chưa được ghép thành file thực thi. 
 
-Object files in Windows have a `.OBJ` extension; in Unix-likes, they're
-`.o`.
+Object file trong Windows có phần mở rộng `.OBJ`; trong các hệ
+Unix-like, chúng là `.o`.
 
 [i[`gcc` compiler]<]
 
-In gcc, we can build some like this, with the `-c` (compile only!) flag:
+Trong gcc, ta có thể build mấy cái đó thế này, với cờ `-c` (chỉ
+compile thôi!):
 
 ``` {.zsh}
 gcc -c foo.c     # produces foo.o
 gcc -c bar.c     # produces bar.o
 ```
 
-And then we can _link_ those together into a single executable:
+Rồi ta có thể _link_ chúng lại thành một file thực thi duy nhất:
 
 ``` {.zsh}
 gcc -o foo foo.o bar.o
 ```
 
-_Voila_, we've produced an executable `foo` from the two object files.
+_Voila_, ta đã tạo ra file thực thi `foo` từ hai object file.
 
-But you're thinking, why bother? Can't we just:
+Nhưng bạn nghĩ, tội gì cho khổ? Chẳng phải ta có thể:
 
 ``` {.zsh}
 gcc -o foo foo.c bar.c
 ```
 
-and kill two [flw[boids|Boids]] with one stone?
+và [flw[hạ|Boids]] hai con chim bằng một viên đá?
 
 [i[`gcc` compiler]>]
 
-For little programs, that's fine. I do it all the time.
+Với chương trình nhỏ thì ổn. Tôi vẫn làm vậy suốt.
 
-But for larger programs, we can take advantage of the fact that
-compiling from source to object files is relatively slow, and linking
-together a bunch of object files is relatively fast.
+Nhưng với chương trình lớn hơn, ta có thể tận dụng chuyện biên dịch
+từ nguồn ra object file thì tương đối chậm, còn link một đống object
+file lại thì tương đối nhanh.
 
-This really shows with the `make` utility that only rebuilds sources
-that are newer than their outputs.
+Điều này thể hiện rõ nhất với công cụ `make`, thứ chỉ build lại
+những nguồn mới hơn output của chúng.
 
-Let's say you had a thousand C files. You could compile them all to
-object files to start (slowly) and then combine all those object files
-into an executable (fast).
+Giả sử bạn có một nghìn file C. Ban đầu bạn compile tất cả chúng
+thành object file (chậm) rồi gộp tất cả các object file đó thành
+file thực thi (nhanh).
 
-Now say you modified just one of those C source files---here's the
-magic: _you only have to rebuild that one object file for that source
-file_! And then you rebuild the executable (fast). All the other C files
-don't have to be touched.
+Giờ giả sử bạn sửa đúng một trong số các file nguồn C đó, đây mới là
+phép màu: _bạn chỉ cần build lại đúng object file cho file nguồn
+đó_! Rồi build lại file thực thi (nhanh). Mọi file C khác không cần
+đụng tới.
 
-In other words, by only rebuilding the object files we need to, we cut
-down on compilation times radically. (Unless of course you're doing a
-"clean" build, in which case all the object files have to be created.)
+Nói cách khác, nhờ chỉ build lại những object file cần, ta cắt giảm
+thời gian compile dữ dội. (Dĩ nhiên trừ khi bạn làm build "clean",
+khi đó tất cả object file đều phải được tạo lại.)
 
 [i[Object files]>]
 [i[Multifile projects]>]
