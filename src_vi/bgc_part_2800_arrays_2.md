@@ -3,33 +3,32 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Arrays Part II
+# Mảng Phần II
 
-We're going to go over a few extra misc things this chapter concerning
-arrays.
+Chương này ta sẽ đi qua vài thứ linh tinh thêm về mảng.
 
-* Type qualifiers with array parameters
-* The `static` keyword with array parameters
-* Partial multi-dimensional array initializers
+* Type qualifier với tham số mảng
+* Từ khoá `static` với tham số mảng
+* Initializer một phần cho mảng đa chiều
 
-They're not super-commonly seen, but we'll peek at them since they're
-part of the newer spec.
+Chúng không phải cái hay thấy, nhưng ta sẽ liếc qua vì chúng là một
+phần của spec mới hơn.
 
-## Type Qualifiers for Arrays in Parameter Lists
+## Type qualifier cho mảng trong danh sách tham số
 
 [i[Type qualifiers-->arrays in parameter lists]<]
 [i[Arrays-->type qualifiers in parameter lists]<]
 
-If you recall from earlier, these two things are equivalent in function
-parameter lists:
+Nếu bạn nhớ từ trước, hai thứ này tương đương trong danh sách tham
+số hàm:
 
 ``` {.c}
 int func(int *p) {...}
 int func(int p[]) {...}
 ```
 
-And you might also recall that you can add type qualifiers to a pointer
-variable like so:
+Và bạn cũng có thể nhớ rằng bạn có thể thêm type qualifier vào biến
+con trỏ như vầy:
 
 ``` {.c}
 int *const p;
@@ -38,11 +37,11 @@ int *const volatile p;
 // etc.
 ```
 
-But how can we do that when we're using array notation in your parameter
-list?
+Nhưng làm sao làm được chuyện đó khi ta dùng ký pháp mảng trong danh
+sách tham số?
 
-Turns out it goes in the brackets. And you can put the optional count
-after. The two following lines are equivalent:
+Hoá ra nó đi vào trong ngoặc vuông. Và bạn có thể đặt count tuỳ chọn
+ở sau. Hai dòng sau tương đương:
 
 ``` {.c}
 int func(int *const volatile p) {...}
@@ -50,31 +49,30 @@ int func(int p[const volatile]) {...}
 int func(int p[const volatile 10]) {...}
 ```
 
-If you have a multidimensional array, you need to put the type
-qualifiers in the first set of brackets.
+Nếu bạn có mảng đa chiều, bạn cần đặt type qualifier ở bộ ngoặc
+vuông đầu.
 
 [i[Type qualifiers-->arrays in parameter lists]>]
 [i[Arrays-->type qualifiers in parameter lists]>]
 
-## `static` for Arrays in Parameter Lists
+## `static` cho mảng trong danh sách tham số
 
 [i[Arrays-->`static` in parameter lists]<]
 
-Similarly, you can use the keyword static in the array in a parameter
-list.
+Tương tự, bạn có thể dùng từ khoá static trong mảng trong danh sách
+tham số.
 
-This is something I've never seen in the wild. It is **always** followed
-by a dimension:
+Đây là thứ tôi chưa từng thấy ngoài đời. Nó **luôn** theo sau bởi
+một kích thước:
 
 ``` {.c}
 int func(int p[static 4]) {...}
 ```
 
-What this means, in the above example, is the compiler is going to
-assume that any array you pass to the function will be _at least_ 4
-elements.
+Điều này có nghĩa, trong ví dụ trên, compiler sẽ giả định mọi mảng
+bạn truyền cho hàm sẽ có _ít nhất_ 4 phần tử.
 
-Anything else is undefined behavior.
+Bất cứ gì khác là hành vi không xác định.
 
 ``` {.c}
 int func(int p[static 4]) {...}
@@ -91,53 +89,51 @@ int main(void)
 }
 ```
 
-This basically sets the minimum size array you can have.
+Cái này về cơ bản đặt kích thước tối thiểu của mảng bạn có thể có.
 
-Important note: there is nothing in the compiler that prohibits you from
-passing in a smaller array. The compiler probably won't warn you, and it
-won't detect it at runtime.
+Lưu ý quan trọng: không có gì trong compiler cấm bạn truyền mảng nhỏ
+hơn. Compiler khả năng sẽ không cảnh báo bạn, và nó cũng không phát
+hiện lúc runtime.
 
-By putting `static` in there, you're saying, "I double secret PROMISE
-that I will never pass in a smaller array than this." And the compiler
-says, "Yeah, fine," and trusts you to not do it.
+Khi đặt `static` vào đó, bạn đang nói, "Tôi hứa danh dự gấp đôi là
+tôi không bao giờ truyền vào mảng nhỏ hơn cái này." Và compiler nói,
+"Ừ, được rồi," và tin bạn sẽ không làm thế.
 
-And then the compiler can make certain code optimizations, safe in the
-knowledge that you, the programmer, will always do the right thing.
+Và rồi compiler có thể thực hiện một số tối ưu code nhất định, yên
+tâm rằng bạn, lập trình viên, sẽ luôn làm đúng.
 
 [i[Arrays-->`static` in parameter lists]>]
 
-## Equivalent Initializers
+## Các initializer tương đương
 
 [i[Arrays-->multidimensional initializers]<]
 
-C is a little bit, shall we say, _flexible_ when it comes to array
-initializers.
+C hơi, nói thế nào nhỉ, _linh hoạt_ khi dính tới initializer của
+mảng.
 
-We've already seen some of this, where any missing values are replaced
-with zero.
+Ta đã thấy một chút rồi, khi giá trị thiếu được thay bằng zero.
 
-For example, we can initialize a 5 element array to `1,2,0,0,0` with
-this:
+Ví dụ, ta có thể khởi tạo mảng 5 phần tử thành `1,2,0,0,0` với:
 
 ``` {.c}
 int a[5] = {1, 2};
 ```
 
-Or set an array entirely to zero with:
+Hoặc set cả mảng về zero với:
 
 ``` {.c}
 int a[5] = {0};
 ```
 
-But things get interesting when initializing multidimensional arrays.
+Nhưng chuyện thú vị bắt đầu khi khởi tạo mảng đa chiều.
 
-Let's make an array of 3 rows and 2 columns:
+Làm một mảng 3 hàng, 2 cột:
 
 ``` {.c}
 int a[3][2];
 ```
 
-Let's write some code to initialize it and print the result:
+Viết chút code để khởi tạo và in kết quả:
 
 ``` {.c}
 #include <stdio.h>
@@ -158,7 +154,7 @@ int main(void)
 }
 ```
 
-And when we run it, we get the expected:
+Và khi chạy, ta có kết quả như kỳ vọng:
 
 ``` {.default}
 1 2
@@ -166,8 +162,7 @@ And when we run it, we get the expected:
 5 6
 ```
 
-Let's leave off some of the initializer elements and see they get set to
-zero:
+Hãy bỏ bớt vài phần tử initializer và xem chúng được set về zero:
 
 
 ``` {.c}
@@ -178,7 +173,7 @@ zero:
     };
 ```
 
-which produces:
+cho ra:
 
 ``` {.default}
 1 2
@@ -186,7 +181,7 @@ which produces:
 5 6
 ```
 
-Now let's leave off the entire last middle element:
+Giờ bỏ cả phần tử giữa cuối cùng:
 
 ``` {.c}
     int a[3][2] = {
@@ -196,7 +191,7 @@ Now let's leave off the entire last middle element:
     };
 ```
 
-And now we get this, which might not be what you expect:
+Và giờ ta có cái này, có thể không như bạn nghĩ:
 
 ``` {.default}
 1 2
@@ -204,28 +199,27 @@ And now we get this, which might not be what you expect:
 0 0
 ```
 
-But if you stop to think about it, we only provided enough initializers
-for two rows, so they got used for the first two rows. And the remaining
-elements were initialized to zero.
+Nhưng nếu bạn dừng lại suy nghĩ, ta chỉ cung cấp đủ initializer cho
+hai hàng, nên chúng được dùng cho hai hàng đầu. Và các phần tử còn
+lại được khởi tạo thành zero.
 
-So far so good. Generally, if we leave off parts of the initializer, the
-compiler sets the corresponding elements to `0`.
+Đến đây ổn. Nhìn chung, nếu ta bỏ bớt phần của initializer, compiler
+set các phần tử tương ứng thành `0`.
 
-But let's get _crazy_.
+Nhưng hãy làm _điên_ hơn.
 
 ``` {.c}
     int a[3][2] = { 1, 2, 3, 4, 5, 6 };
 ```
 
-What---? That's a 2D array, but it only has a 1D initializer!
+Cái gì---? Đó là mảng 2D, nhưng chỉ có initializer 1D!
 
-Turns out that's legal (though GCC will warn about it with the proper
-warnings turned on).
+Hoá ra chuyện đó hợp lệ (dù GCC sẽ cảnh báo nếu bật đúng warning).
 
-Basically, what it does is starts filling in elements in row 0, then row
-1, then row 2 from left to right.
+Về cơ bản, nó bắt đầu điền phần tử ở hàng 0, rồi hàng 1, rồi hàng 2
+từ trái sang phải.
 
-So when we print, it prints in order:
+Nên khi ta in, nó in theo thứ tự:
 
 ``` {.default}
 1 2
@@ -233,13 +227,13 @@ So when we print, it prints in order:
 5 6
 ```
 
-If we leave some off:
+Nếu ta bỏ vài cái:
 
 ``` {.c}
     int a[3][2] = { 1, 2, 3 };
 ```
 
-they fill with `0`:
+chúng được điền `0`:
 
 ``` {.default}
 1 2
@@ -247,16 +241,15 @@ they fill with `0`:
 0 0
 ```
 
-So if you want to fill the whole array with `0`, then go ahead and:
+Nên nếu bạn muốn điền cả mảng bằng `0`, cứ:
 
 ``` {.c}
     int a[3][2] = {0};
 ```
 
-But my recommendation is if you have a 2D array, use a 2D initializer.
-It just makes the code more readable. (Except for initializing the whole
-array with `0`, in which case it's idiomatic to use `{0}` no matter the
-dimension of the array.)
+Nhưng khuyến nghị của tôi là nếu bạn có mảng 2D, dùng initializer
+2D. Nó làm code dễ đọc hơn. (Trừ việc khởi tạo cả mảng bằng `0`,
+trường hợp đó dùng `{0}` là idiom bất kể chiều của mảng.)
 
 [i[Arrays-->multidimensional initializers]>]
 
