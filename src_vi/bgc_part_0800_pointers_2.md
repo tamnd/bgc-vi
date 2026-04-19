@@ -3,41 +3,41 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Pointers II: Arithmetic {#pointers2}
+# Pointers II: Số học con trỏ {#pointers2}
 
 [i[Pointers-->arithmetic]<]
 
-Time to get more into it with a number of new pointer topics! If you're
-not up to speed with pointers, [check out the first section in the guide
-on the matter](#pointers).
+Đến lúc lao vào sâu hơn với một loạt chủ đề mới về con trỏ! Nếu bạn
+chưa nắm vững con trỏ, [xem lại mục đầu trong sách về chủ đề
+này](#pointers).
 
-## Pointer Arithmetic
+## Số học con trỏ
 
-Turns out you can do math on pointers, notably addition and subtraction.
+Hoá ra bạn có thể làm toán trên con trỏ, cụ thể là cộng và trừ.
 
-But what does it mean when you do that?
+Nhưng như thế có nghĩa là gì?
 
-In short, if you have a pointer to a type, adding one to the pointer
-moves to the next item of that type directly after it in memory.
+Ngắn gọn, nếu bạn có con trỏ tới một kiểu, cộng 1 vào con trỏ sẽ
+chuyển nó tới item kế tiếp của kiểu đó nằm ngay sau trong bộ nhớ.
 
-It's **important** to remember that as we move pointers around and look
-at different places in memory, we need to make sure that we're always
-pointing to a valid place in memory before we dereference. If we're off in
-the weeds and we try to see what's there, the behavior is undefined and
-a crash is a common result.
+Điều **quan trọng** cần nhớ là khi di chuyển con trỏ và nhìn vào các
+chỗ khác nhau trong bộ nhớ, ta phải đảm bảo con trỏ luôn trỏ đến một
+chỗ hợp lệ trước khi dereference. Nếu đang lang thang đâu đó ngoài
+đồng cỏ và cố xem ở đó có gì, hành vi là undefined và chương trình
+thường sẽ crash.
 
-This is a little chicken-and-eggy with [Array/Pointer Equivalence,
-below](#arraypointerequiv), but we're going to give it a shot, anyway.
+Chuyện này hơi kiểu gà-với-trứng so với [Array/Pointer Equivalence ở
+dưới](#arraypointerequiv), nhưng ta vẫn sẽ thử.
 
-### Adding to Pointers
+### Cộng vào con trỏ
 
-First, let's take an array of numbers.
+Đầu tiên, lấy một mảng số.
 
 ``` {.c}
 int a[5] = {11, 22, 33, 44, 55};
 ```
 
-Then let's get a pointer to the first element in that array:
+Rồi lấy con trỏ tới phần tử đầu tiên của mảng:
 
 ``` {.c}
 int a[5] = {11, 22, 33, 44, 55};
@@ -45,35 +45,35 @@ int a[5] = {11, 22, 33, 44, 55};
 int *p = &a[0];  // Or "int *p = a;" works just as well
 ```
 
-Then let's print the value there by dereferencing the pointer:
+Rồi in giá trị ở đó bằng cách dereference con trỏ:
 
 ``` {.c}
 printf("%d\n", *p);  // Prints 11
 ```
 
-Now let's use pointer arithmetic to print the next element in the array,
-the one at index 1:
+Giờ dùng số học con trỏ để in phần tử kế tiếp trong mảng, phần tử ở
+index 1:
 
 ``` {.c}
 printf("%d\n", *(p + 1));  // Prints 22!!
 ```
 
-What happened there? C knows that `p` is a pointer to an `int`. So it
-knows the `sizeof` an `int`^[Recall that the `sizeof` operator tells you
-the size in bytes of an object in memory.] and it knows to skip that
-many bytes to get to the next `int` after the first one!
+Chuyện gì vừa xảy ra? C biết `p` là con trỏ tới một `int`. Nó biết
+`sizeof` của một `int`^[Nhớ rằng toán tử `sizeof` cho biết kích cỡ
+tính bằng byte của một đối tượng trong bộ nhớ.] và biết phải nhảy bao
+nhiêu byte để tới `int` kế tiếp sau cái đầu!
 
-In fact, the prior example could be written these two equivalent ways:
+Thực ra, ví dụ trước có thể viết hai cách tương đương:
 
 ``` {.c}
 printf("%d\n", *p);        // Prints 11
 printf("%d\n", *(p + 0));  // Prints 11
 ```
 
-because adding `0` to a pointer results in the same pointer.
+vì cộng `0` vào con trỏ cho ra cùng một con trỏ.
 
-Let's think of the upshot here. We can iterate over elements of an array
-this way instead of using an array:
+Rút ra gì? Ta có thể duyệt các phần tử của mảng theo cách này thay vì
+dùng mảng:
 
 ``` {.c}
 int a[5] = {11, 22, 33, 44, 55};
@@ -85,52 +85,51 @@ for (int i = 0; i < 5; i++) {
 }
 ```
 
-And that works the same as if we used array notation! Oooo! Getting
-closer to that array/pointer equivalence thing! More on this later in
-this chapter.
+Và nó chạy giống hệt như dùng ký hiệu mảng! Oooo! Đến gần hơn với
+array/pointer equivalence rồi! Sẽ nói thêm ở phần sau của chương.
 
-But what's actually happening, here? How does it work?
+Nhưng thực chất chuyện gì đang xảy ra ở đây? Nó hoạt động thế nào?
 
-Remember from early on that memory is like a big array, where a byte is
-stored at each array index?
+Nhớ từ đầu rằng bộ nhớ giống như một mảng lớn, mỗi index của mảng lưu
+một byte?
 
-And the array index into memory has a few names:
+Và index vào bộ nhớ có vài tên gọi:
 
-* Index into memory
+* Index vào bộ nhớ
 * Location
-* Address
-* _Pointer!_
+* Address (địa chỉ)
+* _Pointer!_ (con trỏ)
 
-So a pointer is an index into memory, somewhere.
+Vậy con trỏ là index vào bộ nhớ, ở một chỗ nào đó.
 
-For a random example, say that a number 3490 was stored at address
-("index") 23,237,489,202. If we have an `int` pointer to that 3490, that
-value of that pointer is 23,237,489,202... because the pointer is the
-memory address. Different words for the same thing.
+Lấy ví dụ ngẫu nhiên, giả sử số 3490 được lưu ở địa chỉ ("index")
+23.237.489.202. Nếu ta có một con trỏ `int` tới số 3490 đó, giá trị
+của con trỏ đó là 23.237.489.202... bởi vì con trỏ là địa chỉ bộ nhớ.
+Cùng một thứ, chỉ khác cách gọi.
 
-And now let's say we have another number, 4096, stored right after the
-3490 at address 23,237,489,210 (8 higher than the 3490 because each
-`int` in this example is 8 bytes long).
+Giờ giả sử ta có thêm số nữa, 4096, được lưu ngay sau 3490 ở địa chỉ
+23.237.489.210 (cao hơn 3490 là 8 vì mỗi `int` trong ví dụ này dài 8
+byte).
 
-If we add `1` to that pointer, it actually jumps ahead `sizeof(int)`
-bytes to the next `int`. It knows to jump that far ahead because it's an
-`int` pointer. If it were a `float` pointer, it'd jump `sizeof(float)`
-bytes ahead to get to the next float!
+Nếu cộng `1` vào con trỏ, thực ra nó nhảy tới trước `sizeof(int)` byte
+để tới `int` kế. Nó biết nhảy chừng đó vì là con trỏ `int`. Nếu là
+con trỏ `float`, nó sẽ nhảy tới trước `sizeof(float)` byte để tới
+float kế!
 
-So you can look at the next `int`, by adding `1` to the pointer, the one
-after that by adding `2` to the pointer, and so on.
+Vậy bạn có thể nhìn `int` kế tiếp bằng cách cộng `1` vào con trỏ, cái
+sau đó bằng cách cộng `2`, v.v.
 
-### Changing Pointers
+### Thay đổi con trỏ
 
-We saw how we could add an integer to a pointer in the previous section.
-This time, let's _modify the pointer, itself_.
+Ở mục trước ta thấy cách cộng một số nguyên vào con trỏ. Lần này, ta
+sẽ _tự sửa chính con trỏ_.
 
-You can just add (or subtract) integer values directly to (or from) any
-pointer!
+Bạn có thể cộng (hoặc trừ) trực tiếp giá trị số nguyên vào (hoặc từ)
+bất kỳ con trỏ nào!
 
-Let's do that example again, except with a couple changes. First, I'm
-going to add a `999` to the end of our numbers to act as a sentinel
-value. This will let us know where the end of the data is.
+Làm lại ví dụ đó, nhưng có vài thay đổi. Đầu tiên, tôi sẽ thêm `999`
+vào cuối dãy số để làm sentinel (giá trị canh). Giá trị đó sẽ báo cho
+ta biết đâu là cuối dữ liệu.
 
 ``` {.c}
 int a[] = {11, 22, 33, 44, 55, 999};  // Add 999 here as a sentinel
@@ -138,12 +137,12 @@ int a[] = {11, 22, 33, 44, 55, 999};  // Add 999 here as a sentinel
 int *p = &a[0];  // p points to the 11
 ```
 
-And we also have `p` pointing to the element at index `0` of `a`, namely
-`11`, just like before.
+Và ta cũng có `p` trỏ tới phần tử ở index `0` của `a`, tức `11`, giống
+như trước.
 
-Now---let's start _incrementing_ `p` so that it points at subsequent
-elements of the array. We'll do this until `p` points to the `999`; that
-is, we'll do it until `*p == 999`:
+Giờ, bắt đầu _tăng_ `p` để nó trỏ tới các phần tử tiếp theo của mảng.
+Ta làm vậy cho đến khi `p` trỏ tới `999`, tức là cho đến khi
+`*p == 999`:
 
 ``` {.c}
 while (*p != 999) {       // While the thing p points to isn't 999
@@ -152,38 +151,35 @@ while (*p != 999) {       // While the thing p points to isn't 999
 }
 ```
 
-Pretty crazy, right?
+Điên ghê, nhỉ?
 
-When we give it a run, first `p` points to `11`. Then we increment `p`,
-and it points to `22`, and then again, it points to `33`. And so on,
-until it points to `999` and we quit.
+Chạy thử, đầu tiên `p` trỏ tới `11`. Rồi tăng `p`, nó trỏ tới `22`,
+rồi lại tăng, trỏ tới `33`. Cứ thế cho đến khi trỏ tới `999` thì
+thoát.
 
-### Subtracting Pointers
+### Trừ con trỏ
 
 [i[Pointers-->subtracting]<]
-You can subtract a value from a pointer to get to earlier address, as
-well, just like we were adding to them before.
+Bạn có thể trừ một giá trị từ con trỏ để lui về địa chỉ trước đó, y
+như ta cộng vào vậy.
 
-But we can also subtract two pointers to find the difference between
-them, e.g. we can calculate how many `int`s there are between two
-`int*`s. The catch is that this only works within a single array^[Or
-string, which is really an array of `char`s. Somewhat peculiarly, you
-can also have a pointer that references _one past_ the end of the array
-without a problem and still do math on it. You just can't dereference it
-when it's out there.]---if the pointers point to anything else, you get
-undefined behavior.
+Nhưng ta cũng có thể trừ hai con trỏ để tìm khoảng cách giữa chúng,
+chẳng hạn ta có thể tính giữa hai `int*` có bao nhiêu `int`. Điểm lưu
+ý là chuyện này chỉ hoạt động trong cùng một mảng^[Hoặc chuỗi, thực
+ra là mảng `char`. Hơi kỳ là bạn cũng có thể có con trỏ tham chiếu
+tới _một chỗ sau_ phần cuối mảng mà vẫn làm toán với nó được. Chỉ là
+không được dereference khi nó ở đó.], nếu các con trỏ trỏ tới thứ
+khác, bạn nhận undefined behavior.
 
-Remember how strings are `char*`s in C? Let's see if we can use this to
-write another variant of `strlen()` to compute the length of a string
-that utilizes pointer subtraction.
+Nhớ chuỗi là `char*` trong C chứ? Xem thử có dùng cái này viết một
+biến thể `strlen()` để tính độ dài chuỗi bằng phép trừ con trỏ được
+không.
 
-The idea is that if we have a pointer to the beginning of the string, we
-can find a pointer to the end of the string by scanning ahead for the
-`NUL` character.
+Ý tưởng là nếu có con trỏ tới đầu chuỗi, ta có thể tìm con trỏ tới
+cuối chuỗi bằng cách quét tới khi gặp ký tự `NUL`.
 
-And if we have a pointer to the beginning of the string, and we computed
-the pointer to the end of the string, we can just subtract the two
-pointers to come up with the length!
+Và nếu có con trỏ tới đầu chuỗi, và tính được con trỏ tới cuối chuỗi,
+ta chỉ cần trừ hai con trỏ là ra độ dài!
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -207,40 +203,39 @@ int main(void)
 }
 ```
 
-Remember that you can only use pointer subtraction between two pointers
-that point to the same array!
+Nhớ rằng bạn chỉ được trừ con trỏ giữa hai con trỏ trỏ tới cùng một
+mảng!
 [i[Pointers-->subtracting]>]
 
 ## Array/Pointer Equivalence {#arraypointerequiv}
 
 [i[Pointers-->array equivalence]<]
-We're finally ready to talk about this! We've seen plenty of examples of
-places where we've intermixed array notation, but let's give out the
-_fundamental formula of array/pointer equivalence_:
+Cuối cùng thì cũng đến lúc nói chuyện này! Ta đã thấy kha khá ví dụ
+chỗ nào đó trộn lẫn ký hiệu mảng, nhưng giờ xin đưa ra _công thức
+căn bản của array/pointer equivalence_:
 
 ``` {.c}
 a[b] == *(a + b)
 ```
 
-Study that! Those are equivalent and can be used interchangeably!
+Nghiền đi! Chúng tương đương và dùng thay cho nhau được!
 
-I've oversimplified a bit, because in my above example `a` and `b` can
-both be expressions, and we might want a few more parentheses to force
-order of operations in case the expressions are complex.
+Tôi đã đơn giản hoá một chút, vì trong ví dụ trên `a` và `b` đều có
+thể là biểu thức, và có khi ta cần thêm ngoặc để ép thứ tự toán tử
+nếu biểu thức phức tạp.
 
-The spec is specific, as always, declaring (in C11 §6.5.2.1¶2):
+Spec thì luôn cụ thể, tuyên bố (trong C11 §6.5.2.1¶2):
 
 > `E1[E2]` is identical to `(*((E1)+(E2)))`
 
-but that's a little harder to grok. Just make sure you include
-parentheses if the expressions are complicated so all your math
-happens in the right order.
+nhưng cái đó hơi khó hình dung. Chỉ cần đảm bảo dùng ngoặc nếu biểu
+thức phức tạp để phép toán diễn ra đúng thứ tự.
 
-This means we can _decide_ if we're going to use array or pointer
-notation for any array or pointer (assuming it points to an element of
-an array).
+Nghĩa là ta có thể _quyết định_ dùng ký hiệu mảng hay ký hiệu con trỏ
+cho bất kỳ mảng hay con trỏ nào (giả định nó trỏ tới một phần tử của
+một mảng).
 
-Let's use an array and pointer with both array and pointer notation:
+Dùng cả mảng và con trỏ với cả hai ký hiệu:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -271,30 +266,29 @@ int main(void)
 }
 ```
 
-So you can see that in general, if you have an array variable, you can
-use pointer or array notion to access elements. Same with a pointer
-variable.
+Có thể thấy nhìn chung, nếu bạn có biến mảng, có thể dùng ký hiệu con
+trỏ hay ký hiệu mảng để truy cập phần tử. Tương tự với biến con trỏ.
 
-The one big difference is that you can _modify_ a pointer to point to a
-different address, but you can't do that with an array variable. <!--
-6.3.2.1p2 --> In other words, you can't assign into an array variable at
-all—only into individual elements of that array.
+Khác biệt lớn duy nhất là bạn có thể _sửa_ một con trỏ để trỏ sang
+địa chỉ khác, nhưng không làm thế được với biến mảng. <!-- 6.3.2.1p2
+--> Nói cách khác, bạn không gán được vào biến mảng, chỉ gán vào từng
+phần tử của mảng đó thôi.
 
-If you really want to copy one array to another, you have to use a
-function like `memcpy()` (or a loop) to make that happen.
+Nếu thực sự muốn copy mảng này sang mảng khác, bạn phải dùng hàm như
+`memcpy()` (hay một vòng lặp).
 
-### Array/Pointer Equivalence in Function Calls
+### Array/Pointer Equivalence trong lời gọi hàm
 
-This is where you'll encounter this concept the most, for sure.
+Đây chắc chắn là chỗ bạn gặp khái niệm này nhiều nhất.
 
-If you have a function that takes a pointer argument, e.g.:
+Nếu bạn có hàm nhận đối số là con trỏ, ví dụ:
 
 ``` {.c}
 int my_strlen(char *s)
 ```
 
-this means you can pass either an array or a pointer to this function
-and have it work!
+nghĩa là bạn có thể truyền hoặc mảng, hoặc con trỏ vào hàm này và nó
+vẫn chạy!
 
 ``` {.c}
 char s[] = "Antelopes";
@@ -304,7 +298,7 @@ printf("%d\n", my_strlen(s));  // Works!
 printf("%d\n", my_strlen(t));  // Works, too!
 ```
 
-And it's also why these two function signatures are equivalent:
+Và đó cũng là lý do hai signature hàm này tương đương:
 
 ``` {.c}
 int my_strlen(char *s)    // Works!
@@ -312,57 +306,54 @@ int my_strlen(char s[])   // Works, too!
 ```
 [i[Pointers-->array equivalence]>]
 
-## `void` Pointers
+## Con trỏ `void`
 
 [i[`void*` void pointer]<]
 
-You've already seen the `void` keyword used with functions that
-indicates no parameters or no return value, but this is an entirely
-separate, unrelated animal. 
+Bạn đã thấy từ khoá `void` dùng với hàm để chỉ không có tham số hay
+không có giá trị trả về, nhưng cái này là một con thú hoàn toàn tách
+biệt, không liên quan.
 
-A `void*` is definitely a pointer to an existing *thing*. But the `void`
-part of it indicates that we don't know the _type_ of the thing. And
-sometimes, believe it or not, that's really useful. It enables us to
-write code that's a little more type-agnostic, which is some nice
-flexibility to have in a typed language like C.
+Một `void*` chắc chắn là con trỏ tới một *thứ* đang tồn tại. Nhưng
+phần `void` chỉ ra rằng ta không biết _kiểu_ của thứ đó. Và đôi khi,
+tin hay không tuỳ bạn, cái đó thực sự hữu ích. Nó cho phép viết code
+kiểu-bất-khả-tri hơn một chút, một sự linh hoạt rất nice trong một
+ngôn ngữ có kiểu như C.
 
-There are basically two use cases for this—let's check them out and see
-if we can demystify it a bit.
+Về cơ bản có hai trường hợp sử dụng, xem và giải hoặc một chút bí ẩn.
 
 [i[`memcpy()` function]<]
 
-1. A function is going to operate on something byte-by-byte. For
-   example, `memcpy()` copies bytes of memory from one pointer to
-   another, but those pointers can point to any type. `memcpy()` takes
-   advantage of the fact that if you iterate through `char*`s, you're
-   iterating through the bytes of an object no matter what type the
-   object is. More on this in the [Multibyte Values](#multibyte-values)
-   subsection.
+1. Hàm sẽ xử lý một thứ gì đó theo từng byte. Ví dụ, `memcpy()` chép
+   byte bộ nhớ từ con trỏ này sang con trỏ kia, nhưng các con trỏ đó
+   có thể trỏ tới kiểu bất kỳ. `memcpy()` tận dụng chuyện nếu bạn
+   duyệt qua các `char*`, bạn đang duyệt qua các byte của một đối
+   tượng bất kể đối tượng là kiểu gì. Sẽ nói thêm ở tiểu mục
+   [Multibyte Values](#multibyte-values).
 
-2. Another function is calling a function you passed to it (a callback),
-   and it's passing you data. You know the type of the data, but the
-   function calling you doesn't. So it passes you `void*`s---'cause it
-   doesn't know the type---and you convert those to the type you need.
-   The built-in
+2. Một hàm khác gọi một hàm bạn truyền vào cho nó (callback), và nó
+   truyền dữ liệu cho bạn. Bạn biết kiểu của dữ liệu, nhưng hàm gọi
+   bạn thì không. Nên nó truyền `void*` cho bạn, vì nó không biết
+   kiểu, rồi bạn chuyển cái đó về kiểu mình cần.
    [fl[`qsort()`|https://beej.us/guide/bgclr/html/split/stdlib.html#man-qsort]]
-   and
+   và
    [fl[`bsearch()`|https://beej.us/guide/bgclr/html/split/stdlib.html#man-bsearch]]
-   use this technique.
+   có sẵn đều dùng kỹ thuật này.
 
-Let's look at an example, the built-in `memcpy()` function:
+Xem ví dụ, hàm `memcpy()` có sẵn:
 
 ``` {.c}
 void *memcpy(void *s1, void *s2, size_t n);
 ```
 
-This function copies `n` bytes of memory starting from address `s2` into
-the memory starting at address `s1`.
+Hàm này chép `n` byte bộ nhớ bắt đầu từ địa chỉ `s2` vào bộ nhớ bắt
+đầu từ địa chỉ `s1`.
 
-But look! `s1` and `s2` are `void*`s! Why? What does it mean? Let's run
-more examples to see.
+Nhưng nhìn! `s1` và `s2` là `void*`! Vì sao? Nghĩa là gì? Thử thêm ví
+dụ.
 
-For instance, we could copy a string with `memcpy()` (though `strcpy()`
-is more appropriate for strings):
+Chẳng hạn, ta có thể chép một chuỗi bằng `memcpy()` (dù `strcpy()`
+phù hợp hơn cho chuỗi):
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -379,7 +370,7 @@ int main(void)
 }
 ```
 
-Or we can copy some `int`s:
+Hoặc chép vài `int`:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -396,26 +387,24 @@ int main(void)
 }
 ```
 
-That one's a little wild---you see what we did there with `memcpy()`? We
-copied the data from `a` to `b`, but we had to specify how many _bytes_
-to copy, and an `int` is more than one byte.
+Cái này hơi hoang đấy, thấy ta vừa làm gì với `memcpy()` chứ? Ta chép
+dữ liệu từ `a` sang `b`, nhưng phải chỉ rõ chép bao nhiêu _byte_, và
+một `int` thì lớn hơn một byte.
 
-OK, then---how many bytes does an `int` take? Answer: depends on the
-system. But we can tell how many bytes any type takes with the `sizeof`
-operator.
+Vậy, một `int` chiếm bao nhiêu byte? Trả lời: tuỳ hệ thống. Nhưng ta
+có thể biết bao nhiêu byte một kiểu chiếm bằng toán tử `sizeof`.
 
-So there's the answer: an `int` takes `sizeof(int)` bytes of memory to
-store.
+Vậy đây rồi: một `int` cần `sizeof(int)` byte bộ nhớ để lưu.
 
-And if we have 3 of them in our array, like we did in that example, the
-entire space used for the 3 `int`s must be `3 * sizeof(int)`.
+Và nếu có 3 cái trong mảng, như ví dụ đó, tổng dung lượng dùng cho 3
+`int` phải là `3 * sizeof(int)`.
 
-(In the string example, earlier, it would have been more technically
-accurate to copy `7 * sizeof(char)` bytes. But `char`s are always one
-byte large, by definition, so that just devolves into `7 * 1`.)
+(Ở ví dụ chuỗi trước, chặt chẽ kỹ thuật hơn thì phải chép
+`7 * sizeof(char)` byte. Nhưng `char` theo định nghĩa luôn dài một
+byte, nên cái đó thoái hoá thành `7 * 1`.)
 
-We could even copy a `float` or a `struct` with `memcpy()`! (Though this
-is abusive---we should just use `=` for that):
+Ta thậm chí có thể chép một `float` hay `struct` bằng `memcpy()`!
+(Dù đây là lạm dụng, ta nên dùng `=` cho chuyện đó):
 
 ``` {.c}
 struct antelope my_antelope;
@@ -426,12 +415,12 @@ struct antelope my_clone_antelope;
 memcpy(&my_clone_antelope, &my_antelope, sizeof my_antelope);
 ```
 
-Look at how versatile `memcpy()` is! If you have a pointer to a source
-and a pointer to a destination, and you have the number of bytes you
-want to copy, you can copy _any type of data_.
+Nhìn `memcpy()` đa năng chưa! Nếu có con trỏ tới nguồn và con trỏ tới
+đích, và biết số byte muốn chép, bạn có thể chép _bất kỳ kiểu dữ liệu
+nào_.
 
-Imagine if we didn't have `void*`. We'd have to write specialized
-`memcpy()` functions for each type:
+Tưởng tượng nếu không có `void*`. Ta sẽ phải viết các hàm `memcpy()`
+chuyên biệt cho mỗi kiểu:
 
 [i[`memcpy()` function]>]
 
@@ -445,43 +434,39 @@ memcpy_unsigned_char(unsigned char *a, unsigned char *b, int count);
 // etc... blech!
 ```
 
-Much better to just use `void*` and have one function that can do it
-all.
+Tốt hơn nhiều là cứ dùng `void*` và có một hàm lo hết.
 
-That's the power of `void*`. You can write a function that doesn't care
-about the variable's type and is still able to do things with it.
+Đó là sức mạnh của `void*`. Bạn có thể viết hàm không quan tâm kiểu
+biến mà vẫn làm được việc với nó.
 
-But with great power comes great responsibility. Maybe not _that_ great
-in this case, but there are some limits.
+Nhưng sức mạnh lớn đi kèm trách nhiệm lớn. Có thể trách nhiệm không
+_đến mức_ đó trong trường hợp này, nhưng có những giới hạn.
 
 [i[`void*` void pointer-->caveats]<]
 
-1. You cannot do pointer arithmetic on a `void*`.
-2. You cannot dereference a `void*`.
-3. You cannot use the arrow operator on a `void*`, since it's also a
+1. Không làm được số học con trỏ trên `void*`.
+2. Không dereference được `void*`.
+3. Không dùng được toán tử mũi tên trên `void*`, vì đó cũng là
    dereference.
-4. You cannot use array notation on a `void*`, since it's also a
-   dereference, as well^[Because remember that array notation is just a
-   dereference and some pointer math, and you can't dereference a
-   `void*`!].
+4. Không dùng được ký hiệu mảng trên `void*`, vì đó cũng là
+   dereference^[Vì nhớ rằng ký hiệu mảng chỉ là một dereference cộng
+   chút toán tử con trỏ, mà bạn không dereference được `void*`!].
 
-And if you think about it, these rules make sense. All those operations
-rely on knowing the `sizeof` the type of data pointed to, and with
-`void*`, we don't know the size of the data being pointed to---it could
-be anything!
+Và nếu nghĩ kỹ, các quy tắc này hợp lý. Tất cả thao tác đó dựa vào
+việc biết `sizeof` của kiểu dữ liệu được trỏ tới, mà với `void*` ta
+không biết kích cỡ của dữ liệu được trỏ tới, có thể là bất cứ gì!
 
 [i[`void*` void pointer-->caveats]>]
 
-But wait---if you can't dereference a `void*` what good can it ever do
-you?
+Nhưng khoan, nếu không dereference được `void*` thì nó có ích gì cho
+bạn?
 
-Like with `memcpy()`, it helps you write generic functions that can
-handle multiple types of data. But the secret is that, deep down, _you
-convert the `void*` to another type before you use it_!
+Giống như với `memcpy()`, nó giúp bạn viết các hàm tổng quát xử lý
+được nhiều kiểu dữ liệu. Nhưng bí mật là, ở cốt lõi, _bạn chuyển
+`void*` sang kiểu khác trước khi dùng_!
 
-And conversion is easy: you can just assign into a variable of the
-desired type^[You can also _cast_ the `void*` to another type, but we
-haven't gotten to casts yet.].
+Và chuyển thì dễ: chỉ cần gán vào biến có kiểu mong muốn^[Bạn cũng có
+thể _cast_ `void*` sang kiểu khác, nhưng ta chưa tới cast.].
 
 ``` {.c}
 char a = 'X';  // A single char
@@ -494,8 +479,8 @@ printf("%c\n", *q);  // Prints "X"
 ```
 
 [i[`memcpy()` function]<]
-Let's write our own `memcpy()` to try this out. We can copy bytes
-(`char`s), and we know the number of bytes because it's passed in.
+Viết `memcpy()` của riêng mình để thử. Ta có thể chép byte (`char`),
+và biết số byte vì nó được truyền vào.
 
 ``` {.c}
 void *my_memcpy(void *dest, void *src, int byte_count)
@@ -514,33 +499,30 @@ void *my_memcpy(void *dest, void *src, int byte_count)
 }
 ```
 
-Right there at the beginning, we copy the `void*`s into `char*`s so that
-we can use them as `char*`s. It's as easy as that.
+Ngay đầu, ta chép `void*` vào `char*` để có thể dùng chúng như
+`char*`. Đơn giản vậy thôi.
 
-Then some fun in a while loop, where we decrement `byte_count` until it
-becomes false (`0`). Remember that with post-decrement, the value of the
-expression is computed (for `while` to use) and _then_ the variable is
-decremented.
+Rồi vui vẻ trong một vòng while, nơi ta giảm `byte_count` đến khi
+thành false (`0`). Nhớ rằng với post-decrement, giá trị của biểu thức
+được tính (cho `while` dùng) _rồi_ biến mới được giảm.
 
-And some fun in the copy, where we assign `*d = *s` to copy the byte,
-but we do it with post-increment so that both `d` and `s` move to the
-next byte after the assignment is made.
+Và vui vẻ trong phần copy, nơi ta gán `*d = *s` để chép byte, nhưng
+làm với post-increment để cả `d` và `s` chuyển sang byte kế sau khi
+gán xong.
 
-Lastly, most memory and string functions return a copy of a pointer to
-the destination just in case the caller wants to use it.
+Cuối cùng, hầu hết các hàm về bộ nhớ và chuỗi trả về một bản sao của
+con trỏ tới đích phòng khi caller cần dùng.
 
-Now that we've done that, I just want to quickly point out that we can
-use this technique to iterate over the bytes of _any_ object in C,
-`float`s, `struct`s, or anything!
+Xong rồi, tôi chỉ muốn nhanh chóng chỉ ra rằng ta có thể dùng kỹ
+thuật này để duyệt qua các byte của _bất kỳ_ đối tượng nào trong C,
+`float`, `struct`, hay gì cũng được!
 [i[`memcpy()` function]>]
 
 [i[`qsort()` function]<]
-[Let's]{#qsort-example} run one more real-world example with the
-built-in `qsort()` routine that can sort _anything_ thanks to the magic
-of `void*`s.
+[Làm]{#qsort-example} thêm một ví dụ thực tế với routine có sẵn
+`qsort()`, có thể sắp xếp _bất cứ gì_ nhờ phép màu của `void*`.
 
-(In the following example, you can ignore the word `const`, which we
-haven't covered yet.)
+(Trong ví dụ dưới, có thể bỏ qua từ `const`, ta chưa nói tới.)
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -603,11 +585,10 @@ int main(void)
 }
 ```
 
-As long as you give `qsort()` a function that can compare two items that
-you have in your array to be sorted, it can sort anything. And it does
-this without needing to have the types of the items hardcoded in there
-anywhere. `qsort()` just rearranges blocks of bytes based on the results
-of the `compar()` function you passed in.
+Chỉ cần bạn đưa cho `qsort()` một hàm có thể so sánh hai item trong
+mảng cần sort, nó sắp được mọi thứ. Và làm vậy mà không cần phải
+hard-code kiểu của item ở đâu cả. `qsort()` chỉ sắp xếp lại các khối
+byte dựa vào kết quả của hàm `compar()` bạn truyền vào.
 [i[`qsort()` function]>]
 [i[`void*` void pointer]>]
 [i[Pointers-->arithmetic]>]
