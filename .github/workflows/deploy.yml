@@ -1,10 +1,9 @@
 name: Build and deploy to GitHub Pages
 
+# Paused during the translation marathon so every chapter PR does not
+# burn a full build. Re-enable (restore push + pull_request triggers)
+# before cutting the first release.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
