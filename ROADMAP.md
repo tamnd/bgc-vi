@@ -18,7 +18,7 @@ Programming (Vietnamese).
 | bgc_part_0725_io.md | File Input/Output | done |
 | bgc_part_0750_typedef.md | `typedef`: Making New Types | done |
 | bgc_part_0800_pointers_2.md | Pointers II: Arithmetic | done |
-| bgc_part_0850_malloc.md | Manual Memory Allocation | not started |
+| bgc_part_0850_malloc.md | Manual Memory Allocation | done |
 | bgc_part_0900_scope.md | Scope | not started |
 | bgc_part_1000_types_2.md | Types II: Way More Types! | not started |
 | bgc_part_1100_types_3.md | Types III: Conversions | not started |
