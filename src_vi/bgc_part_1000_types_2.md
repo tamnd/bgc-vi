@@ -3,20 +3,19 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Types II: Way More Types!
+# Types II: Còn nhiều kiểu nữa!
 
-We're used to `char`, `int`, and `float` types, but it's now time to
-take that stuff to the next level and see what else we have out there in
-the types department!
+Ta đã quen với các kiểu `char`, `int`, và `float`, nhưng giờ là lúc
+nâng những thứ đó lên tầm cao mới và xem còn gì nữa ở khoản kiểu!
 
-## Signed and Unsigned Integers
+## Số nguyên có dấu và không dấu
 
 [i[Types-->signed and unsigned]<]
-So far we've used `int` as a _signed_ type, that is, a value that can be
-either negative or positive. But C also has specific _unsigned_ integer
-types that can only hold positive numbers.
+Tới giờ ta dùng `int` như kiểu _có dấu_ (signed), tức giá trị có thể
+âm hoặc dương. Nhưng C còn có các kiểu nguyên _không dấu_ (unsigned)
+cụ thể, chỉ chứa được số dương.
 
-These types are prefaced by the keyword [i[`unsigned` type]<]`unsigned`.
+Các kiểu này dùng từ khoá [i[`unsigned` type]<]`unsigned` đi trước.
 
 ``` {.c}
 int a;           // signed
@@ -26,47 +25,44 @@ unsigned int b;  // unsigned
 unsigned c;      // unsigned, shorthand for "unsigned int"
 ```
 
-Why? Why would you decide you only wanted to hold positive numbers?
+Vì sao? Vì sao bạn quyết định chỉ muốn chứa số dương?
 
-Answer: you can get larger numbers in an unsigned variable than you can
-in a signed ones.
+Đáp: với biến unsigned, bạn có thể chứa số lớn hơn so với biến signed.
 
-But why is that?
+Nhưng vì sao thế?
 
-You can think of integers being represented by a certain number of
-_bits_^["Bit" is short for _binary digit_. Binary is just another way of
-representing numbers. Instead of digits 0-9 like we're used to, it's
-digits 0-1.]. On my computer, an `int` is represented by 64 bits.
+Bạn có thể nghĩ về số nguyên được biểu diễn bởi một số _bit_^["Bit"
+là viết tắt của _binary digit_ (chữ số nhị phân). Nhị phân chỉ là một
+cách biểu diễn số khác. Thay vì các chữ số 0-9 như ta quen, là các
+chữ số 0-1.]. Trên máy tôi, một `int` được biểu diễn bởi 64 bit.
 
-And each permutation of bits that are either `1` or `0` represents a
-number. We can decide how to divvy up these numbers.
+Và mỗi hoán vị các bit là `1` hay `0` biểu diễn một số. Ta có thể
+quyết định chia các số này thế nào.
 
-With signed numbers, we use (roughly) half the permutations to represent
-negative numbers, and the other half to represent positive numbers.
+Với số signed, ta dùng (xấp xỉ) một nửa số hoán vị để biểu diễn số âm,
+nửa kia biểu diễn số dương.
 
-With unsigned, we use _all_ the permutations to represent positive
-numbers.
+Với unsigned, ta dùng _tất cả_ các hoán vị để biểu diễn số dương.
 
-On my computer with 64-bit `int`s using [flw[two's
-complement|Two%27s_complement]] to represent unsigned numbers, I have
-the following limits on integer range:
+Trên máy tôi với `int` 64-bit dùng [flw[two's
+complement|Two%27s_complement]] để biểu diễn số, tôi có các giới hạn
+sau về miền số nguyên:
 
-|Type|Minimum|Maximum|
+|Kiểu|Min|Max|
 |:-|-:|-:|
 |`int`|`-9,223,372,036,854,775,808`|`9,223,372,036,854,775,807`|
 |`unsigned int`|`0`|`18,446,744,073,709,551,615`|
 
-Notice that the largest positive `unsigned int` is approximately twice
-as large as the largest positive `int`. So you can get some flexibility
-there.
+Chú ý số `unsigned int` dương lớn nhất xấp xỉ gấp đôi số `int` dương
+lớn nhất. Nên bạn có một chút linh hoạt.
 [i[`unsigned` type]>]
 [i[Types-->signed and unsigned]>]
 
-## Character Types
+## Kiểu ký tự
 
 [i[Types-->character]<]
 [i[`char` type]<]
-Remember `char`? The type we can use to hold a single character?
+Nhớ `char` chứ? Kiểu dùng để chứa một ký tự?
 
 ``` {.c}
 char c = 'B';
@@ -74,7 +70,7 @@ char c = 'B';
 printf("%c\n", c);  // "B"
 ```
 
-I have a shocker for you: it's actually an integer.
+Tôi có tin sốc cho bạn: nó thật ra là một số nguyên.
 
 ``` {.c}
 char c = 'B';
@@ -83,35 +79,33 @@ char c = 'B';
 printf("%d\n", c);  // 66 (!!)
 ```
 
-Deep down, `char` is just a small `int`, namely an integer that uses
-just a single byte of space, limiting its range to...
+Ở tầng sâu, `char` chỉ là một `int` nhỏ, cụ thể là một số nguyên dùng
+đúng một byte chỗ, hạn chế miền giá trị xuống còn...
 
-Here the C spec gets just a little funky. It assures us that a `char` is
-a single byte, i.e. `sizeof(char) == 1`. But then in C11 §3.6¶3 it goes
-out of its way to say:
+Ở đây spec C hơi khó chịu. Nó đảm bảo rằng `char` là một byte, tức
+`sizeof(char) == 1`. Nhưng rồi ở C11 §3.6¶3 nó đi thẳng ra nói:
 
 > A byte is composed of a contiguous sequence of bits, _the number of
 > which is implementation-defined._
 
-Wait---what? Some of you might be used to the notion that a byte is 8
-bits, right? I mean, that's what it is, right? And the answer is,
-"Almost certainly."^[The industry term for a sequence of exactly,
-indisputably 8 bits is an _octet_.] But C is an old language, and
-machines back in the day had, shall we say, a more _relaxed_ opinion
-over how many bits were in a byte. And through the years, C has retained
-this flexibility.
+Khoan, cái gì? Có lẽ một số bạn quen với ý niệm một byte là 8 bit
+chứ? Ý tôi là đúng vậy mà, đúng không? Và câu trả lời là, "Gần như
+chắc chắn."^[Thuật ngữ ngành cho một dãy chính xác, không tranh cãi,
+8 bit là _octet_.] Nhưng C là ngôn ngữ đời cũ, và máy móc thời đó có,
+hãy nói là, ý kiến _thoáng_ hơn về chuyện một byte có bao nhiêu bit.
+Và qua năm tháng, C vẫn giữ sự linh hoạt đó.
 
-But assuming your bytes in C are 8 bits, like they are for virtually all
-machines in the world that you'll ever see, the range of a `char` is...
+Nhưng giả định byte trong C là 8 bit, như thực tế với gần như mọi máy
+trên thế giới bạn từng thấy, miền của một `char` là...
 
 [i[`unsigned char` type]<]
 [i[`signed char` type]<]
----So before I can tell you, it turns out that `char`s might be signed
-or unsigned depending on your compiler. Unless you explicitly specify.
+Khoan, trước khi tôi nói được, hoá ra `char` có thể signed hoặc
+unsigned tuỳ compiler. Trừ khi bạn chỉ định rõ.
 
-In many cases, just having `char` is fine because you don't care about
-the sign of the data. But if you need signed or unsigned `char`s, you
-_must_ be specific:
+Nhiều trường hợp, có `char` là ổn vì bạn không quan tâm dấu của dữ
+liệu. Nhưng nếu cần signed hoặc unsigned `char`, bạn _phải_ chỉ định
+rõ:
 
 ``` {.c}
 char a;           // Could be signed or unsigned
@@ -119,27 +113,27 @@ signed char b;    // Definitely signed
 unsigned char c;  // Definitely unsigned
 ```
 
-OK, now, finally, we can figure out the range of numbers if we assume
-that a `char` is 8 bits and your system uses the virtually universal
-two's complement representation for signed and unsigned^[In general, if
-you have an $n$ bit two's complement number, the signed range is
-$-2^{n-1}$ to $2^{n-1}-1$. And the unsigned range is $0$ to $2^n-1$.].
+Được rồi, giờ cuối cùng, ta có thể tính miền các số nếu giả định
+`char` là 8 bit và hệ thống bạn dùng biểu diễn two's complement gần
+như phổ biến cho signed và unsigned^[Nói chung, nếu bạn có số two's
+complement $n$ bit, miền signed là $-2^{n-1}$ tới $2^{n-1}-1$. Còn
+miền unsigned là $0$ tới $2^n-1$.].
 
-So, assuming those constraints, we can finally figure our ranges:
+Với các ràng buộc đó, cuối cùng ta có miền:
 
-|`char` type|Minimum|Maximum|
+|Kiểu `char`|Min|Max|
 |:-|-:|-:|
 |`signed char`|`-128`|`127`|
 |`unsigned char`|`0`|`255`|
 
-And the ranges for `char` are implementation-defined.
+Và miền cho `char` là implementation-defined.
 [i[`unsigned char` type]>]
 [i[`signed char` type]>]
 
-Let me get this straight. `char` is actually a number, so can we do math
-on it?
+Cho tôi xác nhận lại. `char` thực ra là một số, vậy ta làm toán với
+nó được không?
 
-Yup! Just remember to keep things in the range of a `char`!
+Được! Chỉ cần nhớ giữ mọi thứ trong miền của `char`!
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -153,18 +147,17 @@ int main(void)
 ```
 
 [i[`'` single quote]<]
-What about those constant characters in single quotes, like `'B'`? How
-does that have a numeric value?
+Thế còn các hằng ký tự trong dấu nháy đơn như `'B'`? Làm sao nó có
+giá trị số?
 
-The spec is also hand-wavey here, since C isn't designed to run on a
-single type of underlying system.
+Spec ở đây cũng mơ hồ, vì C không được thiết kế để chạy trên một kiểu
+hệ thống nền duy nhất.
 
-But let's just assume for the moment that your character set is based on
-[flw[ASCII|ASCII]] for at least the first 128 characters. In that case,
-the character constant will be converted to a `char` whose value is the
-same as the ASCII value of the character.
+Nhưng cứ giả định tạm rằng bộ ký tự của bạn dựa trên [flw[ASCII|ASCII]]
+ít nhất cho 128 ký tự đầu. Trường hợp đó, hằng ký tự sẽ được chuyển
+thành một `char` có giá trị bằng giá trị ASCII của ký tự đó.
 
-That was a mouthful. Let's just have an example:
+Nghe nhiều nhỉ. Xem ví dụ:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -178,41 +171,41 @@ int main(void)
 }
 ```
 
-This depends on your execution environment and the [flw[character set
-used|List_of_information_system_character_sets]]. One of the most
-popular character sets today is [flw[Unicode|Unicode]] (which is a
-superset of ASCII), so for your basic 0-9, A-Z, a-z and punctuation,
-you'll almost certainly get the ASCII values out of them.
+Chuyện này tuỳ vào môi trường thực thi và [flw[bộ ký tự được
+dùng|List_of_information_system_character_sets]]. Một trong những bộ
+ký tự phổ biến nhất hiện nay là [flw[Unicode|Unicode]] (vốn là tập
+cha của ASCII), nên với các 0-9, A-Z, a-z và dấu câu cơ bản, bạn gần
+như chắc chắn lấy ra được giá trị ASCII.
 [i[`'` single quote]>]
 [i[`char` type]>]
 [i[Types-->character]>]
 
-## More Integer Types: `short`, `long`, `long long`
+## Thêm kiểu nguyên: `short`, `long`, `long long`
 
-So far we've just generally been using two integer types:
+Tới giờ nói chung ta mới dùng hai kiểu số nguyên:
 
 * `char`
 * `int`
 
-and we recently learned about the unsigned variants of the integer
-types. And we learned that `char` was secretly a small `int` in
-disguise. So we know the `int`s can come in multiple bit sizes.
+và gần đây học thêm các biến thể unsigned của các kiểu nguyên. Và ta
+đã biết `char` bí mật là một `int` nhỏ trá hình. Nên ta biết `int`
+có thể tới với nhiều kích cỡ bit.
 
-But there are a couple more integer types we should look at, and the
-minimum ranges they can hold. (Your implementation probably has wider
-ranges than the spec requires, but the ranges here are the ones you can
-be **certain** are portably available.)
+Nhưng còn vài kiểu nguyên nữa ta nên xem, và miền tối thiểu chúng có
+thể chứa. (Cài đặt của bạn có thể có miền rộng hơn so với spec yêu
+cầu, nhưng các miền ở đây là cái bạn có thể **chắc chắn** có portable
+khắp nơi.)
 
-The header file `<limits.h>` defines macros that hold the ranges for
-various types; rely on that to be sure, and _never hardcode or assume
-these values_.
+File header `<limits.h>` định nghĩa các macro chứa miền cho các kiểu
+khác nhau; dựa vào đó cho chắc, và _đừng bao giờ hard-code hay giả
+định các giá trị này_.
 
 [i[`short` type]<]
 [i[`long` type]<]
 [i[`long long` type]<]
-These additional types are `short int`, `long int`, and `long long int`.
-Commonly, when using these types, C developers leave the `int` part off
-(e.g. `long long`), and the compiler is perfectly happy.
+Các kiểu thêm này là `short int`, `long int`, và `long long int`. Khi
+dùng các kiểu này, dev C thường bỏ phần `int` đi (ví dụ `long long`),
+và compiler vẫn vui vẻ.
 
 ``` {.c}
 // These two lines are equivalent:
@@ -224,14 +217,13 @@ short int x;
 short x;
 ```
 
-Let's take a look at the integer data types and sizes in ascending
-order, grouped by signedness. Again, these minimum and maximum limits
-are what you are portably guaranteed by the spec; your system probably
-has wider ranges.
+Xem các kiểu dữ liệu nguyên và kích cỡ theo thứ tự tăng, nhóm theo
+tính signed. Lần nữa, các giới hạn min/max này là cái spec đảm bảo
+portable; hệ thống của bạn có thể có miền rộng hơn.
 
-|Type|Minimum Bytes|Minimum Value|Maximum Value|
+|Kiểu|Min Bytes|Min|Max|
 |:-|-:|-:|-:|
-|`char`|1|-128 or 0|127 or 255^[Depends on if a `char` defaults to `signed char` or `unsigned char`]|
+|`char`|1|-128 or 0|127 or 255^[Tuỳ vào `char` mặc định là `signed char` hay `unsigned char`]|
 |`signed char`|1|-128|127|
 |`short`|2|-32768|32767|
 |`int`|2|-32768|32767|
@@ -243,22 +235,22 @@ has wider ranges.
 |`unsigned long`|4|0|4294967295|
 |`unsigned long long`|8|0|18446744073709551615|
 
-There is no `long long long` type. You can't just keep adding `long`s
-like that. Don't be silly.
+Không có kiểu `long long long`. Bạn không thể cứ thêm `long` vào thế.
+Đừng ngốc.
 
-> Two's complement fans might have noticed something funny about those
-> numbers. Why does, for example, the `signed char` stop at -127 instead
-> of -128? Remember: these are only the minimums required by the spec.
-> Some number representations (like [flw[sign and
+> Fan two's complement có thể đã nhận ra gì đó hài về các số đó. Ví
+> dụ, vì sao `signed char` dừng ở -127 chứ không phải -128? Nhớ: đây
+> chỉ là tối thiểu spec yêu cầu. Vài cách biểu diễn số (như [flw[sign
+> and
 > magnitude|Signed_number_representations#Signed_magnitude_representation]])
-> top off at ±127.
+> chặn ở ±127.
 
-Let's run the same table on my 64-bit, two's complement system and see
-what comes out:
+Chạy lại bảng đó trên hệ thống 64-bit two's complement của tôi xem
+ra gì:
 
-|Type|My Bytes|Minimum Value|Maximum Value|
+|Kiểu|My Bytes|Min|Max|
 |:-|-:|-:|-:|
-|`char`|1|-128|127^[My `char` is signed.]|
+|`char`|1|-128|127^[`char` của tôi là signed.]|
 |`signed char`|1|-128|127|
 |`short`|2|-32768|32767|
 |`int`|4|-2147483648|2147483647|
@@ -270,12 +262,12 @@ what comes out:
 |`unsigned long`|8|0|18446744073709551615|
 |`unsigned long long`|8|0|18446744073709551615|
 
-That's a little more sensible, but we can see how my system has larger
-limits than the minimums in the specification.
+Hợp lý hơn chút, nhưng ta có thể thấy hệ thống của tôi có giới hạn
+lớn hơn so với tối thiểu trong spec.
 
-[So what are the macros in `<limits.h>`?]{#limits-macros}
+[Vậy các macro trong `<limits.h>` là gì?]{#limits-macros}
 
-|Type|Min Macro|Max Macro|
+|Kiểu|Min Macro|Max Macro|
 |:-|:-|:-|
 |`char`|`CHAR_MIN`|`CHAR_MAX`|
 |`signed char`|`SCHAR_MIN`|`SCHAR_MAX`|
@@ -289,20 +281,18 @@ limits than the minimums in the specification.
 |`unsigned long`|`0`|`ULONG_MAX`|
 |`unsigned long long`|`0`|`ULLONG_MAX`|
 
-Notice there's a way hidden in there to determine if a system uses
-signed or unsigned `char`s. If `CHAR_MAX == UCHAR_MAX`, it must be
-unsigned.
+Chú ý có cách kín đáo ở đó để xác định hệ thống dùng `char` signed
+hay unsigned. Nếu `CHAR_MAX == UCHAR_MAX`, nó phải là unsigned.
 
-Also notice there's no minimum macro for the `unsigned`
-variants---they're just `0`.
+Cũng chú ý không có macro min cho các biến thể `unsigned`, chúng chỉ
+là `0`.
 [i[`short` type]>]
 [i[`long` type]>]
 [i[`long long` type]>]
 
-## More Float: `double` and `long double`
+## Thêm float: `double` và `long double`
 
-Let's see what the  spec has to say about floating point numbers in
-§5.2.4.2.2¶1-2:
+Xem spec nói gì về số dấu phẩy động ở §5.2.4.2.2¶1-2:
 
 >The following parameters are used to define the model for each
 >floating-point type:
@@ -319,26 +309,24 @@ Let's see what the  spec has to say about floating point numbers in
 >
 >> $x=sb^e\sum\limits_{k=1}^p f_kb^{-k},$\ \ \ \ $e_{min}\le e\le e_{max}$
 
-I hope that cleared it right up for you.
+Hy vọng mọi chuyện giờ đã sáng tỏ với bạn.
 
-Okay, fine. Let's step back a bit and see what's practical.
+Thôi được. Lùi lại một bước xem cái gì thực tế.
 
-Note: we refer to a bunch of macros in this section. They can be found
-in the header `<float.h>`.
+Chú ý: ta nhắc đến một đống macro trong mục này. Chúng nằm ở header
+`<float.h>`.
 
-Floating point number are encoded in a specific sequence of bits
-([flw[IEEE-754 format|IEEE_754]] is tremendously popular) in bytes.
+Số dấu phẩy động được mã hoá theo một chuỗi bit cụ thể ([flw[định
+dạng IEEE-754|IEEE_754]] vô cùng phổ biến) trong các byte.
 
-Diving in a bit more, the number is basically represented as the
-_significand_ (which is the number part---the significant digits
-themselves, also sometimes referred to as the _mantissa_) and the
-_exponent_, which is what power to raise the digits to. Recall that a
-negative exponent can make a number smaller.
+Đào sâu thêm, số đó về cơ bản được biểu diễn là _significand_ (phần
+số, bản thân các chữ số có nghĩa, đôi khi còn gọi là _mantissa_) và
+_exponent_ (số mũ), tức luỹ thừa mà ta dùng để nâng các chữ số lên.
+Nhớ rằng số mũ âm làm số nhỏ đi.
 
-Imagine we're using $10$ as a number to raise by an exponent. We could
-represent the following numbers by using a significand of $12345$, and
-exponents of $-3$, $4$, and $0$ to encode the following floating point
-values:
+Tưởng tượng ta dùng $10$ làm số để nâng theo số mũ. Ta có thể biểu
+diễn các số sau bằng cách dùng significand là $12345$, và số mũ là
+$-3$, $4$, và $0$ để mã hoá các giá trị dấu phẩy động sau:
 
 $12345\times10^{-3}=12.345$
 
@@ -346,69 +334,67 @@ $12345\times10^4=123450000$
 
 $12345\times10^0=12345$
 
-For all those numbers, the significand stays the same. The only
-difference is the exponent.
+Với tất cả các số đó, significand giữ nguyên. Khác biệt duy nhất là
+số mũ.
 
-On your machine, the base for the exponent is probably $2$, not $10$,
-since computers like binary. You can check it by printing the
-`FLT_RADIX` macro.
+Trên máy bạn, base của số mũ có lẽ là $2$, không phải $10$, vì máy
+tính thích nhị phân. Bạn có thể kiểm bằng cách in macro `FLT_RADIX`.
 
-So we have a number that's represented by a number of bytes, encoded in
-some way. Because there are a limited number of bit patterns, a limited
-number of floating point numbers can be represented.
+Vậy ta có một số biểu diễn bằng một số byte, mã hoá theo cách nào đó.
+Vì số mẫu bit có giới hạn, số dấu phẩy động biểu diễn được cũng có
+giới hạn.
 
-But more particularly, only a certain number of significant decimal
-digits can be represented accurately.
+Cụ thể hơn, chỉ một số chữ số thập phân có nghĩa nhất định được biểu
+diễn chính xác.
 
-How can you get more? You can use larger data types!
+Làm sao để có nhiều hơn? Bạn dùng kiểu dữ liệu lớn hơn!
 
-And we have a couple of them. We know about `float` already, but for
-more precision we have `double`. And for even more precision, we have
-`long double` (unrelated to `long int` except by name).
+Và ta có vài cái. Ta biết `float` rồi, nhưng để có chính xác hơn thì
+có `double`. Và cho chính xác hơn nữa, có `long double` (không liên
+quan tới `long int` ngoài cái tên).
 
-The spec doesn't go into how many bytes of storage each type should
-take, but on my system, we can see the relative size increases:
+Spec không ghi mỗi kiểu nên chiếm bao nhiêu byte lưu trữ, nhưng trên
+máy tôi, ta có thể thấy kích cỡ tăng tương đối:
 
 [i[`double` type]<]
 [i[`long double` type]<]
 
-|Type|`sizeof`|
+|Kiểu|`sizeof`|
 |:-|-:|
 |`float`|4|
 |`double`|8|
 |`long double`|16|
 
-So each of the types (on my system) uses those additional bits for more
-precision.
+Nên mỗi kiểu (trên máy tôi) dùng các bit thêm đó cho độ chính xác cao
+hơn.
 
-But _how much_ precision are we talking, here? How many decimal numbers
-can be represented by these values?
+Nhưng _chính xác tới đâu_? Bao nhiêu số thập phân có thể biểu diễn
+được bằng các giá trị này?
 
-Well, C provides us with a bunch of macros in `<float.h>` to help us
-figure that out.
+Thì C cung cấp cho ta một đống macro trong `<float.h>` để giúp hình
+dung chuyện đó.
 
-It gets a little wonky if you are using a base-2 (binary) system for
-storing the numbers (which is virtually everyone on the planet, probably
-including you), but bear with me while we figure it out.
+Hơi lắt léo nếu bạn dùng hệ base-2 (nhị phân) để lưu số (thực ra là
+gần như mọi người trên hành tinh này, có lẽ kể cả bạn), nhưng chịu
+khó theo khi ta tính ra.
 [i[`double` type]>]
 [i[`long double` type]>]
 
-### How Many Decimal Digits?
+### Bao nhiêu chữ số thập phân?
 
 [i[Significant digits]<]
-The million dollar question is, "How many significant decimal digits can
-I store in a given floating point type so that I get out the same
-decimal number when I print it?"
+Câu hỏi triệu đô là, "Tôi có thể lưu bao nhiêu chữ số thập phân có
+nghĩa trong một kiểu dấu phẩy động nhất định để lấy ra đúng số thập
+phân đó khi in?"
 
-The number of decimal digits you can store in a floating point type and
-surely get the same number back out when you print it is given by these
-macros:
+Số chữ số thập phân bạn có thể lưu trong kiểu dấu phẩy động và chắc
+chắn lấy lại đúng số đó khi in được cho bởi các macro sau:
 
 [i[`FLT_DIG` macro]<]
 [i[`DBL_DIG` macro]<]
 [i[`LDBL_DIG` macro]<]
 
-|Type|Decimal Digits You Can Store|Minimum|My System|
+|Kiểu|Chữ số thập phân lưu được|Min|Máy tôi|
 |:-|-:|-:|
 |`float`|`FLT_DIG`|6|6|
 |`double`|`DBL_DIG`|10|15|
@@ -417,14 +403,13 @@ macros:
 [i[`DBL_DIG` macro]>]
 [i[`LDBL_DIG` macro]>]
 
-On my system, `FLT_DIG` is 6, so I can be sure that if I print out a 6
-digit `float`, I'll get the same thing back. (It could be more
-digits---some numbers will come back correctly with more digits. But 6
-is definitely coming back.)
+Trên máy tôi, `FLT_DIG` là 6, nên tôi có thể chắc rằng nếu in ra
+`float` 6 chữ số, tôi sẽ lấy lại đúng thứ đó. (Có thể nhiều chữ số
+hơn, một số số sẽ trở về đúng với nhiều chữ số hơn. Nhưng 6 thì chắc
+chắn trở về.)
 
-For example, printing out `float`s following this pattern of increasing
-digits, we apparently make it to 8 digits before something goes wrong,
-but after that we're back to 7 correct digits.
+Ví dụ, in ra các `float` theo mẫu tăng dần chữ số, có vẻ ta tới 8 chữ
+số trước khi có gì đó sai, nhưng sau đó ta quay về 7 chữ số đúng.
 
 ``` {.default}
 0.12345
@@ -435,14 +420,14 @@ but after that we're back to 7 correct digits.
 0.1234567910
 ```
 
-Let's do another demo. In this code we'll have two `float`s that both
-hold numbers that have `FLT_DIG` significant decimal digits^[This
-program runs as its comments indicate on a system with `FLT_DIG` of `6`
-that uses IEEE-754 base-2 floating point numbers. Otherwise, you might
-get different output.]. Then we add those together, for what should be
-12 significant decimal digits. But that's more than we can store in a
-`float` and correctly recover as a string---so we see when we print it
-out, things start going wrong after the 7th significant digit.
+Làm demo nữa. Trong code này ta có hai `float` đều chứa số có
+`FLT_DIG` chữ số thập phân có nghĩa^[Chương trình này chạy như bình
+luận cho biết trên hệ thống có `FLT_DIG` là `6`, dùng số dấu phẩy
+động IEEE-754 base-2. Ngoài ra, bạn có thể có output khác.]. Rồi ta
+cộng chúng lại, đáng lẽ được 12 chữ số thập phân có nghĩa. Nhưng thế
+nhiều hơn ta có thể lưu trong một `float` và khôi phục về chuỗi đúng
+được, nên ta thấy khi in ra, mọi thứ bắt đầu sai sau chữ số có nghĩa
+thứ 7.
 
 
 ``` {.c .numberLines}
@@ -467,129 +452,123 @@ int main(void)
 }
 ```
 
-(The above code has an `f` after the numeric constants---this indicates
-that the constant is type `float`, as opposed to the default of
-`double`. More on this later.)
+(Code trên có `f` sau các hằng số, cái này cho biết hằng đó là kiểu
+`float`, khác với mặc định là `double`. Sẽ nói thêm sau.)
 
-Remember that `FLT_DIG` is the safe number of digits you can store in a
-`float` and retrieve correctly.
+Nhớ rằng `FLT_DIG` là số chữ số an toàn bạn có thể lưu trong một
+`float` và lấy lại đúng.
 
-Sometimes you might get one or two more out of it. But sometimes you'll
-only get `FLT_DIG` digits back. The sure thing: if you store any number
-of digits up to and including `FLT_DIG` in a `float`, you're sure to get
-them back correctly.
+Đôi khi bạn có thể lấy ra thêm một hai chữ số. Nhưng đôi khi chỉ có
+`FLT_DIG` chữ số trở về. Điều chắc chắn: nếu bạn lưu bất kỳ số chữ số
+nào lên tới và bao gồm `FLT_DIG` trong một `float`, bạn chắc chắn lấy
+lại chúng đúng.
 
-So that's the story. `FLT_DIG`. The End.
+Vậy là hết chuyện. `FLT_DIG`. Hết.
 
 [i[`FLT_DIG` macro]>]
 
-...Or is it?
+...Hay chưa hết?
 
-### Converting to Decimal and Back
+### Chuyển sang thập phân và trở lại
 
-But storing a base 10 number in a floating point number and getting it
-back out is only half the story.
+Nhưng lưu số base 10 trong số dấu phẩy động và lấy ra chỉ mới là một
+nửa câu chuyện.
 
-Turns out floating point numbers can encode numbers that require more
-decimal places to print out completely. It's just that your big decimal
-number might not map to one of those numbers.
+Hoá ra số dấu phẩy động có thể mã hoá các số cần nhiều chữ số thập
+phân hơn để in ra đầy đủ. Chỉ là số thập phân lớn của bạn có thể
+không ánh xạ tới một trong các số đó.
 
-That is, when you look at floating point numbers from one to the next,
-there's a gap. If you try to encode a decimal number in that gap, it'll
-use the closest floating point number. That's why you can only encode
-`FLT_DIG` for a `float`.
+Tức là, khi nhìn các số dấu phẩy động đi từ cái này sang cái kế, có
+khoảng hở. Nếu bạn thử mã hoá một số thập phân trong khoảng hở đó, nó
+sẽ dùng số dấu phẩy động gần nhất. Đó là vì sao bạn chỉ có thể mã
+hoá `FLT_DIG` cho một `float`.
 
-But what about those floating point numbers that _aren't_ in the gap?
-How many places do you need to print those out accurately?
+Nhưng còn các số dấu phẩy động _không_ nằm trong khoảng hở thì sao?
+Cần bao nhiêu chữ số để in chúng ra chính xác?
 
-Another way to phrase this question is for any given floating point
-number, how many decimal digits do I have to preserve if I want to
-convert the decimal number back into an identical floating point number?
-That is, how many digits do I have to print in base 10 to recover
-**all** the digits in base 2 in the original number?
+Một cách đặt câu hỏi khác là với một số dấu phẩy động bất kỳ, tôi cần
+giữ bao nhiêu chữ số thập phân nếu muốn chuyển số thập phân đó ngược
+lại thành cùng số dấu phẩy động? Tức là tôi phải in bao nhiêu chữ số
+base 10 để khôi phục **tất cả** các chữ số base 2 trong số gốc?
 
-Sometimes it might only be a few. But to be sure, you'll want to convert
-to decimal with a certain safe number of decimal places. That number is
-encoded in the following macros:
+Đôi khi có thể chỉ vài cái. Nhưng cho chắc, bạn sẽ muốn chuyển sang
+thập phân với một số vị trí thập phân an toàn nhất định. Số đó được
+mã hoá trong các macro sau:
 
 [i[`FLT_DECMIAL_DIG` macro]<]
 [i[`DBL_DECMIAL_DIG` macro]<]
 [i[`LDBL_DECMIAL_DIG` macro]<]
 [i[`DECMIAL_DIG` macro]<]
 
-|Macro|Description|
+|Macro|Mô tả|
 |-----------|---------------------------------------------------|
-|`FLT_DECIMAL_DIG`|Number of decimal digits encoded in a `float`.|
-|`DBL_DECIMAL_DIG`|Number of decimal digits encoded in a `double`.|
-|`LDBL_DECIMAL_DIG`|Number of decimal digits encoded in a `long double`.|
-|`DECIMAL_DIG`|Same as the widest encoding, `LDBL_DECIMAL_DIG`.|
+|`FLT_DECIMAL_DIG`|Số chữ số thập phân mã hoá trong `float`.|
+|`DBL_DECIMAL_DIG`|Số chữ số thập phân mã hoá trong `double`.|
+|`LDBL_DECIMAL_DIG`|Số chữ số thập phân mã hoá trong `long double`.|
+|`DECIMAL_DIG`|Giống như cách mã hoá rộng nhất, `LDBL_DECIMAL_DIG`.|
 
 [i[`LDBL_DECMIAL_DIG` macro]>]
 [i[`DECMIAL_DIG` macro]>]
 
-Let's see an example where `DBL_DIG` is 15 (so that's all we can have in
-a constant), but `DBL_DECIMAL_DIG` is 17 (so we have to convert to 17
-decimal numbers to preserve all the bits of the original `double`).
+Xem ví dụ với `DBL_DIG` là 15 (nên đó là hết ta có thể có trong một
+hằng), nhưng `DBL_DECIMAL_DIG` là 17 (nên ta phải chuyển sang 17 số
+thập phân để giữ hết mọi bit của `double` gốc).
 
-Let's assign the 15 significant digit number `0.123456789012345` to `x`,
-and let's assign the 1 significant digit number `0.0000000000000006` to
-`y`.
+Gán số có 15 chữ số có nghĩa `0.123456789012345` cho `x`, và gán số có
+1 chữ số có nghĩa `0.0000000000000006` cho `y`.
 
 ``` {.default}
 x is exact: 0.12345678901234500    Printed to 17 decimal places
 y is exact: 0.00000000000000060
 ```
 
-But let's add them together. This should give `0.1234567890123456`, but
-that's more than `DBL_DIG`, so strange things might happen... let's
-look:
+Nhưng cộng chúng lại. Đáng lẽ ra `0.1234567890123456`, nhưng thế là
+nhiều hơn `DBL_DIG`, nên chuyện lạ có thể xảy ra... xem:
 
 ``` {.default}
 x + y not quite right: 0.12345678901234559    Should end in 4560!
 ```
 
-That's what we get for printing more than `DBL_DIG`, right? But check
-this out... that number, above, is exactly representable as it is!
+Đó là cái ta có vì in nhiều hơn `DBL_DIG`, đúng không? Nhưng xem
+này... số đó, ở trên, được biểu diễn chính xác đúng y như vậy!
 
-If we assign `0.12345678901234559` (17 digits) to `z` and print it, we
-get:
+Nếu ta gán `0.12345678901234559` (17 chữ số) cho `z` rồi in, ta có:
 
 ``` {.default}
 z is exact: 0.12345678901234559   17 digits correct! More than DBL_DIG!
 ```
 
-If we'd truncated `z` down to 15 digits, it wouldn't have been the same
-number. That's why to preserve all the bits of a `double`, we need
-`DBL_DECIMAL_DIG` and not just the lesser `DBL_DIG`.
+Nếu ta cắt `z` về 15 chữ số, nó sẽ không còn là cùng một số. Đó là vì
+sao để giữ toàn bộ bit của một `double`, ta cần `DBL_DECIMAL_DIG`, chứ
+không chỉ `DBL_DIG` nhỏ hơn.
 
 [i[`DBL_DECMIAL_DIG` macro]>]
 
-All that being said, it's clear that when we're messing with decimal
-numbers in general, it's not safe to print more than [i[`FLT_DIG`
-macro]]`FLT_DIG`, [i[`DBL_DIG` macro]]`DBL_DIG`, or [i[`LDBL_DIG`
-macro]]`LDBL_DIG` digits to be sensible in relation to the original base
-10 numbers and any subsequent math.
+Tất cả đã nói, rõ ràng khi nghịch số thập phân nói chung, không an
+toàn khi in nhiều hơn [i[`FLT_DIG`
+macro]]`FLT_DIG`, [i[`DBL_DIG` macro]]`DBL_DIG`, hay [i[`LDBL_DIG`
+macro]]`LDBL_DIG` chữ số để hợp lý tương ứng với các số base 10 gốc
+và bất kỳ phép toán tiếp theo.
 
-But when converting from `float` to a decimal representation and _back_
-to `float`, definitely use `FLT_DECIMAL_DIG` to do that so that all the
-bits are preserved exactly. [i[`FLT_DECMIAL_DIG` macro]>]
+Nhưng khi chuyển từ `float` sang biểu diễn thập phân rồi _trở lại_
+`float`, chắc chắn dùng `FLT_DECIMAL_DIG` để bảo toàn chính xác mọi
+bit. [i[`FLT_DECMIAL_DIG` macro]>]
 
 [i[Significant digits]>]
 
-## Constant Numeric Types
+## Kiểu hằng số
 
-When you write down a constant number, like `1234`, it has a type. But
-what type is it? Let's look at how C decides what type the constant
-is, and how to force it to choose a specific type.
+Khi bạn viết một số hằng, như `1234`, nó có kiểu. Nhưng kiểu gì? Xem
+cách C quyết định kiểu hằng là gì, và cách ép nó chọn kiểu cụ thể.
 
-### Hexadecimal and Octal
+### Hệ cơ số 16 và cơ số 8
 
-In addition to good ol' decimal like Grandma used to bake, C also
-supports constants of different bases.
+Ngoài hệ thập phân cũ kỹ như bà ngoại hay nướng, C còn hỗ trợ hằng ở
+các hệ cơ số khác.
 
 [i[`0x` hexadecimal]<]
 
-If you lead a number with `0x`, it is read as a hex number:
+Nếu bạn mở đầu một số bằng `0x`, nó được đọc như số hex:
 
 ``` {.c}
 int a = 0x1A2B;   // Hexadecimal
@@ -602,7 +581,7 @@ printf("%x", a);  // Print a hex number, "1a2b"
 
 
 [i[`0` octal]<]
-If you lead a number with a `0`, it is read as an octal number:
+Nếu bạn mở đầu một số bằng `0`, nó được đọc như số bát phân:
 
 ``` {.c}
 int a = 012;
@@ -610,9 +589,9 @@ int a = 012;
 printf("%o\n", a);  // Print an octal number, "12"
 ```
 
-This is particularly problematic for beginner programmers who try to pad
-decimal numbers on the left with `0` to line things up nice and pretty,
-inadvertently changing the base of the number:
+Cái này đặc biệt rắc rối với lập trình viên mới, khi họ cố độn số
+thập phân bên trái bằng `0` để canh cho đẹp, vô tình đổi luôn cơ số
+của số:
 
 ``` {.c}
 int x = 11111;  // Decimal 11111
@@ -622,17 +601,17 @@ int z = 01111;  // Decimal 585 (Octal 1111)
 
 [i[`0` octal]>]
 
-#### A Note on Binary
+#### Ghi chú về nhị phân
 
 [i[`0b` binary]<]
 
-An unofficial extension^[It's really surprising to me that C doesn't
-have this in the spec yet. In the C99 Rationale document, they write, "A
-proposal to add binary constants was rejected due to lack of precedent
-and insufficient utility." Which seems kind of silly in light of some of
-the other features they kitchen-sinked in there! I'll bet one of the
-next releases has it.] in many C compilers allows you to represent a
-binary number with a `0b` prefix:
+Một mở rộng không chính thức^[Tôi khá ngạc nhiên là C chưa có cái
+này trong spec. Trong tài liệu C99 Rationale, họ viết, "A proposal
+to add binary constants was rejected due to lack of precedent and
+insufficient utility." Nghe hơi ngốc khi so với một số tính năng
+khác họ tống vào! Tôi cược một trong các bản phát hành tới sẽ có.]
+trong nhiều compiler C cho phép bạn biểu diễn số nhị phân với tiền
+tố `0b`:
 
 ``` {.c}
 int x = 0b101010;    // Binary 101010
@@ -640,21 +619,20 @@ int x = 0b101010;    // Binary 101010
 printf("%d\n", x);   // Prints 42 decimal
 ```
 
-There's no `printf()` format specifier for printing a binary number. You
-have to do it a character at a time with bitwise operators.
+Không có format specifier của `printf()` nào để in số nhị phân. Bạn
+phải làm từng ký tự một bằng toán tử bitwise.
 
 [i[`0b` binary]>]
 
-### Integer Constants
+### Hằng số nguyên
 
 [i[Integer constants]<]
 
-You can force a constant integer to be a certain type by appending a
-suffix to it that indicates the type.
+Bạn có thể ép một hằng nguyên thành kiểu cụ thể bằng cách gắn hậu tố
+chỉ kiểu đó.
 
-We'll do some assignments to demo, but most often devs leave off the
-suffixes unless needed to be precise. The compiler is pretty good at
-making sure the types are compatible.
+Ta sẽ làm vài gán để demo, nhưng dev hầu hết bỏ hậu tố trừ khi cần
+chính xác. Compiler khá giỏi trong việc đảm bảo các kiểu tương thích.
 
 [i[`U` unsigned constant]<]
 [i[`L` long constant]<]
@@ -672,50 +650,49 @@ unsigned long int      x = 1234UL;
 unsigned long long int x = 1234ULL;
 ```
 
-The suffix can be uppercase or lowercase. And the `U` and `L` or `LL`
-can appear either one first.
+Hậu tố có thể viết hoa hay thường. Và `U` cùng `L` hay `LL` có thể
+xuất hiện cái nào trước cũng được.
 
-|Type|Suffix|
+|Kiểu|Hậu tố|
 |:-|:-|
-|`int`|None|
+|`int`|Không|
 |`long int`|`L`|
 |`long long int`|`LL`|
 |`unsigned int`|`U`|
 |`unsigned long int`|`UL`|
 |`unsigned long long int`|`ULL`|
 
-I mentioned in the table that "no suffix" means `int`... but it's
-actually more complex than that.
+Tôi có nhắc trong bảng rằng "không hậu tố" nghĩa là `int`... nhưng
+thực tế phức tạp hơn thế.
 
-So what happens when you have an unsuffixed number like:
+Vậy chuyện gì xảy ra khi bạn có số không hậu tố như:
 
 ``` {.c}
 int x = 1234;
 ```
 
-What type is it?
+Nó kiểu gì?
 
-What C will generally do is choose the smallest type from `int` up that
-can hold the value.
+Cái C thường làm là chọn kiểu nhỏ nhất từ `int` trở lên có thể chứa
+giá trị đó.
 
-But specifically, that depends on the number's base (decimal, hex, or
-octal), as well.
+Nhưng cụ thể, điều đó cũng tuỳ vào cơ số của số (thập phân, hex, hay
+bát phân).
 
-The spec has a great table indicating which type gets used for what
-unsuffixed value. In fact, I'm just going to copy it wholesale right
-here.
+Spec có một bảng ngon chỉ ra kiểu nào được dùng cho giá trị không
+hậu tố nào. Thực ra, tôi sẽ chỉ chép y nguyên vào đây.
 
-C11 §6.4.4.1¶5 reads, "The type of an integer constant is the first of
+C11 §6.4.4.1¶5 ghi, "The type of an integer constant is the first of
 the first of the corresponding list in which its value can be
 represented."
 
-And then goes on to show this table:
+Rồi tiếp theo là bảng này:
 
 +----------------+------------------------+-------------------------+
-|Suffix          |Decimal Constant        |Octal or Hexadecimal\    |
-|                |                        |Constant                 |
+|Hậu tố          |Hằng thập phân          |Hằng bát phân hoặc\      |
+|                |                        |hexadecimal              |
 +:===============+:=======================+:========================+
-|none            |`int`\                  |`int`\                   |
+|không có        |`int`\                  |`int`\                   |
 |                |`long int`              |`unsigned int`\          |
 |                |                        |`long int`\              |
 |                |                        |`unsigned long int`\     |
@@ -723,27 +700,27 @@ And then goes on to show this table:
 |                |                        |`unsigned long long int`\|
 |                |                        |                         |
 +----------------+------------------------+-------------------------+
-|`u` or `U`      |`unsigned int`\         |`unsigned int`\          |
+|`u` hay `U`     |`unsigned int`\         |`unsigned int`\          |
 |                |`unsigned long int`\    |`unsigned long int`\     |
 |                |`unsigned long long int`|`unsigned long long int`\|
 |                |                        |                         |
 +----------------+------------------------+-------------------------+
-|`l` or `L`      |`long int`\             |`long int`\              |
+|`l` hay `L`     |`long int`\             |`long int`\              |
 |                |`long long int`         |`unsigned long int`\     |
 |                |                        |`long long int`\         |
 |                |                        |`unsigned long long int`\|
 |                |                        |                         |
 +----------------+------------------------+-------------------------+
-|Both `u` or `U`\|`unsigned long int`\    |`unsigned long int`\     |
-|and `l` or `L`  |`unsigned long long int`|`unsigned long long int`\|
+|Cả `u` hay `U`\ |`unsigned long int`\    |`unsigned long int`\     |
+|và `l` hay `L`  |`unsigned long long int`|`unsigned long long int`\|
 |                |                        |                         |
 +----------------+------------------------+-------------------------+
-|`ll` or `LL`    |`long long int`         |`long long int`\         |
+|`ll` hay `LL`   |`long long int`         |`long long int`\         |
 |                |                        |`unsigned long long int`\|
 |                |                        |                         |
 +----------------+------------------------+-------------------------+
-|Both `u` or `U`\|`unsigned long long int`|`unsigned long long int` |
-|and `ll` or `LL`|                        |                         |
+|Cả `u` hay `U`\ |`unsigned long long int`|`unsigned long long int` |
+|và `ll` hay `LL`|                        |                         |
 +----------------+------------------------+-------------------------+
 
 [i[`L` long constant]>]
@@ -751,39 +728,39 @@ And then goes on to show this table:
 [i[`UL` unsigned long constant]>]
 [i[`ULL` unsigned long long constant]>]
 
-What that's saying is that, for example, if you specify a number like
-`123456789U`, first C will see if it can be `unsigned int`. If it
-doesn't fit there, it'll try `unsigned long int`. And then `unsigned
-long long int`. It'll use the smallest type that can hold the number.
+Ý nghĩa là, chẳng hạn, nếu bạn chỉ định một số như `123456789U`, C
+sẽ thử xem nó có vừa `unsigned int` không. Nếu không vừa, nó sẽ thử
+`unsigned long int`. Rồi `unsigned long long int`. Nó sẽ dùng kiểu
+nhỏ nhất có thể chứa số đó.
 
 [i[`U` unsigned constant]>]
 
 [i[Integer constants]>]
 
-### Floating Point Constants
+### Hằng dấu phẩy động
 
 [i[Floating point constants]<]
 
-You'd think that a floating point constant like `1.23` would have a
-default type of `float`, right?
+Bạn nghĩ hằng dấu phẩy động như `1.23` sẽ có kiểu mặc định là `float`
+chứ?
 
-Surprise! Turns out unsuffiexed floating point numbers are type
-`double`! Happy belated birthday!
+Bất ngờ! Hoá ra số dấu phẩy động không hậu tố là kiểu `double`! Chúc
+mừng sinh nhật muộn nhé!
 
 [i[`F` float constant]<]
 [i[`L` long double constant]<]
 
-You can force it to be of type `float` by appending an `f` (or
-`F`---it's case-insensitive). You can force it to be of type `long
-double` by appending `l` (or `L`).
+Bạn có thể ép nó thành kiểu `float` bằng cách gắn `f` (hoặc `F`,
+không phân biệt hoa thường). Bạn có thể ép nó thành `long double`
+bằng cách gắn `l` (hoặc `L`).
 
-|Type|Suffix|
+|Kiểu|Hậu tố|
 |:-|:-|
 |`float`|`F`|
-|`double`|None|
+|`double`|Không|
 |`long double`|`L`|
 
-For example:
+Ví dụ:
 
 ``` {.c}
 float x       = 3.14f;
@@ -794,65 +771,64 @@ long double x = 3.14L;
 [i[`F` float constant]>]
 [i[`L` long double constant]>]
 
-This whole time, though, we've just been doing this, right?
+Suốt thời gian qua ta vẫn làm thế này, đúng không?
 
 ``` {.c}
 float x = 3.14;
 ```
 
-Isn't the left a `float` and the right a `double`? Yes! But C's pretty
-good with automatic numeric conversions, so it's more common to have an
-unsuffixed floating point constant than not. More on that later.
+Bên trái không phải `float` và bên phải `double` sao? Đúng vậy!
+Nhưng C khá giỏi với chuyển đổi số tự động, nên hằng dấu phẩy động
+không hậu tố còn phổ biến hơn có hậu tố. Sẽ nói thêm sau.
 
 [i[Floating point constants]>]
 
-#### Scientific Notation
+#### Ký hiệu khoa học
 
 [i[Scientific notation]<]
 
-Remember earlier when we talked about how a floating point number can be
-represented by a significand, base, and exponent?
+Nhớ trước đó ta nói về chuyện số dấu phẩy động có thể biểu diễn bởi
+significand, base, và exponent chứ?
 
-Well, there's a common way of writing such a number, shown here followed
-by it's more recognizable equivalent which is what you get when you
-actually run the math:
+Có một cách viết phổ biến cho số kiểu đó, thể hiện ở đây kèm cái
+tương đương dễ nhận hơn là thứ bạn có khi thực sự chạy tính toán:
 
 $1.2345\times10^3 = 1234.5$
 
-Writing numbers in the form $s\times b^e$ is called [flw[_scientific
-notation_|Scientific_notation]]. In C, these are written using "E
-notation", so these are equivalent:
+Viết số dạng $s\times b^e$ gọi là [flw[_scientific
+notation_|Scientific_notation]] (ký hiệu khoa học). Trong C, chúng
+được viết bằng "E notation", nên các cái này tương đương:
 
 |Scientific Notation|E notation|
 |:-|:-|
 |$1.2345\times10^{-3}=0.0012345$|`1.2345e-3`|
 |$1.2345\times10^8=123450000$|`1.2345e+8`|
 
-You can print a number in this notation with `%e`:
+Bạn có thể in số theo ký hiệu này với `%e`:
 
 ``` {.c}
 printf("%e\n", 123456.0);  // Prints 1.234560e+05
 ```
 
-A couple little fun facts about scientific notation:
+Vài sự thật vui về ký hiệu khoa học:
 
-* You don't have to write them with a single leading digit before the
-  decimal point. Any number of numbers can go in front.
+* Bạn không bắt buộc phải viết với đúng một chữ số trước dấu thập
+  phân. Có thể bao nhiêu chữ số cũng được đằng trước.
 
   ``` {.c}
   double x = 123.456e+3;  // 123456
   ```
 
-  However, when you print it, it will change the exponent so there is
-  only one digit in front of the decimal point.
+  Tuy nhiên khi in ra, nó sẽ đổi số mũ để chỉ có một chữ số trước
+  dấu thập phân.
 
-* The plus can be left off the exponent, as it's default, but this is
-  uncommon in practice from what I've seen.
+* Dấu cộng có thể bỏ ở số mũ, vì đó là mặc định, nhưng theo tôi thấy
+  ít thấy trong thực tế.
 
   ``` {.c}
   1.2345e10 == 1.2345e+10
   ```
-* You can apply the `F` or `L` suffixes to E-notation constants:
+* Bạn có thể áp hậu tố `F` hay `L` cho hằng E-notation:
 
   ``` {.c}
   1.2345e10F
@@ -861,26 +837,26 @@ A couple little fun facts about scientific notation:
 
 [i[Scientific notation]>]
 
-#### Hexadecimal Floating Point Constants
+#### Hằng dấu phẩy động hexadecimal
 
 [i[Hex floating point constants]<]
 
-But wait, there's more floating to be done!
+Nhưng khoan, còn nhiều dấu phẩy động để xử!
 
-Turns out there are hexadecimal floating point constants, as well!
+Hoá ra cũng có hằng dấu phẩy động hexadecimal!
 
-These work similar to decimal floating point numbers, but they begin
-with a `0x` just like integer numbers.
+Chúng hoạt động tương tự số dấu phẩy động thập phân, nhưng bắt đầu
+bằng `0x` y như số nguyên.
 
-The catch is that you _must_ specify an exponent, and this exponent
-produces a power of 2. That is: $2^x$.
+Điều lưu ý là bạn _phải_ chỉ định số mũ, và số mũ này tạo ra luỹ thừa
+của 2. Tức là: $2^x$.
 
-And then you use a `p` instead of an `e` when writing the number:
+Rồi bạn dùng `p` thay cho `e` khi viết số:
 
-So `0xa.1p3` is $10.0625\times2^3 == 80.5$.
+Nên `0xa.1p3` là $10.0625\times2^3 == 80.5$.
 
-When using floating point hex constants, 
-We can print hex scientific notation with `%a`:
+Khi dùng hằng hex dấu phẩy động,
+Ta có thể in hex scientific notation với `%a`:
 
 ``` {.c}
 double x = 0xa.1p3;
