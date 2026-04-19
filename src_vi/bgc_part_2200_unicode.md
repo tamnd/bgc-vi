@@ -3,131 +3,131 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Unicode, Wide Characters, and All That
+# Unicode, wide character, và mấy thứ đó
 
 [i[Unicode]<]
 
-Before we begin, note that this is an active area of language
-development in C as it works to get past some, erm, _growing pains_. Now
-that C23 has come out, updates here are probable.
+Trước khi bắt đầu, lưu ý đây là vùng ngôn ngữ C đang phát triển sôi
+động khi nó cố vượt qua vài, ờm, _cơn đau trưởng thành_. Giờ C23 đã
+ra mắt, cập nhật ở đây là khả năng cao.
 
-Most people are basically interested in the deceptively simple question,
-"How do I use such-and-such character set in C?" We'll get to that. But
-as we'll see, it might already work on your system. Or you might have to
-punt to a third-party library.
+Phần lớn mọi người về cơ bản quan tâm câu hỏi tưởng đơn giản nhưng
+lừa gạt, "Làm sao dùng bộ ký tự này-nọ trong C?" Ta sẽ tới đó. Nhưng
+như ta sẽ thấy, có khi nó đã chạy sẵn trên hệ của bạn rồi. Hoặc bạn
+có thể phải đổ qua thư viện bên thứ ba.
 
-We're going to talk about a lot of things this chapter---some are
-platform agnostic, and some are C-specific.
+Ta sẽ nói về khá nhiều thứ trong chương này, vài cái không phụ thuộc
+nền tảng, vài cái riêng của C.
 
-Let's get an outline first of what we're going to look at:
+Hãy xem sơ đồ những gì ta sắp xem:
 
-* Unicode background
-* Character encoding background
-* Source and Execution character Sets
-* Using Unicode and UTF-8
-* Using other character types like `wchar_t`, `char16_t`, and `char32_t`
+* Nền tảng Unicode
+* Nền tảng encoding ký tự
+* Bộ ký tự nguồn và bộ ký tự thực thi
+* Dùng Unicode và UTF-8
+* Dùng các kiểu ký tự khác như `wchar_t`, `char16_t`, và `char32_t`
 
-Let's dive in!
+Lao vào nào!
 
-## What is Unicode?
+## Unicode là gì?
 
-Back in the day, it was popular in the US and much of the world to use a
-7-bit or 8-bit encoding for characters in memory. This meant we could
-have 128 or 256 characters (including non-printable characters) total.
-That was fine for a US-centric world, but it turns out there are
-actually other alphabets out there---who knew? Chinese has over 50,000
-characters, and that's not fitting in a byte.
+Ngày xưa, ở Mỹ và phần lớn thế giới, phổ biến dùng encoding 7-bit
+hay 8-bit cho ký tự trong bộ nhớ. Điều này nghĩa là ta có thể có 128
+hay 256 ký tự (kể cả ký tự không in được) tổng cộng. Chừng đó ổn
+với một thế giới lấy Mỹ làm trung tâm, nhưng hóa ra ngoài kia còn
+bảng chữ cái khác, ai mà biết được? Tiếng Trung có hơn 50.000 ký
+tự, và ngần đó không nhét vừa một byte.
 
-So people came up with all kinds of alternate ways to represent their
-own custom character sets. And that was fine, but turned into a
-compatibility nightmare.
+Thế là người ta đẻ ra đủ kiểu cách khác nhau để biểu diễn bộ ký tự
+riêng của mình. Và vậy cũng ổn, nhưng biến thành cơn ác mộng tương
+thích.
 
-To escape it, Unicode was invented. One character set to rule them all.
-It extends off into infinity (effectively) so we'll never run out of
-space for new characters. It has Chinese, Latin, Greek, cuneiform, chess
-symbols, emojis... just about everything, really! And more is being
-added all the time!
+Để thoát khỏi đó, Unicode được phát minh. Một bộ ký tự để cai trị
+tất cả. Nó trải ra tới vô hạn (về cơ bản) nên ta sẽ không bao giờ
+hết chỗ cho ký tự mới. Nó có tiếng Trung, Latin, Hy Lạp, chữ hình
+nêm, ký hiệu cờ vua, emoji... gần như mọi thứ, thật đấy! Và liên tục
+có thêm cái mới!
 
-## Code Points
+## Code point
 
 [i[Unicode-->code points]<]
 
-I want to talk about two concepts here. It's confusing because they're
-both numbers... different numbers for the same thing. But bear with me.
+Tôi muốn nói về hai khái niệm ở đây. Hơi rối vì cả hai đều là số,
+các số khác nhau cho cùng một thứ. Nhưng ráng theo tôi nào.
 
-Let's loosely define _code point_ to mean a numeric value representing a
-character. (Code points can also represent unprintable control
-characters, but just assume I mean something like the letter "B" or the
-character "π".)
+Định nghĩa _code point_ một cách lỏng lẻo là một giá trị số đại diện
+cho một ký tự. (Code point cũng có thể đại diện cho ký tự điều khiển
+không in được, nhưng cứ giả định tôi muốn nói tới cái gì đó như chữ
+"B" hay ký tự "π".)
 
-Each code point represents a unique character. And each character has a
-unique numeric code point associated with it.
+Mỗi code point đại diện cho một ký tự duy nhất. Và mỗi ký tự có một
+code point số duy nhất gắn với nó.
 
-For example, in Unicode, the numeric value 66 represents "B", and 960
-represents "π". Other character mappings that aren't Unicode use
-different values, potentially, but let's forget them and concentrate on
-Unicode, the future!
+Ví dụ, trong Unicode, giá trị số 66 đại diện cho "B", và 960 đại
+diện cho "π". Các ánh xạ ký tự khác không phải Unicode dùng giá trị
+khác, có thể, nhưng hãy quên chúng và tập trung vào Unicode, tương
+lai!
 
-So that's one thing: there's a number that represents each character. In
-Unicode, these numbers run from 0 to over 1 million.
+Vậy đó là một chuyện: có một con số đại diện cho từng ký tự. Trong
+Unicode, các số này chạy từ 0 tới hơn 1 triệu.
 
 [i[Unicode-->code points]>]
 
-Got it?
+Hiểu rồi chứ?
 
-Because we're about to flip the table a little.
+Vì ta sắp lật bàn tí đây.
 
 ## Encoding
 
 [i[Unicode-->encoding]<]
 
-If you recall, an 8-bit byte can hold values from 0-255, inclusive.
-That's great for "B" which is 66---that fits in a byte. But "π" is 960,
-and that doesn't fit in a byte! We need another byte. How do we store
-all that in memory? Or what about bigger numbers, like 195,024? That's
-going to need a number of bytes to hold.
+Nếu bạn còn nhớ, một byte 8-bit có thể giữ giá trị từ 0-255, gồm cả
+hai đầu. Chừng đó ổn với "B" là 66, cái đó vừa vặn trong một byte.
+Nhưng "π" là 960, cái đó không vừa một byte! Ta cần byte khác. Làm
+sao ta lưu hết mớ đó trong bộ nhớ? Hay mấy số lớn hơn, như 195.024?
+Cái đó sẽ cần một số byte để giữ.
 
-The Big Question: how are these numbers represented in memory? This is
-what we call the _encoding_ of the characters.
+Câu hỏi lớn: các con số này được biểu diễn ra sao trong bộ nhớ? Đây
+là cái ta gọi là _encoding_ của các ký tự.
 
-So we have two things: one is the code point which tells us effectively
-the serial number of a particular character. And we have the encoding
-which tells us how we're going to represent that number in memory.
+Vậy ta có hai thứ: một là code point cho ta biết về cơ bản số sê-ri
+của một ký tự cụ thể. Và ta có encoding cho ta biết ta sẽ biểu diễn
+con số đó ra sao trong bộ nhớ.
 
-There are plenty of encodings. You can make up your own right now, if
-you want^[For example, we could store the code point in a big-endian
-32-bit integer. Straightforward! We just invented an encoding! Actually
-not; that's what UTF-32BE encoding is. Oh well---back to the grind!].
-But we're going to look at some really common encodings that are in use
-with Unicode.
+Có cả đống encoding. Bạn có thể tự nghĩ ra encoding của mình ngay
+bây giờ, nếu bạn muốn^[Ví dụ, ta có thể lưu code point trong một số
+nguyên 32-bit big-endian. Thẳng thớm! Ta vừa phát minh ra một
+encoding! Thật ra thì không; đó là cái encoding UTF-32BE. Chao ôi,
+quay lại với công việc thôi!]. Nhưng ta sẽ xem vài encoding thực sự
+phổ biến đang được dùng với Unicode.
 
 [i[Unicode-->UTF-8]<]
 [i[Unicode-->UTF-16]<]
 [i[Unicode-->UTF-32]<]
 
-|Encoding|Description|
+|Encoding|Mô tả|
 |:-----------------:|:--------------------------------------------------------------|
-|UTF-8|A byte-oriented encoding that uses a variable number of bytes per character. This is the one to use.|
-|UTF-16|A 16-bit per character[^091d] encoding.|
-|UTF-32|A 32-bit per character encoding.|
+|UTF-8|Encoding hướng byte, dùng số byte thay đổi trên mỗi ký tự. Đây là cái nên dùng.|
+|UTF-16|Encoding 16-bit cho mỗi ký tự[^091d].|
+|UTF-32|Encoding 32-bit cho mỗi ký tự.|
 
-[^091d]: Ish. Technically, it's variable width---there's a way to
-represent code points higher than $2^{16}$ by putting two UTF-16
-characters together.
+[^091d]: Kiểu kiểu vậy. Về kỹ thuật, nó có độ rộng thay đổi, có cách
+biểu diễn code point lớn hơn $2^{16}$ bằng cách ghép hai ký tự UTF-16
+lại.
 
-With UTF-16 and UTF-32, the byte order matters, so you might see
-UTF-16BE for big-endian and UTF-16LE for little-endian. Same for UTF-32.
-Technically, if unspecified, you should assume big-endian. But since
-Windows uses UTF-16 extensively and is little-endian, sometimes that is
-assumed^[There's a special character called the _Byte Order Mark_ (BOM),
-code point 0xFEFF, that can optionally precede the data stream and
-indicate the endianess. It is not required, however.].
+Với UTF-16 và UTF-32, thứ tự byte có ý nghĩa, nên bạn có thể thấy
+UTF-16BE cho big-endian và UTF-16LE cho little-endian. Y vậy cho
+UTF-32. Về kỹ thuật, nếu không chỉ định, bạn nên giả định
+big-endian. Nhưng vì Windows dùng UTF-16 nhiều và nó little-endian,
+đôi khi điều đó được giả định^[Có một ký tự đặc biệt tên _Byte Order
+Mark_ (BOM), code point 0xFEFF, có thể tuỳ chọn đi trước luồng dữ
+liệu và cho biết endianness. Tuy nhiên nó không bắt buộc.].
 
-Let's look at some examples. I'm going to write the values in hex
-because that's exactly two digits per 8-bit byte, and it makes it easier
-to see how things are arranged in memory.
+Xem vài ví dụ. Tôi sẽ viết giá trị theo hex vì nó đúng hai chữ số
+cho mỗi byte 8-bit, và làm vậy dễ thấy mọi thứ xếp ra sao trong bộ
+nhớ hơn.
 
-|Character|Code Point|UTF-16BE|UTF-32BE|UTF-16LE|UTF-32LE|UTF-8|
+|Ký tự|Code Point|UTF-16BE|UTF-32BE|UTF-16LE|UTF-32LE|UTF-8|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |`A`|41|0041|00000041|4100|41000000|41|
 |`B`|42|0042|00000042|4200|42000000|42|
@@ -137,69 +137,65 @@ to see how things are arranged in memory.
 
 [i[Unicode-->endianess]<]
 
-Look in there for the patterns. Note that UTF-16BE and UTF-32BE are
-simply the code point represented directly as 16- and 32-bit
-values^[Again, this is only true in UTF-16 for characters that fit in
-two bytes.].
+Ngó trong đó tìm mẫu xem. Để ý UTF-16BE và UTF-32BE chỉ là code
+point được biểu diễn thẳng dưới dạng giá trị 16 và 32-bit^[Lại, điều
+này chỉ đúng trong UTF-16 cho các ký tự vừa trong hai byte.].
 
 [i[Unicode-->UTF-16]>]
 [i[Unicode-->UTF-32]>]
 
-Little-endian is the same, except the bytes are in little-endian order.
+Little-endian cũng y vậy, chỉ khác là các byte theo thứ tự
+little-endian.
 
 [i[Unicode-->endianess]>]
 
-Then we have UTF-8 at the end. First you might notice that the
-single-byte code points are represented as a single byte. That's nice.
-You might also notice that different code points take different number
-of bytes. This is a variable-width encoding.
+Rồi ta có UTF-8 ở cuối. Đầu tiên bạn có thể để ý code point
+một-byte được biểu diễn dưới dạng một byte. Cái đó hay. Bạn cũng có
+thể để ý code point khác nhau chiếm số byte khác nhau. Đây là
+encoding độ rộng thay đổi.
 
-So as soon as we get above a certain value, UTF-8 starts using
-additional bytes to store the values. And they don't appear to correlate
-with the code point value, either.
+Nên ngay khi vượt qua một giá trị nào đó, UTF-8 bắt đầu dùng thêm
+byte để lưu giá trị. Và chúng có vẻ không tương quan với giá trị
+code point.
 
-[flw[The details of UTF-8 encoding|UTF-8]] are beyond the scope of this
-guide, but it's enough to know that it has a variable number of bytes
-per code point, and those byte values don't match up with the code point
-_except for the first 128 code points_. If you really want to learn
-more, [fl[Computerphile has a great UTF-8 video with Tom
+[flw[Chi tiết encoding UTF-8|UTF-8]] nằm ngoài phạm vi sách này,
+nhưng biết thế này là đủ: nó có số byte thay đổi cho mỗi code point,
+và các giá trị byte đó không khớp với code point _trừ 128 code
+point đầu tiên_. Nếu bạn thật sự muốn biết thêm, [fl[Computerphile
+có video về UTF-8 rất hay với Tom
 Scott|https://www.youtube.com/watch?v=MijmeoH9LT4]].
 
-That last bit is a neat thing about Unicode and UTF-8 from a North
-American perspective: it's backward compatible with 7-bit ASCII
-encoding! So if you're used to ASCII, UTF-8 is the same! Every
-ASCII-encoded document is also UTF-8 encoded! (But not the other way
-around, obviously.)
+Cái cuối đó là điều thú vị về Unicode và UTF-8 từ góc nhìn Bắc Mỹ:
+nó tương thích ngược với encoding ASCII 7-bit! Nên nếu bạn quen với
+ASCII, UTF-8 giống y vậy! Mọi tài liệu được encode bằng ASCII cũng
+được encode bằng UTF-8! (Dĩ nhiên không phải ngược lại.)
 
-It's probably that last point more than any other that is driving UTF-8
-to take over the world.
+Có lẽ chính điểm cuối này, hơn bất cứ điểm nào khác, đang đẩy UTF-8
+thống trị thế giới.
 
 [i[Unicode-->UTF-8]>]
 [i[Unicode-->encoding]>]
 
-## Source and Execution Character Sets {#src-exec-charset}
+## Bộ ký tự nguồn và thực thi {#src-exec-charset}
 
 [i[Character sets]<]
 
-When programming in C, there are (at least) three character sets that
-are in play:
+Khi lập trình C, có (ít nhất) ba bộ ký tự đang chơi:
 
-* The one that your code exists on disk as.
-* [i[Character sets-->source]]The one the compiler translates that into
-  just as compilation begins (the _source character set_). This might be
-  the same as the one on disk, or it might not.
-* [i[Character sets-->execution]]The one the compiler translates the
-  source character set into for execution (the _execution character
-  set_). This might be the same as the source character set, or it might
-  not.
+* Cái code của bạn tồn tại trên đĩa dưới dạng.
+* [i[Character sets-->source]]Cái compiler dịch sang ngay khi bắt
+  đầu compile (_bộ ký tự nguồn_). Có thể giống cái trên đĩa, hoặc
+  không.
+* [i[Character sets-->execution]]Cái compiler dịch bộ ký tự nguồn
+  sang để thực thi (_bộ ký tự thực thi_). Có thể giống bộ ký tự
+  nguồn, hoặc không.
 
-Your compiler probably has options to select these character sets at
-build-time.
+Compiler của bạn có lẽ có tùy chọn để chọn các bộ ký tự này lúc
+build.
 
 [i[Character sets-->basic]<]
 
-The basic character set for both source and execution will contain
-the following characters:
+Bộ ký tự cơ bản cho cả nguồn và thực thi sẽ chứa các ký tự sau:
 
 ``` {.default}
 A B C D E F G H I J K L M
@@ -213,44 +209,42 @@ space tab vertical-tab
 form-feed end-of-line
 ```
 
-Those are the characters you can use in your source and remain 100%
-portable.
+Đó là các ký tự bạn có thể dùng trong nguồn và vẫn portable 100%.
 
-The execution character set will additionally have characters for alert
-(bell/flash), backspace, carriage return, and newline.
+Bộ ký tự thực thi sẽ có thêm ký tự cho alert (chuông/chớp),
+backspace, carriage return, và newline.
 
-But most people don't go to that extreme and freely use their extended
-character sets in source and executable, especially now that Unicode and
-UTF-8 are getting more common. I mean, the basic character set doesn't
-even allow for `@`, `$`, or `` ` ``!
+Nhưng phần lớn mọi người không đi tới mức cực đoan đó và thoải mái
+dùng bộ ký tự mở rộng trong nguồn và chương trình chạy, nhất là bây
+giờ Unicode và UTF-8 đang phổ biến hơn. Ý tôi là, bộ ký tự cơ bản
+thậm chí không cho phép `@`, `$`, hay `` ` ``!
 
-Notably, it's a pain (though possible with escape sequences) to enter
-Unicode characters using only the basic character set.
+Đáng chú ý, đau đầu (dù làm được bằng escape sequence) khi gõ ký tự
+Unicode chỉ bằng bộ ký tự cơ bản.
 
 [i[Character sets-->basic]>]
 [i[Character sets]>]
 
-## Unicode in C {#unicode-in-c}
+## Unicode trong C {#unicode-in-c}
 
-Before I get into encoding in C, let's talk about Unicode from a code
-point standpoint. There is a way in C to specify Unicode characters and
-these will get translated by the compiler into the execution character
-set^[Presumably the compiler makes the best effort to translate the code
-point to whatever the output encoding is, but I can't find any
-guarantees in the spec.].
+Trước khi đi vào encoding trong C, hãy nói về Unicode từ góc độ code
+point. Có cách trong C để chỉ định ký tự Unicode và chúng sẽ được
+compiler dịch sang bộ ký tự thực thi^[Có lẽ compiler cố hết sức dịch
+code point sang encoding output nào đó, nhưng tôi không tìm thấy
+đảm bảo nào trong spec.].
 
-So how do we do it?
+Vậy làm sao ta làm?
 
-How about the euro symbol, code point 0x20AC. (I've written it in hex
-because both ways of representing it in C require hex.) How can we put
-that in our C code?
+Thử ký hiệu euro, code point 0x20AC. (Tôi viết nó bằng hex vì cả hai
+cách biểu diễn nó trong C đều dùng hex.) Làm sao ta đặt nó vào code
+C?
 
 [i[`\u` Unicode escape]<]
-Use the `\u` escape to put it in a string, e.g. `"\u20AC"` (case for the
-hex doesn't matter). You must put **exactly four** hex digits after the
-`\u`, padding with leading zeros if necessary.
+Dùng escape `\u` để đặt nó trong chuỗi, ví dụ `"\u20AC"` (viết hoa
+thường hex không quan trọng). Bạn phải đặt **đúng bốn** chữ số hex
+sau `\u`, pad bằng số 0 đầu nếu cần.
 
-Here's an example:
+Đây là ví dụ:
 
 ``` {.c}
 char *s = "\u20AC1.23";
@@ -260,10 +254,10 @@ printf("%s\n", s);  // €1.23
 
 [i[`\U` Unicode escape]<]
 
-So `\u` works for 16-bit Unicode code points, but what about ones bigger
-than 16 bits? For that, we need capitals: `\U`.
+Vậy `\u` chạy với code point Unicode 16-bit, còn mấy cái lớn hơn
+16-bit thì sao? Cho cái đó, ta cần chữ hoa: `\U`.
 
-For example:
+Ví dụ:
 
 ``` {.c}
 char *s = "\U0001D4D1";
@@ -271,8 +265,7 @@ char *s = "\U0001D4D1";
 printf("%s\n", s);  // Prints a mathematical letter "B"
 ```
 
-It's the same as `\u`, just with 32 bits instead of 16. These are
-equivalent:
+Giống `\u`, chỉ là 32-bit thay vì 16. Hai cái này tương đương:
 
 ``` {.c}
 \u03C0
@@ -282,13 +275,13 @@ equivalent:
 [i[`\u` Unicode escape]>]
 [i[`\U` Unicode escape]>]
 
-Again, these are translated into the [i[Character
-sets-->execution]]execution character set during compilation. They
-represent Unicode code points, not any specific encoding. Furthermore,
-if a Unicode code point is not representable in the execution character
-set, the compiler can do whatever it wants with it.
+Lại, các cái này được dịch sang [i[Character
+sets-->execution]]bộ ký tự thực thi lúc compile. Chúng đại diện cho
+code point Unicode, không phải encoding cụ thể nào. Thêm nữa, nếu
+một code point Unicode không biểu diễn được trong bộ ký tự thực thi,
+compiler có thể làm gì với nó cũng được.
 
-Now, you might wonder why you can't just do this:
+Giờ, bạn có thể thắc mắc sao không làm thế này:
 
 ``` {.c}
 char *s = "€1.23";
@@ -296,117 +289,114 @@ char *s = "€1.23";
 printf("%s\n", s);  // €1.23
 ```
 
-And you probably can, given a modern compiler. The [i[Character
-sets-->source]]source character set will be translated for you into the
-[i[Character sets-->execution]]execution character set by the compiler.
-But compilers are free to puke out if they find any characters that
-aren't included in their extended character set, and the € symbol
-certainly isn't in the [i[Character sets-->basic]]basic character set.
+Và có lẽ bạn làm được, với compiler hiện đại. [i[Character
+sets-->source]]Bộ ký tự nguồn sẽ được compiler dịch sang [i[Character
+sets-->execution]]bộ ký tự thực thi cho bạn. Nhưng compiler có quyền
+nôn ra nếu tìm thấy ký tự nào không có trong bộ ký tự mở rộng của
+nó, và ký hiệu € chắc chắn không có trong [i[Character
+sets-->basic]]bộ ký tự cơ bản.
 
 [i[`\u` Unicode escape]<]
 [i[`\U` Unicode escape]<]
 
-Caveat from the spec: you can't use `\u` or `\U` to encode any code
-points below 0xA0 except for 0x24 (`$`), 0x40 (`@`), and 0x60 (`` `
-``)---yes, those are precisely the trio of common punctuation marks
-missing from the basic character set. Apparently this restriction is
-relaxed in the upcoming version of the spec.
+Lưu ý từ spec: bạn không thể dùng `\u` hay `\U` để encode bất kỳ code
+point nào dưới 0xA0 trừ 0x24 (`$`), 0x40 (`@`), và 0x60 (`` `
+``), đúng rồi, đó là bộ ba dấu câu phổ biến bị thiếu khỏi bộ ký tự
+cơ bản. Rõ ràng hạn chế này được nới lỏng trong phiên bản spec sắp
+tới.
 
 [i[`\u` Unicode escape]>]
 [i[`\U` Unicode escape]>]
 
-Finally, you can also use these in identifiers in your code, with some
-restrictions. But I don't want to get into that here. We're all about
-string handling in this chapter.
+Cuối cùng, bạn cũng có thể dùng các cái này trong định danh trong
+code của mình, với vài hạn chế. Nhưng tôi không muốn đi vào đó ở
+đây. Chương này ta chỉ tập trung xử lý chuỗi.
 
-And that's about it for Unicode in C (except encoding).
+Và đó gần như là toàn bộ về Unicode trong C (trừ encoding).
 
-## A Quick Note on UTF-8 Before We Swerve into the Weeds {#utf8-quick}
+## Ghi chú nhanh về UTF-8 trước khi lao vào bụi rậm {#utf8-quick}
 
 [i[Unicode-->UTF-8]<]
 
-It could be that your source file on disk, the extended source
-characters, and the extended execution characters are all in UTF-8
-format. And the libraries you use expect UTF-8. This is the glorious
-future of UTF-8 everywhere.
+Có thể file nguồn của bạn trên đĩa, các ký tự nguồn mở rộng, và các
+ký tự thực thi mở rộng đều ở định dạng UTF-8. Và các thư viện bạn
+dùng mong đợi UTF-8. Đây là tương lai rực rỡ của UTF-8 ở mọi nơi.
 
-If that's the case, and you don't mind being non-portable to systems
-that aren't like that, then just run with it. Stick Unicode characters
-in your source and data at will. Use regular C strings and be happy.
+Nếu đúng vậy, và bạn không ngại không portable sang các hệ không
+như thế, cứ chạy. Nhét ký tự Unicode vào nguồn và dữ liệu thoải mái.
+Dùng chuỗi C thường và vui vẻ.
 
-A lot of things will just work (albeit non-portably) because UTF-8
-strings can safely be NUL-terminated just like any other C string. But
-maybe losing portability in exchange for easier character handling is a
-tradeoff that's worth it to you.
+Nhiều thứ sẽ chạy được (dù không portable) vì chuỗi UTF-8 có thể
+kết thúc bằng NUL an toàn y như chuỗi C nào khác. Nhưng có thể đổi
+tính portable để xử lý ký tự dễ hơn là cái đánh đổi đáng giá với
+bạn.
 
-There are some caveats, however:
+Tuy nhiên, có vài lưu ý:
 
-* Things like `strlen()` report the number of bytes in a string, not the
-  number of characters, necessarily. (The [i[`mbstowcs()` function-->with
-  UTF-8]]`mbstowcs()` returns the number of characters in a string when
-  you convert it to wide characters. POSIX extends this so you can pass
-  `NULL` for the first argument if you just want the character count.)
+* Những thứ như `strlen()` báo số byte trong chuỗi, không phải số ký
+  tự. ([i[`mbstowcs()` function-->with
+  UTF-8]]`mbstowcs()` trả về số ký tự trong chuỗi khi bạn chuyển nó
+  sang wide character. POSIX mở rộng cái này để bạn có thể truyền
+  `NULL` làm đối số đầu nếu chỉ muốn đếm số ký tự.)
 
-* The following won't work properly with characters of more than one
-  byte: [i[`strtok()` function-->with UTF-8]]`strtok()`, [i[`strchr()`
-  function-->with UTF-8]]`strchr()` (use [i[`strstr()` function-->with
-  UTF-8]]`strstr()` instead), `strspn()`-type functions, [i[`toupper()`
+* Những cái sau sẽ không chạy đúng với ký tự hơn một byte:
+  [i[`strtok()` function-->with UTF-8]]`strtok()`, [i[`strchr()`
+  function-->with UTF-8]]`strchr()` (dùng [i[`strstr()` function-->with
+  UTF-8]]`strstr()` thay thế), họ hàm `strspn()`, [i[`toupper()`
   function-->with UTF-8]]`toupper()`, [i[`tolower()` function-->with
-  UTF-8]]`tolower()`, [i[`isalpha()` function-->with
-  UTF-8]]`isalpha()`-type functions, and probably more. Beware anything
-  that operates on bytes.
+  UTF-8]]`tolower()`, họ hàm [i[`isalpha()` function-->with
+  UTF-8]]`isalpha()`, và chắc còn nữa. Cảnh giác với bất cứ gì hoạt
+  động trên byte.
 
-* [i[`printf()` function-->with UTF-8]]`printf()` variants allow for a
-  way to only print so many bytes of a string^[With a format specifier
-  like `"%.12s"`, for example.]. You want to make certain you print the
-  correct number of bytes to end on a character boundary.
+* [i[`printf()` function-->with UTF-8]]Các biến thể `printf()` cho
+  phép chỉ in ra một số byte của chuỗi^[Với format specifier kiểu
+  `"%.12s"` chẳng hạn.]. Bạn cần chắc chắn in đúng số byte để kết
+  thúc ở ranh giới ký tự.
 
-* [i[`malloc()` function-->with UTF-8]]If you want to `malloc()` space
-  for a string, or declare an array of `char`s for one, be aware that
-  the maximum size could be more than you were expecting. Each character
-  could take up to [i[`MB_LEN_MAX` macro]]`MB_LEN_MAX` bytes (from
-  `<limits.h>`)---except characters in the basic character set which are
-  guaranteed to be one byte.
+* [i[`malloc()` function-->with UTF-8]]Nếu bạn muốn `malloc()` chỗ
+  cho chuỗi, hay khai báo mảng `char` cho một chuỗi, lưu ý kích
+  thước tối đa có thể nhiều hơn bạn nghĩ. Mỗi ký tự có thể chiếm tới
+  [i[`MB_LEN_MAX` macro]]`MB_LEN_MAX` byte (từ `<limits.h>`), trừ
+  các ký tự trong bộ ký tự cơ bản đảm bảo là một byte.
 
-And probably others I haven't discovered. Let me know what pitfalls
-there are out there...
+Và chắc còn nữa mà tôi chưa khám phá ra. Cho tôi biết còn cái bẫy
+nào ngoài kia nữa nhé...
 
 [i[Unicode-->UTF-8]>]
 
-## Different Character Types
+## Các kiểu ký tự khác nhau
 
-I want to introduce more character types. We're used to `char`, right?
+Tôi muốn giới thiệu thêm kiểu ký tự. Ta quen với `char`, đúng không?
 
-But that's too easy. Let's make things a lot more difficult! Yay!
+Nhưng cái đó quá dễ. Hãy làm mọi thứ khó hơn nhiều! Hoan hô!
 
-### Multibyte Characters
+### Ký tự multibyte
 
 [i[Multibyte characters]<]
 
-First of all, I want to potentially change your thinking about what a
-string (array of `char`s) is. These are _multibyte strings_ made up of
-_multibyte characters_.
+Trước hết, tôi muốn có thể thay đổi cách bạn nghĩ về chuỗi (mảng
+`char`) là gì. Chúng là _chuỗi multibyte_ được tạo từ _ký tự
+multibyte_.
 
-That's right---your run-of-the-mill string of characters is multibyte.
-When someone says "C string", they mean "C multibyte string".
+Đúng rồi, cái chuỗi ký tự bình thường của bạn là multibyte. Khi ai
+đó nói "C string", họ đang nói "chuỗi multibyte C".
 
-Even if a particular character in the string is only a single byte, or
-if a string is made up of only single characters, it's known as
-a multibyte string.
+Kể cả khi một ký tự cụ thể trong chuỗi chỉ là một byte, hay nếu
+chuỗi được tạo chỉ từ ký tự đơn, nó vẫn được gọi là chuỗi multibyte.
 
-For example:
+Ví dụ:
 
 ``` {.c}
 char c[128] = "Hello, world!";  // Multibyte string
 ```
 
-What we're saying here is that a particular character that's not in the
-basic character set could be composed of multiple bytes. Up to
-[i[`MB_LEN_MAX` macro]]`MB_LEN_MAX` of them (from `<limits.h>`). Sure,
-it only looks like one character on the screen, but it could be multiple
-bytes.
+Cái ta đang nói ở đây là một ký tự cụ thể không thuộc bộ ký tự cơ
+bản có thể được tạo từ nhiều byte. Tối đa
+[i[`MB_LEN_MAX` macro]]`MB_LEN_MAX` byte (từ `<limits.h>`). Chắc,
+trên màn hình nó chỉ trông như một ký tự, nhưng có thể là nhiều
+byte.
 
-You can throw Unicode values in there, as well, as we saw earlier:
+Bạn cũng có thể ném giá trị Unicode vào đó, như ta thấy trước đó:
 
 ``` {.c}
 char *s = "\u20AC1.23";
@@ -414,7 +404,7 @@ char *s = "\u20AC1.23";
 printf("%s\n", s);  // €1.23
 ```
 
-But here we're getting into some weirdness, because check this out:
+Nhưng ở đây ta vào vùng kỳ lạ, vì xem này:
 
 [i[`strlen()` function-->with UTF-8]<]
 
@@ -424,19 +414,19 @@ char *s = "\u20AC1.23";  // €1.23
 printf("%zu\n", strlen(s));  // 7!
 ```
 
-The string length of `"€1.23"` is `7`?! Yes! Well, on my system, yes!
-Remember that `strlen()` returns the number of bytes in the string, not
-the number of characters. (When we get to "wide characters", coming up,
-we'll see a way to get the number of characters in the string.)
+Độ dài chuỗi của `"€1.23"` là `7`?! Đúng vậy! Ờ, trên hệ của tôi,
+đúng! Nhớ `strlen()` trả về số byte trong chuỗi, không phải số ký
+tự. (Khi ta tới "wide character", sắp tới, ta sẽ thấy cách lấy số
+ký tự trong chuỗi.)
 
 [i[`strlen()` function-->with UTF-8]>]
 
-Note that while C allows individual multibyte `char` constants (as
-opposed to `char*`), the behavior of these varies by implementation and
-your compiler might warn on it.
+Lưu ý C cho phép hằng `char` multibyte riêng lẻ (khác với `char*`),
+nhưng hành vi của chúng thay đổi theo implementation và compiler có
+thể cảnh báo về nó.
 
-GCC, for example, warns of multi-character character constants for the
-following two lines (and, on my system, prints out the UTF-8 encoding):
+GCC, chẳng hạn, cảnh báo về hằng ký tự multi-character cho hai dòng
+sau (và, trên hệ của tôi, in ra encoding UTF-8):
 
 ``` {.c}
 printf("%x\n", '€');
@@ -445,58 +435,53 @@ printf("%x\n", '\u20ac');
 
 [i[Multibyte characters]>]
 
-### Wide Characters {#wide-characters}
+### Wide character {#wide-characters}
 
 [i[Wide characters]<]
 
-If you're not a multibyte character, then you're a _wide character_.
+Nếu bạn không phải ký tự multibyte, thì bạn là _wide character_.
 
-A wide character is a single value that can uniquely represent any
-character in the current locale. It's analogous to Unicode code points.
-But it might not be. Or it might be.
+Wide character là một giá trị đơn có thể đại diện duy nhất cho bất
+kỳ ký tự nào trong locale hiện tại. Nó tương đương với code point
+Unicode. Nhưng có thể không. Hoặc có thể.
 
-Basically, where multibyte character strings are arrays of bytes, wide
-character strings are arrays of _characters_. So you can start thinking
-on a character-by-character basis rather than a byte-by-byte basis (the
-latter of which gets all messy when characters start taking up variable
-numbers of bytes).
+Về cơ bản, chuỗi ký tự multibyte là mảng các byte, thì chuỗi wide
+character là mảng các _ký tự_. Nên bạn có thể bắt đầu suy nghĩ theo
+kiểu từng-ký-tự thay vì từng-byte (cái sau rối mù khi ký tự bắt đầu
+chiếm số byte thay đổi).
 
 [i[`wchar_t` type]<]
 
-Wide characters can be represented by a number of types, but the big
-standout one is `wchar_t`. It's the main one. It's like `char`, except
-wide.
+Wide character có thể được biểu diễn bằng một số kiểu, nhưng cái nổi
+bật nhất là `wchar_t`. Nó là cái chính. Giống `char`, chỉ là wide.
 
-You might be wondering if you can't tell if it's Unicode or not, how
-does that allow you much flexibility in terms of writing code? `wchar_t`
-opens some of those doors, as there are a rich set of functions you can
-use to deal with `wchar_t` strings (like getting the length, etc.)
-without caring about the encoding.
+Bạn có thể thắc mắc nếu bạn không biết có phải Unicode hay không,
+sao mà cho bạn nhiều linh hoạt trong việc viết code? `wchar_t` mở vài
+cửa đó ra, vì có bộ hàm phong phú bạn có thể dùng để xử lý chuỗi
+`wchar_t` (như lấy độ dài, v.v.) mà không quan tâm encoding.
 
-## Using Wide Characters and `wchar_t`
+## Dùng wide character và `wchar_t`
 
-Time for a new type: `wchar_t`. This is the main wide character type.
-Remember how a `char` is only one byte? And a byte's not enough to
-represent all characters, potentially? Well, this one is enough.
+Đến lúc cho kiểu mới: `wchar_t`. Đây là kiểu wide character chính.
+Nhớ cách `char` chỉ một byte chứ? Và một byte có thể không đủ đại
+diện mọi ký tự? Ừ, cái này đủ.
 
-To use `wchar_t`, include `<wchar.h>`.
+Để dùng `wchar_t`, include `<wchar.h>`.
 
-How many bytes big is it? Well, it's not totally clear. Could be 16
-bits. Could be 32 bits.
+Nó to bao nhiêu byte? Không rõ lắm. Có thể 16 bit. Có thể 32 bit.
 
-But wait, you're saying---if it's only 16 bits, it's not big enough to
-hold all the Unicode code points, is it? You're right---it's not. The
-spec doesn't require it to be. It just has to be able to represent all
-the characters in the current locale.
+Nhưng khoan, bạn đang nói, nếu chỉ 16 bit, nó không đủ giữ hết code
+point Unicode đúng không? Đúng, không đủ. Spec không yêu cầu nó phải
+thế. Nó chỉ phải biểu diễn được mọi ký tự trong locale hiện tại.
 
-This can cause grief with Unicode on platforms with 16-bit `wchar_t`s
-(ahem---Windows). But that's out of scope for this guide.
+Điều này có thể gây đau đầu với Unicode trên nền tảng `wchar_t`
+16-bit (ờ hèm, Windows). Nhưng cái đó ngoài phạm vi sách này.
 
 [i[`L` wide character prefix]<]
 
-You can declare a string or character of this type with the `L` prefix,
-and you can print them with the `%ls` ("ell ess") format specifier. Or
-print an individual `wchar_t` with `%lc`.
+Bạn có thể khai báo chuỗi hay ký tự kiểu này với tiền tố `L`, và bạn
+có thể in chúng với format specifier `%ls` ("ell ess"). Hoặc in một
+`wchar_t` riêng lẻ với `%lc`.
 
 ``` {.c}
 wchar_t *s = L"Hello, world!";
@@ -507,49 +492,49 @@ printf("%ls %lc\n", s, c);
 
 [i[`L` wide character prefix]>]
 
-Now---are those characters stored as Unicode code points, or not?
-Depends on the implementation. But you can test if they are with the
-macro [i[`__STDC_ISO_10646__` macro]] `__STDC_ISO_10646__`. If this is
-defined, the answer is, "It's Unicode!"
+Giờ, các ký tự đó có được lưu dưới dạng code point Unicode hay
+không? Tùy implementation. Nhưng bạn có thể kiểm tra xem có phải
+không bằng macro [i[`__STDC_ISO_10646__` macro]]
+`__STDC_ISO_10646__`. Nếu cái này được định nghĩa, câu trả lời là,
+"Nó là Unicode!"
 
-More detailedly, the value in that macro is an integer in the form
-`yyyymm` that lets you know what Unicode standard you can rely
-on---whatever was in effect on that date.
+Chi tiết hơn, giá trị trong macro đó là số nguyên dạng `yyyymm` cho
+bạn biết bạn có thể dựa vào chuẩn Unicode nào, bất cứ cái nào đang
+có hiệu lực vào ngày đó.
 
-But how do you use them?
+Nhưng dùng chúng thế nào?
 
-### Multibyte to `wchar_t` Conversions
+### Chuyển multibyte sang `wchar_t`
 
-So how do we get from the byte-oriented standard strings to the
-character-oriented wide strings and back?
+Vậy làm sao từ chuỗi chuẩn hướng byte sang chuỗi wide hướng ký tự và
+ngược lại?
 
-We can use a couple string conversion functions to make this happen.
+Ta có thể dùng vài hàm chuyển chuỗi để làm chuyện này.
 
-First, some naming conventions you'll see in these functions:
+Đầu tiên, vài quy ước đặt tên bạn sẽ thấy trong các hàm này:
 
 * `mb`: multibyte
 * `wc`: wide character
 * `mbs`: multibyte string
 * `wcs`: wide character string
 
-So if we want to convert a multibyte string to a wide character string,
-we can call the `mbstowcs()`. And the other way around: `wcstombs()`.
+Vậy nếu ta muốn chuyển chuỗi multibyte thành chuỗi wide character,
+ta có thể gọi `mbstowcs()`. Và chiều ngược lại: `wcstombs()`.
 
 [i[`mbtowc()` function]]
 [i[`wctomb()` function]]
 [i[`mbstowcs()` function]]
 [i[`wcstombs()` function]]
 
-|Conversion Function|Description|
+|Hàm chuyển|Mô tả|
 |------------|---------------------------------------------------|
-|`mbtowc()`|Convert a multibyte character to a wide character.|
-|`wctomb()`|Convert a wide character to a multibyte character.|
-|`mbstowcs()`|Convert a multibyte string to a wide string.|
-|`wcstombs()`|Convert a wide string to a multibyte string.|
+|`mbtowc()`|Chuyển ký tự multibyte sang wide character.|
+|`wctomb()`|Chuyển wide character sang ký tự multibyte.|
+|`mbstowcs()`|Chuyển chuỗi multibyte sang chuỗi wide.|
+|`wcstombs()`|Chuyển chuỗi wide sang chuỗi multibyte.|
 
-Let's do a quick demo where we convert a multibyte string to a wide
-character string, and compare the string lengths of the two using their
-respective functions.
+Làm demo nhanh ta chuyển chuỗi multibyte thành chuỗi wide character,
+rồi so độ dài chuỗi của hai cái bằng các hàm tương ứng.
 
 [i[`mbstowcs()` function]<]
 
@@ -583,26 +568,24 @@ int main(void)
 
 [i[`wchar_t` type]>]
 
-On my system, this outputs:
+Trên hệ của tôi, cái này in ra:
 
 ``` {.default}
 multibyte: "The cost is €1.23" (19 bytes)
 wide char: "The cost is €1.23" (17 characters)
 ```
 
-(Your system might vary on the number of bytes depending on your
-locale.)
+(Máy bạn có thể khác số byte tùy locale.)
 
-One interesting thing to note is that `mbstowcs()`, in addition to
-converting the multibyte string to wide, returns the length (in
-characters) of the wide character string. On POSIX-compliant systems,
-you can take advantage of a special mode where it _only_ returns the
-length-in-characters of a given multibyte string: you just pass `NULL`
-to the destination, and `0` to the maximum number of characters to
-convert (this value is ignored).
+Một điều thú vị cần lưu ý là `mbstowcs()`, ngoài việc chuyển chuỗi
+multibyte sang wide, còn trả về độ dài (tính bằng ký tự) của chuỗi
+wide character. Trên hệ tuân thủ POSIX, bạn có thể tận dụng chế độ
+đặc biệt nơi nó _chỉ_ trả về độ dài tính bằng ký tự của một chuỗi
+multibyte cho trước: bạn chỉ truyền `NULL` cho đích, và `0` cho số
+ký tự tối đa cần chuyển (giá trị này bị bỏ qua).
 
-(In the code below, I'm using my extended source character set---you
-might have to replace those with `\u` escapes.)
+(Trong code dưới, tôi đang dùng bộ ký tự nguồn mở rộng của mình, bạn
+có thể phải thay bằng escape `\u`.)
 
 ``` {.c}
 setlocale(LC_ALL, "");
@@ -615,67 +598,63 @@ printf("%zu", len_in_chars);  // 7
 
 [i[`mbstowcs()` function]>]
 
-Again, that's a non-portable POSIX extension.
+Lại, đó là mở rộng POSIX không portable.
 
-And, of course, if you want to convert the other way, it's
+Và, dĩ nhiên, nếu bạn muốn chuyển chiều ngược lại, đó là
 [i[`wcstombs()` function]] `wcstombs()`.
 
-## Wide Character Functionality
+## Chức năng wide character
 
-Once we're in wide character land, we have all kinds of functionality at
-our disposal. I'm just going to summarize a bunch of the functions here,
-but basically what we have here are the wide character versions of the
-multibyte string functions that we're used to. (For example, we know
-`strlen()` for multibyte strings; there's a [i[`wcslen()` function]]
-`wcslen()` for wide character strings.)
+Một khi đã ở xứ wide character, ta có đủ loại chức năng trong tay.
+Tôi sẽ chỉ tóm tắt một đống hàm ở đây, nhưng về cơ bản cái ta có ở
+đây là phiên bản wide character của các hàm chuỗi multibyte ta quen
+thuộc. (Ví dụ, ta biết `strlen()` cho chuỗi multibyte; có
+[i[`wcslen()` function]] `wcslen()` cho chuỗi wide character.)
 
 ### `wint_t`
 
 [i[`wint_t` type]<]
 
-A lot of these functions use a `wint_t` to hold single characters,
-whether they are passed in or returned.
+Nhiều hàm trong đám này dùng `wint_t` để giữ ký tự đơn, dù chúng
+được truyền vào hay trả về.
 
-It is related to `wchar_t` in nature. A `wint_t` is an integer that can
-represent all values in the extended character set, and also a special
-end-of-file character, `WEOF`.
+Về bản chất nó có liên quan đến `wchar_t`. `wint_t` là số nguyên có
+thể đại diện mọi giá trị trong bộ ký tự mở rộng, và cũng một ký tự
+end-of-file đặc biệt, `WEOF`.
 
 [i[`wint_t` type]>]
 
-This is used by a number of single-character-oriented wide character
-functions.
+Cái này được dùng bởi một số hàm wide character hướng ký tự đơn.
 
-### I/O Stream Orientation {#io-stream-orientation}
+### Hướng luồng I/O {#io-stream-orientation}
 
 [i[I/O stream orientation]<]
 
-The tl;dr here is to not mix and match byte-oriented functions (like
-`fprintf()`) with wide-oriented functions (like `fwprintf()`). Decide if
-a stream will be byte-oriented or wide-oriented and stick with those
-types of I/O functions.
+Tóm gọn ở đây là đừng trộn lẫn hàm hướng byte (như `fprintf()`) với
+hàm hướng wide (như `fwprintf()`). Quyết định xem luồng sẽ hướng
+byte hay hướng wide và bám lấy kiểu hàm I/O đó.
 
-In more detail: streams can be either byte-oriented or wide-oriented.
-When a stream is first created, it has no orientation, but the first
-read or write will set the orientation.
+Chi tiết hơn: luồng có thể hướng byte hoặc hướng wide. Khi luồng
+mới được tạo, nó không có hướng, nhưng lần đọc hoặc ghi đầu sẽ đặt
+hướng.
 
-If you first use a wide operation (like `fwprintf()`) it will orient the
-stream wide.
+Nếu bạn dùng phép wide trước (như `fwprintf()`) nó sẽ đặt hướng
+luồng sang wide.
 
-If you first use a byte operation (like `fprintf()`) it will orient the
-stream by bytes.
+Nếu bạn dùng phép byte trước (như `fprintf()`) nó sẽ đặt hướng
+luồng theo byte.
 
-You can manually set an unoriented stream one way or the other with a
-call to [i[`fwide()` function]] `fwide()`. You can use that same
-function to get the orientation of a stream.
+Bạn có thể đặt thủ công một luồng chưa có hướng theo cách này hoặc
+cách kia bằng lời gọi [i[`fwide()` function]] `fwide()`. Bạn có thể
+dùng cùng hàm đó để lấy hướng của luồng.
 
-If you need to change the orientation mid-flight, you can do it with
-`freopen()`.
+Nếu cần đổi hướng giữa chừng, bạn có thể làm bằng `freopen()`.
 
 [i[I/O stream orientation]>]
 
-### I/O Functions
+### Hàm I/O
 
-Typically include `<stdio.h>` and `<wchar.h>` for these.
+Thường include `<stdio.h>` và `<wchar.h>` cho mấy cái này.
 
 [i[`wprintf()` function]]
 [i[`wscanf()` function]]
@@ -698,32 +677,32 @@ Typically include `<stdio.h>` and `<wchar.h>` for these.
 [i[`ungetwc()` function]]
 [i[`fwide()` function]]
 
-|I/O Function|Description|
+|Hàm I/O|Mô tả|
 |------------|---------------------------------------------------|
-|`wprintf()`|Formatted console output.|
-|`wscanf()`|Formatted console input.|
-|`getwchar()`|Character-based console input.|
-|`putwchar()`|Character-based console output.|
-|`fwprintf()`|Formatted file output.|
-|`fwscanf()`|Formatted file input.|
-|`fgetwc()`|Character-based file input.|
-|`fputwc()`|Character-based file output.|
-|`fgetws()`|String-based file input.|
-|`fputws()`|String-based file output.|
-|`swprintf()`|Formatted string output.|
-|`swscanf()`|Formatted string input.|
-|`vfwprintf()`|Variadic formatted file output.|
-|`vfwscanf()`|Variadic formatted file input.|
-|`vswprintf()`|Variadic formatted string output.|
-|`vswscanf()`|Variadic formatted string input.|
-|`vwprintf()`|Variadic formatted console output.|
-|`vwscanf()`|Variadic formatted console input.|
-|`ungetwc()`|Push a wide character back on an output stream.|
-|`fwide()`|Get or set stream multibyte/wide orientation.|
+|`wprintf()`|Output console có định dạng.|
+|`wscanf()`|Input console có định dạng.|
+|`getwchar()`|Input console hướng ký tự.|
+|`putwchar()`|Output console hướng ký tự.|
+|`fwprintf()`|Output file có định dạng.|
+|`fwscanf()`|Input file có định dạng.|
+|`fgetwc()`|Input file hướng ký tự.|
+|`fputwc()`|Output file hướng ký tự.|
+|`fgetws()`|Input file hướng chuỗi.|
+|`fputws()`|Output file hướng chuỗi.|
+|`swprintf()`|Output chuỗi có định dạng.|
+|`swscanf()`|Input chuỗi có định dạng.|
+|`vfwprintf()`|Output file có định dạng, variadic.|
+|`vfwscanf()`|Input file có định dạng, variadic.|
+|`vswprintf()`|Output chuỗi có định dạng, variadic.|
+|`vswscanf()`|Input chuỗi có định dạng, variadic.|
+|`vwprintf()`|Output console có định dạng, variadic.|
+|`vwscanf()`|Input console có định dạng, variadic.|
+|`ungetwc()`|Đẩy một wide character ngược lại luồng output.|
+|`fwide()`|Lấy hoặc đặt hướng multibyte/wide của luồng.|
 
-### Type Conversion Functions
+### Hàm chuyển kiểu
 
-Typically include `<wchar.h>` for these.
+Thường include `<wchar.h>` cho mấy cái này.
 
 [i[`wcstod()` function]]
 [i[`wcstof()` function]]
@@ -733,19 +712,19 @@ Typically include `<wchar.h>` for these.
 [i[`wcstoul()` function]]
 [i[`wcstoull()` function]]
 
-|Conversion Function|Description|
+|Hàm chuyển|Mô tả|
 |------------|---------------------------------------------------|
-|`wcstod()`|Convert string to `double`.|
-|`wcstof()`|Convert string to `float`.|
-|`wcstold()`|Convert string to `long double`.|
-|`wcstol()`|Convert string to `long`.|
-|`wcstoll()`|Convert string to `long long`.|
-|`wcstoul()`|Convert string to `unsigned long`.|
-|`wcstoull()`|Convert string to `unsigned long long`.|
+|`wcstod()`|Chuyển chuỗi sang `double`.|
+|`wcstof()`|Chuyển chuỗi sang `float`.|
+|`wcstold()`|Chuyển chuỗi sang `long double`.|
+|`wcstol()`|Chuyển chuỗi sang `long`.|
+|`wcstoll()`|Chuyển chuỗi sang `long long`.|
+|`wcstoul()`|Chuyển chuỗi sang `unsigned long`.|
+|`wcstoull()`|Chuyển chuỗi sang `unsigned long long`.|
 
-### String and Memory Copying Functions
+### Hàm copy chuỗi và bộ nhớ
 
-Typically include `<wchar.h>` for these.
+Thường include `<wchar.h>` cho mấy cái này.
 
 [i[`wcscpy()` function]]
 [i[`wcsncpy()` function]]
@@ -754,18 +733,18 @@ Typically include `<wchar.h>` for these.
 [i[`wcscat()` function]]
 [i[`wcsncat()` function]]
 
-|Copying Function|Description|
+|Hàm copy|Mô tả|
 |----|----------------------------------------------|
-|`wcscpy()`|Copy string.|
-|`wcsncpy()`|Copy string, length-limited.|
-|`wmemcpy()`|Copy memory.|
-|`wmemmove()`|Copy potentially-overlapping memory.|
-|`wcscat()`|Concatenate strings.|
-|`wcsncat()`|Concatenate strings, length-limited.|
+|`wcscpy()`|Copy chuỗi.|
+|`wcsncpy()`|Copy chuỗi, giới hạn độ dài.|
+|`wmemcpy()`|Copy bộ nhớ.|
+|`wmemmove()`|Copy bộ nhớ có thể chồng lấn.|
+|`wcscat()`|Nối chuỗi.|
+|`wcsncat()`|Nối chuỗi, giới hạn độ dài.|
 
-### String and Memory Comparing Functions
+### Hàm so sánh chuỗi và bộ nhớ
 
-Typically include `<wchar.h>` for these.
+Thường include `<wchar.h>` cho mấy cái này.
 
 [i[`wcscmp()` function]]
 [i[`wcsncmp()` function]]
@@ -773,19 +752,19 @@ Typically include `<wchar.h>` for these.
 [i[`wmemcmp()` function]]
 [i[`wcsxfrm()` function]]
 
-|Comparing Function|Description|
+|Hàm so sánh|Mô tả|
 |-------------------|---------------------------------------------------------------|
-|`wcscmp()`|Compare strings lexicographically.|
-|`wcsncmp()`|Compare strings lexicographically, length-limited.|
-|`wcscoll()`|Compare strings in dictionary order by locale.|
-|`wmemcmp()`|Compare memory lexicographically.|
-|`wcsxfrm()`|Transform strings into versions such that `wcscmp()` behaves like `wcscoll()`[^97d0].|
+|`wcscmp()`|So sánh chuỗi theo thứ tự từ điển.|
+|`wcsncmp()`|So sánh chuỗi theo thứ tự từ điển, giới hạn độ dài.|
+|`wcscoll()`|So sánh chuỗi theo thứ tự từ điển của locale.|
+|`wmemcmp()`|So sánh bộ nhớ theo thứ tự từ điển.|
+|`wcsxfrm()`|Biến chuỗi thành phiên bản khiến `wcscmp()` hành xử như `wcscoll()`[^97d0].|
 
-[^97d0]: `wcscoll()` is the same as `wcsxfrm()` followed by `wcscmp()`.
+[^97d0]: `wcscoll()` là `wcsxfrm()` rồi theo sau bởi `wcscmp()`.
 
-### String Searching Functions
+### Hàm tìm kiếm chuỗi
 
-Typically include `<wchar.h>` for these.
+Thường include `<wchar.h>` cho mấy cái này.
 
 [i[`wcschr()` function]]
 [i[`wcsrchr()` function]]
@@ -796,34 +775,34 @@ Typically include `<wchar.h>` for these.
 [i[`wcscspn()` function]]
 [i[`wcstok()` function]]
 
-|Searching Function|Description|
+|Hàm tìm|Mô tả|
 |-|-|
-|`wcschr()`|Find a character in a string.|
-|`wcsrchr()`|Find a character in a string from the back.|
-|`wmemchr()`|Find a character in memory.|
-|`wcsstr()`|Find a substring in a string.|
-|`wcspbrk()`|Find any of a set of characters in a string.|
-|`wcsspn()`|Find length of substring including any of a set of characters.|
-|`wcscspn()`|Find length of substring before any of a set of characters.|
-|`wcstok()`|Find tokens in a string.|
+|`wcschr()`|Tìm một ký tự trong chuỗi.|
+|`wcsrchr()`|Tìm một ký tự trong chuỗi từ phía sau.|
+|`wmemchr()`|Tìm một ký tự trong bộ nhớ.|
+|`wcsstr()`|Tìm chuỗi con trong chuỗi.|
+|`wcspbrk()`|Tìm bất kỳ ký tự nào trong một tập ký tự trong chuỗi.|
+|`wcsspn()`|Tìm độ dài chuỗi con gồm bất kỳ ký tự nào trong tập.|
+|`wcscspn()`|Tìm độ dài chuỗi con trước bất kỳ ký tự nào trong tập.|
+|`wcstok()`|Tìm token trong chuỗi.|
 
-### Length/Miscellaneous Functions
+### Hàm về độ dài/linh tinh
 
-Typically include `<wchar.h>` for these.
+Thường include `<wchar.h>` cho mấy cái này.
 
 [i[`wcslen()` function]]
 [i[`wmemset()` function]]
 [i[`wcsftime()` function]]
 
-|Length/Misc Function|Description|
+|Hàm Length/Misc|Mô tả|
 |-|-|
-|`wcslen()`|Return the length of the string.|
-|`wmemset()`|Set characters in memory.|
-|`wcsftime()`|Formatted date and time output.|
+|`wcslen()`|Trả về độ dài chuỗi.|
+|`wmemset()`|Đặt ký tự trong bộ nhớ.|
+|`wcsftime()`|Output ngày và giờ có định dạng.|
 
-### Character Classification Functions
+### Hàm phân loại ký tự
 
-Include `<wctype.h>` for these.
+Include `<wctype.h>` cho mấy cái này.
 
 [i[`iswalnum()` function]]
 [i[`iswalpha()` function]]
@@ -840,57 +819,56 @@ Include `<wctype.h>` for these.
 [i[`towlower()` function]]
 [i[`towupper()` function]]
 
-|Length/Misc Function|Description|
+|Hàm Length/Misc|Mô tả|
 |------------|---------------------------------------------------|
-|`iswalnum()`|True if the character is alphanumeric.|
-|`iswalpha()`|True if the character is alphabetic.|
-|`iswblank()`|True if the character is blank (space-ish, but not a newline).|
-|`iswcntrl()`|True if the character is a control character.|
-|`iswdigit()`|True if the character is a digit.|
-|`iswgraph()`|True if the character is printable (except space).|
-|`iswlower()`|True if the character is lowercase.|
-|`iswprint()`|True if the character is printable (including space).|
-|`iswpunct()`|True if the character is punctuation.|
-|`iswspace()`|True if the character is whitespace.|
-|`iswupper()`|True if the character is uppercase.|
-|`iswxdigit()`|True if the character is a hex digit.|
-|`towlower()`|Convert character to lowercase.|
-|`towupper()`|Convert character to uppercase.|
+|`iswalnum()`|True nếu ký tự là chữ và số.|
+|`iswalpha()`|True nếu ký tự là chữ cái.|
+|`iswblank()`|True nếu ký tự là khoảng trắng (giống space, nhưng không phải newline).|
+|`iswcntrl()`|True nếu ký tự là ký tự điều khiển.|
+|`iswdigit()`|True nếu ký tự là chữ số.|
+|`iswgraph()`|True nếu ký tự in được (trừ space).|
+|`iswlower()`|True nếu ký tự là chữ thường.|
+|`iswprint()`|True nếu ký tự in được (kể cả space).|
+|`iswpunct()`|True nếu ký tự là dấu câu.|
+|`iswspace()`|True nếu ký tự là khoảng trắng.|
+|`iswupper()`|True nếu ký tự là chữ hoa.|
+|`iswxdigit()`|True nếu ký tự là chữ số hex.|
+|`towlower()`|Chuyển ký tự thành chữ thường.|
+|`towupper()`|Chuyển ký tự thành chữ hoa.|
 
-## Parse State, Restartable Functions
+## Parse state, hàm restartable
 
 [i[Multibyte characters-->parse state]<]
 
-We're going to get a little bit into the guts of multibyte conversion,
-but this is a good thing to understand, conceptually.
+Ta sẽ đi sâu chút vào ruột gan của chuyển multibyte, nhưng đây là
+chuyện hay để hiểu, về khái niệm.
 
-Imagine how your program takes a sequence of multibyte characters and
-turns them into wide characters, or vice-versa. It might, at some point,
-be partway through parsing a character, or it might have to wait for
-more bytes before it makes the determination of the final value.
+Tưởng tượng chương trình của bạn lấy một chuỗi ký tự multibyte và
+biến chúng thành wide character, hoặc ngược lại. Có lúc, nó có thể
+đang phân tích dở một ký tự, hoặc có thể phải đợi thêm byte trước
+khi chốt giá trị cuối.
 
-This parse state is stored in an opaque variable of type `mbstate_t` and
-is used every time conversion is performed. That's how the conversion
-functions keep track of where they are mid-work.
+Parse state này được lưu trong một biến mờ kiểu `mbstate_t` và được
+dùng mỗi khi chuyển được thực hiện. Đó là cách các hàm chuyển theo
+dõi chúng đang ở đâu giữa chừng.
 
-And if you change to a different character sequence mid-stream, or try
-to seek to a different place in your input sequence, it could get
-confused over that.
+Và nếu bạn đổi sang chuỗi ký tự khác giữa chừng, hoặc cố seek sang
+chỗ khác trong chuỗi input, nó có thể bị rối.
 
-Now you might want to call me on this one: we just did some conversions,
-above, and I never mentioned any `mbstate_t` anywhere.
+Giờ bạn có thể bắt bẻ tôi: ta vừa chuyển vài cái ở trên, mà tôi
+chưa bao giờ nhắc tới `mbstate_t` nào.
 
-That's because the conversion functions like `mbstowcs()`, `wctomb()`,
-etc. each have their own `mbstate_t` variable that they use. There's
-only one per function, though, so if you're writing multithreaded code,
-they're not safe to use.
+Đó là vì các hàm chuyển như `mbstowcs()`, `wctomb()`, v.v. mỗi cái
+có biến `mbstate_t` riêng mà chúng dùng. Tuy nhiên chỉ có một cho
+mỗi hàm, nên nếu bạn đang viết code đa luồng, chúng không an toàn
+để dùng.
 
-Fortunately, C defines _restartable_ versions of these functions where
-you can pass in your own `mbstate_t` on per-thread basis if you need to.
-If you're doing multithreaded stuff, use these!
+May thay, C định nghĩa phiên bản _restartable_ của các hàm này,
+trong đó bạn có thể truyền vào `mbstate_t` riêng trên cơ sở từng
+luồng nếu cần. Nếu bạn làm đa luồng, dùng mấy cái này!
 
-Quick note on initializing an `mbstate_t` variable: just `memset()` it
-to zero. There is no built-in function to force it to be initialized.
+Ghi chú nhanh về khởi tạo biến `mbstate_t`: chỉ cần `memset()` nó về
+0. Không có hàm sẵn nào để ép nó khởi tạo.
 
 ``` {.c}
 mbstate_t mbs;
@@ -899,21 +877,22 @@ mbstate_t mbs;
 memset(&mbs, 0, sizeof mbs);
 ```
 
-Here is a list of the restartable conversion functions---note the naming
-convension of putting an "`r`" after the "from" type:
+Đây là danh sách các hàm chuyển restartable, để ý quy ước đặt tên
+chèn thêm "`r`" sau kiểu "from":
 
-* `mbrtowc()`---multibyte to wide character
-* `wcrtomb()`---wide character to multibyte
-* `mbsrtowcs()`---multibyte string to wide character string
-* `wcsrtombs()`---wide character string to multibyte string
+* `mbrtowc()`, multibyte sang wide character
+* `wcrtomb()`, wide character sang multibyte
+* `mbsrtowcs()`, chuỗi multibyte sang chuỗi wide character
+* `wcsrtombs()`, chuỗi wide character sang chuỗi multibyte
 
-These are really similar to their non-restartable counterparts, except
-they require you pass in a pointer to your own `mbstate_t` variable. And
-also they modify the source string pointer (to help you out if invalid
-bytes are found), so it might be useful to save a copy of the original.
+Chúng thực sự giống với đồng nghiệp không restartable, trừ việc
+chúng yêu cầu bạn truyền vào pointer tới biến `mbstate_t` riêng của
+bạn. Và chúng cũng sửa pointer chuỗi nguồn (để giúp bạn nếu phát
+hiện byte không hợp lệ), nên có thể hữu ích khi lưu bản sao của bản
+gốc.
 
-Here's the example from earlier in the chapter reworked to pass in our
-own `mbstate_t`.
+Đây là ví dụ trước đó trong chương, sửa lại để truyền `mbstate_t`
+riêng vào.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -964,48 +943,49 @@ int main(void)
 }
 ```
 
-For the conversion functions that manage their own state, you can reset
-their internal state to the initial one by passing in `NULL` for their
-`char*` arguments, for example:
+Với các hàm chuyển tự quản state riêng, bạn có thể reset state nội
+bộ của chúng về trạng thái ban đầu bằng cách truyền `NULL` cho các
+đối số `char*` của chúng, ví dụ:
 
 ``` {.c}
 mbstowcs(NULL, NULL, 0);   // Reset the parse state for mbstowcs()
 mbstowcs(dest, src, 100);  // Parse some stuff
 ```
 
-For I/O, each wide stream manages its own `mbstate_t` and uses that for
-input and output conversions as it goes.
+Với I/O, mỗi luồng wide tự quản `mbstate_t` của mình và dùng nó cho
+chuyển input và output theo diễn biến.
 
-And some of the byte-oriented I/O functions like `printf()` and
-`scanf()` keep their own internal state while doing their work.
+Và một số hàm I/O hướng byte như `printf()` và `scanf()` giữ state
+nội bộ riêng khi làm việc.
 
-Finally, these restartable conversion functions do actually have their
-own internal state if you pass in `NULL` for the `mbstate_t` parameter.
-This makes them behave more like their non-restartable counterparts.
+Cuối cùng, các hàm chuyển restartable này thật ra có state nội bộ
+riêng nếu bạn truyền `NULL` cho tham số `mbstate_t`. Điều này làm
+chúng hành xử giống với đồng nghiệp không restartable hơn.
 
 [i[Multibyte characters-->parse state]>]
 [i[Wide characters]>]
 
-## Unicode Encodings and C
+## Encoding Unicode và C
 
-In this section, we'll see what C can (and can't) do when it comes to
-three specific Unicode encodings: UTF-8, UTF-16, and UTF-32.
+Trong phần này, ta sẽ xem C làm được (và không làm được) gì với ba
+encoding Unicode cụ thể: UTF-8, UTF-16, và UTF-32.
 
 ### UTF-8
 
 [i[Unicode-->UTF-8]<]
 
-To refresh before this section, read the [UTF-8 quick note,
-above](#utf8-quick).
+Để làm mới trước phần này, đọc lại [ghi chú nhanh UTF-8 ở
+trên](#utf8-quick).
 
-Aside from that, what are C's UTF-8 capabilities?
+Ngoài ra, C có khả năng UTF-8 gì?
 
-Well, not much, unfortunately.
+Ờ, không nhiều, tiếc thay.
 
 [i[`u8` UTF-8 prefix]<]
 
-You can tell C that you specifically want a string literal to be UTF-8
-encoded, and it'll do it for you. You can prefix a string with `u8`:
+Bạn có thể nói với C rằng bạn muốn cụ thể một string literal được
+encode UTF-8, và nó sẽ làm cho bạn. Bạn có thể đặt tiền tố `u8` trước
+chuỗi:
 
 ``` {.c}
 char *s = u8"Hello, world!";
@@ -1013,7 +993,7 @@ char *s = u8"Hello, world!";
 printf("%s\n", s);   // Hello, world!--if you can output UTF-8
 ```
 
-Now, can you put Unicode characters in there?
+Giờ, bạn có thể nhét ký tự Unicode vào đó không?
 
 ``` {.c}
 char *s = u8"€123";
@@ -1021,16 +1001,16 @@ char *s = u8"€123";
 
 [i[`u8` UTF-8 prefix]>]
 
-Sure! If the extended source character set supports it. (gcc does.)
+Được! Nếu bộ ký tự nguồn mở rộng hỗ trợ nó. (gcc hỗ trợ.)
 
-What if it doesn't? You can specify a Unicode code point with your
-friendly neighborhood `\u` and `\U`, [as noted above](#unicode-in-c).
+Nếu không hỗ trợ thì sao? Bạn có thể chỉ định code point Unicode với
+người bạn thân `\u` và `\U`, [như đã nói ở trên](#unicode-in-c).
 
-But that's about it. There's no portable way in the standard library to
-take arbirary input and turn it into UTF-8 unless your locale is UTF-8.
-Or to parse UTF-8 unless your locale is UTF-8.
+Nhưng cái đó là hết. Không có cách portable nào trong thư viện chuẩn
+để lấy input tùy ý và biến nó thành UTF-8 trừ khi locale của bạn là
+UTF-8. Hoặc parse UTF-8 trừ khi locale của bạn là UTF-8.
 
-So if you want to do it, either be in a UTF-8 locale and:
+Nên nếu bạn muốn làm, hoặc ở trong locale UTF-8 và:
 
 [i[`setlocale()` function]<]
 
@@ -1038,8 +1018,8 @@ So if you want to do it, either be in a UTF-8 locale and:
 setlocale(LC_ALL, "");
 ```
 
-or figure out a UTF-8 locale name on your local machine and set it
-explicitly like so:
+hoặc tìm ra tên locale UTF-8 trên máy cục bộ và đặt nó tường minh
+kiểu:
 
 ``` {.c}
 setlocale(LC_ALL, "en_US.UTF-8");  // Non-portable name
@@ -1047,30 +1027,30 @@ setlocale(LC_ALL, "en_US.UTF-8");  // Non-portable name
 
 [i[`setlocale()` function]>]
 
-Or use a [third-party library](#utf-3rd-party).
+Hoặc dùng [thư viện bên thứ ba](#utf-3rd-party).
 
 [i[Unicode-->UTF-8]>]
 
-### UTF-16, UTF-32, `char16_t`, and `char32_t`
+### UTF-16, UTF-32, `char16_t`, và `char32_t`
 
 [i[Unicode-->UTF-16]<]
 [i[Unicode-->UTF-32]<]
 [i[`char16_t` type]<]
 [i[`char32_t` type]<]
 
-`char16_t` and `char32_t` are a couple other potentially wide character
-types with sizes of 16 bits and 32 bits, respectively. Not necessarily
-wide, because if they can't represent every character in the current
-locale, they lose their wide character nature. But the spec refers them
-as "wide character" types all over the place, so there we are.
+`char16_t` và `char32_t` là vài kiểu ký tự có tiềm năng wide khác
+với kích thước 16 bit và 32 bit, tương ứng. Không nhất thiết là
+wide, vì nếu chúng không thể đại diện mọi ký tự trong locale hiện
+tại, chúng mất đi tính wide character. Nhưng spec gọi chúng là kiểu
+"wide character" khắp nơi, nên đành vậy.
 
-These are here to make things a little more Unicode-friendly,
-potentially.
+Mấy cái này có ở đây để làm mọi thứ thân thiện với Unicode hơn một
+chút, có tiềm năng.
 
-To use, include `<uchar.h>`. (That's "u", not "w".)
+Để dùng, include `<uchar.h>`. (Đó là "u", không phải "w".)
 
-This header file doesn't exist on OS X---bummer. If you just want the
-types, you can:
+Header file này không có trên OS X, tiếc. Nếu bạn chỉ muốn kiểu, bạn
+có thể:
 
 ``` {.c}
 #include <stdint.h>
@@ -1079,13 +1059,13 @@ typedef int_least16_t char16_t;
 typedef int_least32_t char32_t;
 ```
 
-But if you also want the functions, that's all on you.
+Nhưng nếu cũng muốn hàm, cái đó tùy bạn.
 
 [i[`u` Unicode prefix]<]
 [i[`U` Unicode prefix]<]
 
-Assuming you're still good to go, you can declare a string or character
-of these types with the `u` and `U` prefixes:
+Giả sử bạn vẫn ổn để tiếp, bạn có thể khai báo chuỗi hay ký tự các
+kiểu này với tiền tố `u` và `U`:
 
 ``` {.c}
 char16_t *s = u"Hello, world!";
@@ -1099,17 +1079,17 @@ char32_t d = U'B';
 [i[`u` Unicode prefix]>]
 [i[`U` Unicode prefix]>]
 
-Now---are values in these stored in UTF-16 or UTF-32? Depends on the
-implementation.
+Giờ, giá trị trong mấy cái này có được lưu theo UTF-16 hay UTF-32
+không? Tùy implementation.
 
-But you can test to see if they are. If the macros [i[`__STDC_UTF_16__`
-macro]] `__STDC_UTF_16__` or [i[`__STDC_UTF_32__ macro`]]
-`__STDC_UTF_32__` are defined (to `1`) it means the types hold UTF-16 or
-UTF-32, respectively.
+Nhưng bạn có thể kiểm tra xem có phải không. Nếu các macro
+[i[`__STDC_UTF_16__` macro]] `__STDC_UTF_16__` hoặc
+[i[`__STDC_UTF_32__ macro`]] `__STDC_UTF_32__` được định nghĩa (thành
+`1`) nghĩa là các kiểu giữ UTF-16 hoặc UTF-32, tương ứng.
 
-If you're curious, and I know you are, the values, if UTF-16 or UTF-32,
-are stored in the native endianess. That is, you should be able to
-compare them straight up to Unicode code point values:
+Nếu bạn tò mò, và tôi biết bạn tò mò, các giá trị, nếu là UTF-16 hay
+UTF-32, được lưu theo endianness của máy. Tức là, bạn có thể so
+chúng thẳng với giá trị code point Unicode:
 
 ``` {.c}
 char16_t pi = u"\u03C0";  // pi symbol
@@ -1125,42 +1105,41 @@ pi == 0x3C0;  // Probably not true
 [i[Unicode-->UTF-16]>]
 [i[Unicode-->UTF-32]>]
 
-### Multibyte Conversions
+### Chuyển Multibyte
 
-You can convert from your multibyte encoding to `char16_t` or `char32_t`
-with a number of helper functions.
+Bạn có thể chuyển từ encoding multibyte sang `char16_t` hay
+`char32_t` bằng vài hàm hỗ trợ.
 
-(Like I said, though, the result might not be UTF-16 or UTF-32 unless the
-corresponding macro is set to `1`.)
+(Như tôi đã nói, kết quả có thể không phải UTF-16 hay UTF-32 trừ khi
+macro tương ứng được đặt thành `1`.)
 
-All of these functions are restartable (i.e. you pass in your own
-`mbstate_t`), and all of them operate character by
-character^[Ish---things get funky with multi-`char16_t` UTF-16
-encodings.].
+Mọi hàm này đều restartable (tức là bạn truyền vào `mbstate_t`
+riêng), và mọi hàm đều thao tác theo từng ký
+tự^[Kiểu kiểu vậy, mọi thứ trở nên lạ với encoding UTF-16 multi-
+`char16_t`.].
 
 [i[`mbrtoc16()` function]]
 [i[`mbrtoc32()` function]]
 [i[`c16rtomb()` function]]
 [i[`c32rtomb()` function]]
 
-|Conversion Function|Description|
+|Hàm chuyển|Mô tả|
 |-|-|
-|`mbrtoc16()`|Convert a multibyte character to a `char16_t` character.|
-|`mbrtoc32()`|Convert a multibyte character to a `char32_t` character.|
-|`c16rtomb()`|Convert a `char16_t` character to a multibyte character.|
-|`c32rtomb()`|Convert a `char32_t` character to a multibyte character.|
+|`mbrtoc16()`|Chuyển ký tự multibyte sang ký tự `char16_t`.|
+|`mbrtoc32()`|Chuyển ký tự multibyte sang ký tự `char32_t`.|
+|`c16rtomb()`|Chuyển ký tự `char16_t` sang ký tự multibyte.|
+|`c32rtomb()`|Chuyển ký tự `char32_t` sang ký tự multibyte.|
 
-### Third-Party Libraries {#utf-3rd-party}
+### Thư viện bên thứ ba {#utf-3rd-party}
 
-For heavy-duty conversion between different specific encodings, there
-are a couple mature libraries worth checking out. Note that I haven't
-used either of these.
+Cho chuyển hạng nặng giữa các encoding cụ thể khác nhau, có vài thư
+viện chín muồi đáng xem. Lưu ý tôi chưa dùng cái nào trong số này.
 
-* [flw[iconv|Iconv]]---Internationalization Conversion, a common
-  POSIX-standard API available on the major platforms.
-* [fl[ICU|http://site.icu-project.org/]]---International Components for
-  Unicode. At least one blogger found this easy to use.
+* [flw[iconv|Iconv]], Internationalization Conversion, một API chuẩn
+  POSIX phổ biến có sẵn trên các nền tảng lớn.
+* [fl[ICU|http://site.icu-project.org/]], International Components
+  for Unicode. Ít nhất một blogger thấy cái này dễ dùng.
 
-If you have more noteworthy libraries, let me know.
+Nếu bạn biết thư viện đáng chú ý khác, cho tôi biết.
 
 [i[Unicode]>]
