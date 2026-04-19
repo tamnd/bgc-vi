@@ -3,14 +3,13 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Variadic Functions
+# Hàm variadic
 
 [i[Variadic functions]<]
 
-_Variadic_ is a fancy word for functions that take arbitrary numbers of
-arguments.
+_Variadic_ là từ kêu kêu để chỉ hàm nhận số đối số tuỳ ý.
 
-A regular function takes a specific number of arguments, for example:
+Hàm thường nhận một số đối số cụ thể, ví dụ:
 
 ``` {.c}
 int add(int x, int y)
@@ -19,25 +18,25 @@ int add(int x, int y)
 }
 ```
 
-You can only call that with exactly two arguments which correspond to
-parameters `x` and `y`.
+Bạn chỉ có thể gọi nó với đúng hai đối số tương ứng tham số `x` và
+`y`.
 
 ``` {.c}
 add(2, 3);
 add(5, 12);
 ```
 
-But if you try it with more, the compiler won't let you:
+Nhưng nếu thử nhiều hơn, compiler không cho:
 
 ``` {.c}
 add(2, 3, 4);  // ERROR
 add(5);        // ERROR
 ```
 
-Variadic functions get around this limitation to a certain extent.
+Hàm variadic vượt qua giới hạn này ở một mức nào đó.
 
-We've already seen a famous example in `printf()`! You can pass all
-kinds of things to it.
+Ta đã thấy một ví dụ nổi tiếng trong `printf()`! Bạn có thể truyền
+đủ kiểu thứ vào nó.
 
 ``` {.c}
 printf("Hello, world!\n");
@@ -45,37 +44,36 @@ printf("The number is %d\n", 2);
 printf("The number is %d and pi is %f\n", 2, 3.14159);
 ```
 
-It seems to not care how many arguments you give it!
+Nó có vẻ chẳng quan tâm bạn đưa bao nhiêu đối số!
 
-Well, that's not entirely true. Zero arguments will give you an error:
+Ừ, không hẳn. Không đối số nào sẽ cho lỗi:
 
 ``` {.c}
 printf();  // ERROR
 ```
 
-This leads us to one of the limitations of variadic functions in C: they
-must have at least one argument.
+Điều này dẫn ta tới một giới hạn của hàm variadic trong C: chúng
+phải có ít nhất một đối số.
 
-But aside from that, they're pretty flexible, even allows arguments to
-have different types just like `printf()` does.
+Nhưng ngoài chuyện đó, chúng khá linh hoạt, thậm chí cho phép đối số
+có kiểu khác nhau như `printf()` làm.
 
-Let's see how they work!
+Xem chúng hoạt động sao nhé!
 
-## Ellipses in Function Signatures
+## Dấu ba chấm trong signature hàm
 
-So how does it work, syntactically?
+Vậy nó chạy thế nào, về cú pháp?
 
 [i[`...` variadic arguments]<]
 
-What you do is put all the arguments that _must_ be passed first (and
-remember there has to be at least one) and after that, you put `...`.
-Just like this:
+Việc bạn làm là đặt mọi đối số _bắt buộc_ phải truyền vào trước (và
+nhớ phải có ít nhất một) và sau đó, bạn đặt `...`. Như vầy:
 
 ``` {.c}
 void func(int a, ...)   // Literally 3 dots here
 ```
 
-Here's some code to demo that:
+Đây là ít code để demo:
 
 ``` {.c}
 #include <stdio.h>
@@ -93,40 +91,40 @@ int main(void)
 
 [i[`...` variadic arguments]>]
 
-So, great, we can get that first argument that's in variable `a`, but
-what about the rest of the arguments? How do you get to them?
+Rồi, hay, ta lấy được đối số đầu ở biến `a`, nhưng còn phần đối số
+còn lại thì sao? Làm sao tới được chúng?
 
-Here's where the fun begins!
+Đây là chỗ vui bắt đầu!
 
-## Getting the Extra Arguments
+## Lấy các đối số dư
 
-You're going to want to include [i[`stdarg.h` header file]] `<stdarg.h>`
-to make any of this work.
+Bạn sẽ muốn include [i[`stdarg.h` header file]] `<stdarg.h>` để làm
+mấy chuyện này.
 
 [i[`va_list` type]<]
 
-First things first, we're going to use a special variable of type
-`va_list` (variable argument list) to keep track of which variable we're
-accessing at a time.
+Trước tiên, ta sẽ dùng một biến đặc biệt kiểu `va_list` (variable
+argument list) để theo dõi ta đang truy cập biến nào tại thời điểm
+đó.
 
 [i[`va_start()` macro]<]
 [i[`va_arg()` macro]<]
 [i[`va_end()` macro]<]
 
-The idea is that we first start processing arguments with a call to
-`va_start()`, process each argument in turn with `va_arg()`, and then,
-when done, wrap it up with `va_end()`.
+Ý tưởng là ta bắt đầu xử lý đối số bằng một lời gọi `va_start()`, xử
+lý từng đối số một bằng `va_arg()`, rồi, khi xong, kết bằng
+`va_end()`.
 
-When you call `va_start()`, you need to pass in the _last named
-parameter_ (the one just before the `...`) so it knows where to start
-looking for the additional arguments.
+Khi bạn gọi `va_start()`, bạn cần truyền _tham số có tên cuối cùng_
+(cái ngay trước `...`) để nó biết chỗ cần bắt đầu tìm các đối số
+thêm.
 
-And when you call `va_arg()` to get the next argument, you have to tell
-it the type of argument to get next.
+Và khi bạn gọi `va_arg()` để lấy đối số kế, bạn phải cho nó biết
+kiểu của đối số kế tiếp cần lấy.
 
-Here's a demo that adds together an arbitrary number of integers. The
-first argument is the number of integers to add together. We'll make use
-of that to figure out how many times we have to call `va_arg()`.
+Đây là demo cộng lại một số tuỳ ý các số nguyên. Đối số đầu là số
+lượng số nguyên cần cộng. Ta sẽ dùng nó để biết phải gọi `va_arg()`
+bao nhiêu lần.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -160,67 +158,61 @@ int main(void)
 [i[`va_start()` macro]>]
 [i[`va_end()` macro]>]
 
-(Note that when `printf()` is called, it uses the number of `%d`s (or
-whatever) in the format string to know how many more arguments there
-are!)
+(Lưu ý khi gọi `printf()`, nó dùng số `%d` (hay bất cứ thứ gì) trong
+chuỗi format để biết còn bao nhiêu đối số nữa!)
 
-If the syntax of `va_arg()` is looking strange to you (because of that
-loose type name floating around in there), you're not alone. These are
-implemented with preprocessor macros in order to get all the proper
-magic in there.
+Nếu cú pháp của `va_arg()` trông lạ với bạn (vì có tên kiểu lơ lửng
+trong đó), bạn không đơn độc. Chúng được cài đặt bằng macro
+preprocessor để có được mọi phép màu cần thiết.
 
-## `va_list` Functionality
+## Chức năng `va_list`
 
-What is that `va_list` variable we're using up there? It's an opaque
-variable^[That is, us lowly developers aren't supposed to know what's in
-there or what it means. The spec doesn't dictate what it is in detail.]
-that holds information about which argument we're going to get next with
-`va_arg()`. You see how we just call `va_arg()` over and over? The
-`va_list` variable is a placeholder that's keeping track of progress so
-far.
+Cái biến `va_list` ta đang dùng ở trên là gì? Đó là biến mờ^[Nghĩa
+là đám dev thấp cổ bé họng như ta không phải biết trong đó có gì hay
+ý nghĩa gì. Spec không ra lệnh chi tiết nó là gì.] giữ thông tin về
+việc ta sẽ lấy đối số nào kế tiếp bằng `va_arg()`. Thấy cách ta gọi
+`va_arg()` lặp đi lặp lại đấy? Biến `va_list` là chỗ giữ chỗ đang
+theo dõi tiến độ cho tới giờ.
 
 [i[`va_start()` macro]<]
 
-But we have to initialize that variable to some sensible value. That's
-where `va_start()` comes into play.
+Nhưng ta phải khởi tạo biến đó bằng một giá trị hợp lý. Đó là lúc
+`va_start()` ra sân.
 
-When we called `va_start(va, count)`, above, we were saying, "Initialize
-the `va` variable to point to the variable argument _immediately after_
-`count`."
+Khi ta gọi `va_start(va, count)` ở trên, ta đang nói, "Khởi tạo biến
+`va` để trỏ tới đối số biến _ngay sau_ `count`."
 
 [i[`va_end()` macro]<]
 
-And that's _why_ we need to have at least one named variable in our
-argument list^[Honestly, it would be possible to remove that limitation
-from the language, but the idea is that the macros `va_start()`,
-`va_arg()`, and `va_end()` should be able to be written in C. And to
-make that happen, we need some way to initialize a pointer to the
-location of the first parameter. And to do that, we need the _name_ of
-the first parameter. It would require a language extension to make this
-possible, and so far the committee hasn't found a rationale for doing
-so.].
+Và đó là _lý do_ ta cần có ít nhất một biến có tên trong danh sách
+đối số^[Thành thật mà nói, loại bỏ giới hạn này khỏi ngôn ngữ là khả
+thi, nhưng ý tưởng là các macro `va_start()`, `va_arg()` và
+`va_end()` có thể viết được bằng C. Và để làm được điều đó, ta cần
+cách nào đó khởi tạo một pointer tới vị trí của tham số đầu. Và để
+làm điều đó, ta cần _tên_ của tham số đầu. Sẽ cần mở rộng ngôn ngữ
+để làm được việc này, và tới giờ ủy ban chưa tìm ra lý do chính
+đáng.].
 
-Once you have that pointer to the initial parameter, you can easily get
-subsequent argument values by calling `va_arg()` repeatedly. When you
-do, you have to pass in your `va_list` variable (so it can keep on
-keeping track of where you are), as well as the type of argument you're
-about to copy off.
+Một khi có pointer tới tham số ban đầu, bạn có thể dễ dàng lấy các
+giá trị đối số sau bằng cách gọi `va_arg()` lặp đi lặp lại. Khi làm
+vậy, bạn phải truyền vào biến `va_list` của mình (để nó tiếp tục
+theo dõi bạn đang ở đâu), cùng với kiểu của đối số bạn sắp copy ra.
 
-It's up to you as a programmer to figure out which type you're going to
-pass to `va_arg()`. In the above example, we just did `int`s. But in the
-case of `printf()`, it uses the format specifier to determine which type
-to pull off next.
+Tùy bạn, người lập trình, nghĩ ra kiểu bạn sẽ truyền cho `va_arg()`.
+Trong ví dụ ở trên, ta chỉ làm `int`. Nhưng trong trường hợp
+`printf()`, nó dùng format specifier để xác định kiểu nào cần lấy
+kế tiếp.
 
-And when you're done, call `va_end()` to wrap it up. You **must** (the
-spec says) call this on a particular `va_list` variable before you
-decide to call either `va_start()` or `va_copy()` on it again. I know we
-haven't talked about `va_copy()` yet.
+Và khi xong, gọi `va_end()` để kết lại. Bạn **phải** (spec nói)
+gọi cái này trên một biến `va_list` cụ thể trước khi bạn quyết định
+gọi lại `va_start()` hay `va_copy()` trên nó lần nữa. Tôi biết ta
+chưa nói về `va_copy()`.
 
-So the standard progression is:
+Vậy tiến trình chuẩn là:
 
-* `va_start()` to initialize your `va_list` variable
-* Repeatedly `va_arg()` to get the values
-* `va_end()` to deinitialize your `va_list` variable
+* `va_start()` để khởi tạo biến `va_list` của bạn
+* Lặp lại `va_arg()` để lấy giá trị
+* `va_end()` để kết biến `va_list` của bạn
 
 [i[`va_start()` macro]>]
 [i[`va_end()` macro]>]
@@ -228,37 +220,37 @@ So the standard progression is:
 
 [i[`va_copy()` macro]<]
 
-I also mentioned `va_copy()` up there; it makes a copy of your `va_list`
-variable in the exact same state. That is, if you haven't started with
-`va_arg()` with the source variable, the new one won't be started,
-either. If you've consumed 5 variables with `va_arg()` so far, the copy
-will also reflect that.
+Tôi cũng có nhắc `va_copy()` ở trên; nó làm bản sao biến `va_list`
+của bạn ở đúng cùng trạng thái. Tức là, nếu bạn chưa bắt đầu dùng
+`va_arg()` với biến nguồn, biến mới cũng chưa bắt đầu. Nếu bạn đã
+ngốn 5 biến bằng `va_arg()` cho tới giờ, bản sao cũng phản ánh y
+vậy.
 
-`va_copy()` can be useful if you need to scan ahead through the
-arguments but need to also remember your current place.
+`va_copy()` có thể hữu ích nếu bạn cần quét trước qua đối số nhưng
+vẫn cần nhớ vị trí hiện tại.
 
 [i[`va_copy()` macro]>]
 
-## Library Functions That Use `va_list`s
+## Hàm thư viện dùng `va_list`
 
 [i[`va_list` type-->passing to functions]<]
 
-One of the other uses for these is pretty cool: writing your own custom
-`printf()` variant. It would be a pain to have to handle all those
-format specifiers right? All zillion of them?
+Một trong những cách dùng khác của mấy cái này khá hay: viết biến
+thể `printf()` tuỳ ý của riêng bạn. Sẽ đau đầu nếu phải xử mọi format
+specifier đó phải không? Cả tỷ cái?
 
-Luckily, there are `printf()` variants that accept a working `va_list`
-as an argument. You can use these to wrap up and make your own custom
-`printf()`s!
+May thay, có các biến thể `printf()` nhận một `va_list` đang hoạt
+động làm đối số. Bạn có thể dùng chúng để bọc lại và tự làm
+`printf()` riêng!
 
 [i[`vprintf()` function]<]
 
-These functions start with the letter `v`, such as `vprintf()`,
-`vfprintf()`, `vsprintf()`, and `vsnprintf()`. Basically all your
-`printf()` golden oldies except with a `v` in front.
+Các hàm này bắt đầu bằng chữ `v`, như `vprintf()`, `vfprintf()`,
+`vsprintf()` và `vsnprintf()`. Về cơ bản là mọi bản hit kinh điển
+của `printf()` chỉ thêm `v` đằng trước.
 
-Let's make a function `my_printf()` that works just like `printf()`
-except it takes an extra argument up front.
+Hãy làm hàm `my_printf()` chạy y `printf()` chỉ khác là nhận thêm
+một đối số đầu.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -289,30 +281,27 @@ int main(void)
 }
 ```
 
-See what we did there?  On lines 12-14 we started a new `va_list`
-variable, and then just passed it right into `vprintf()`. And it knows
-just want to do with it, because it has all the `printf()` smarts
-built-in.
+Thấy ta làm gì đó chưa? Ở dòng 12-14 ta mở một biến `va_list` mới,
+rồi cứ thế truyền thẳng vào `vprintf()`. Và nó biết ngay phải làm gì
+với nó, vì nó có sẵn mọi đầu óc của `printf()` gài vào.
 
 [i[`vprintf()` function]>]
 
-We still have to call `va_end()` when we're done, though, so don't
-forget that!
+Tuy vậy, ta vẫn phải gọi `va_end()` khi xong, nên đừng quên!
 
 [i[`va_list` type-->passing to functions]>]
 [i[`va_list` type]>]
 
-## Variadic Macro Gotchas
+## Bẫy macro variadic
 
-Like I've mentioned, `va_start()` and `va_end()` could be macros. One of
-the consequences of this might be that they could potentially introduce
-a new local scope. (That is, if `va_start()` has `{` and `va_end()`
-contains `}`.)
+Như tôi đã nhắc, `va_start()` và `va_end()` có thể là macro. Một hệ
+quả của chuyện này có thể là chúng có tiềm năng mở ra một scope cục
+bộ mới. (Tức là, nếu `va_start()` có `{` và `va_end()` chứa `}`.)
 
 [i[`va_start()` macro-->scoping issues]>]
 
-So we need to watch out for potential scoping issues. Take the following
-example:
+Nên ta cần cảnh giác với chuyện scope có thể gặp vấn đề. Lấy ví dụ
+sau:
 
 ``` {.c}
 va_start(va, format);          // may contain {
@@ -322,8 +311,8 @@ va_end(va);                    // may contain }
 return rv;
 ```
 
-If `va_start()` opens a new scope, `rv` will be local to that scope and
-then the `return` statement will fail. But this will insidiously only
-happen on compilers that happen to do that with the `va` macros.
+Nếu `va_start()` mở scope mới, `rv` sẽ cục bộ trong scope đó rồi câu
+`return` sẽ fail. Nhưng chuyện này sẽ âm thầm chỉ xảy ra trên các
+compiler tình cờ làm vậy với macro `va`.
 
 [i[Variadic functions]>]

@@ -31,7 +31,7 @@ Programming (Vietnamese).
 | bgc_part_1800_enum.md | Enumerated Types: `enum` | done |
 | bgc_part_1900_ptrptr.md | Pointers III: Pointers to Pointers and More | done |
 | bgc_part_2000_bitwise.md | Bitwise Operations | done |
-| bgc_part_2100_variadic.md | Variadic Functions | not started |
+| bgc_part_2100_variadic.md | Variadic Functions | done |
 | bgc_part_2150_locale.md | Locale and Internationalization | not started |
 | bgc_part_2200_unicode.md | Unicode, Wide Characters, and All That | not started |
 | bgc_part_2300_exit.md | Exiting a Program | not started |
