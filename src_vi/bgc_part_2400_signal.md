@@ -3,30 +3,29 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Signal Handling
+# Xử lý signal
 
 [i[Signal handling]<]
 
-Before we start, I'm just going to advise you to generally ignore this
-entire chapter and use your OS's (very likely) superior signal handling
-functions. Unix-likes have the [i[`sigaction()` function]] `sigaction()`
-family of functions, and Windows has... whatever it does^[Apparently it
-doesn't do Unix-style signals at all deep down, and they're simulated
-for console apps.].
+Trước khi bắt đầu, tôi muốn khuyên bạn nên bỏ qua cả chương này và
+dùng các hàm xử lý signal (rất có thể) ngon hơn của OS. Các hệ
+Unix-like có họ hàm [i[`sigaction()` function]] `sigaction()`, còn
+Windows thì có... thứ gì đó của nó^[Hình như Windows không làm signal
+kiểu Unix ở tầng sâu, và chúng được giả lập cho các app console.].
 
-With that out of the way, what are signals?
+Dẹp chuyện đó sang bên, vậy signal là gì?
 
-## What Are Signals?
+## Signal là gì?
 
-A _signal_ is _raised_ on a variety of external events. Your program can
-be configured to be interrupted to _handle_ the signal, and, optionally,
-continue where it left off once the signal has been handled.
+Một _signal_ được _raise_ khi có đủ kiểu sự kiện bên ngoài xảy ra.
+Chương trình bạn có thể được cấu hình để bị ngắt nhằm _handle_
+signal, và tuỳ chọn, chạy tiếp chỗ bị bỏ dở sau khi đã xử lý xong.
 
-Think of it like a function that's automatically called when one of
-these external events occurs.
+Nghĩ nó như một hàm được gọi tự động khi một trong các sự kiện ngoài
+này xảy ra.
 
-What are these events? On your system, there are probably a lot of them,
-but in the C spec there are just a few:
+Các sự kiện này là gì? Trên hệ của bạn, có lẽ có kha khá, nhưng
+trong spec C chỉ có vài cái:
 
 [i[`SIGABRT` signal]]
 [i[`SIGFPE` signal]]
@@ -35,33 +34,33 @@ but in the C spec there are just a few:
 [i[`SIGSEGV` signal]]
 [i[`SIGTERM` signal]]
 
-|Signal|Description|
+|Signal|Mô tả|
 |-------|--------------------------------------------------------|
-|`SIGABRT`|Abnormal termination---what happens when `abort()` is called.|
-|`SIGFPE`|Floating point exception.|
-|`SIGILL`|Illegal instruction.|
-|`SIGINT`|Interrupt---usually the result of `CTRL-C` being hit.|
-|`SIGSEGV`|"Segmentation Violation": invalid memory access.|
-|`SIGTERM`|Termination requested.|
+|`SIGABRT`|Kết thúc bất thường, thứ xảy ra khi `abort()` được gọi.|
+|`SIGFPE`|Ngoại lệ dấu chấm động.|
+|`SIGILL`|Lệnh không hợp lệ.|
+|`SIGINT`|Ngắt, thường là kết quả của việc bấm `CTRL-C`.|
+|`SIGSEGV`|"Segmentation Violation": truy cập bộ nhớ không hợp lệ.|
+|`SIGTERM`|Yêu cầu kết thúc.|
 
-You can set up your program to ignore, handle, or allow the default
-action for each of these by using the `signal()` function.
+Bạn có thể cài chương trình để bỏ qua, xử lý, hoặc cho chạy hành vi
+mặc định đối với từng signal bằng hàm `signal()`.
 
-## Handling Signals with `signal()`
+## Xử lý signal với `signal()`
 
 [i[`signal()` function]<]
 
-The `signal()` call takes two parameters: the signal in question, and an
-action to take when that signal is raised.
+Lời gọi `signal()` nhận hai tham số: signal cần quan tâm, và hành
+động cần làm khi signal đó được raise.
 
-The action can be one of three things:
+Hành động có thể là một trong ba thứ:
 
-* A pointer to a handler function.
-* [i[`SIG_IGN` macro]<]`SIG_IGN` to ignore the signal.
-* [i[`SIG_DFL` macro]]`SIG_DFL` to restore the default handler for the signal.
+* Một con trỏ tới hàm xử lý (handler).
+* [i[`SIG_IGN` macro]<]`SIG_IGN` để bỏ qua signal.
+* [i[`SIG_DFL` macro]]`SIG_DFL` để khôi phục handler mặc định cho signal.
 
-Let's write a program that you can't `CTRL-C` out of. (Don't fret---in
-the following program, you can also hit `RETURN` and it'll exit.)
+Viết một chương trình mà bạn không `CTRL-C` ra nổi. (Đừng lo, trong
+chương trình sau, bạn cũng có thể bấm `RETURN` để thoát.)
 
 [i[`SIGINT` signal]<]
 
@@ -82,40 +81,39 @@ int main(void)
 }
 ```
 
-Check out line 8---we tell the program to ignore `SIGINT`, the interrupt
-signal that's raised when `CTRL-C` is hit. No matter how much you hit
-it, the signal remains ignored. If you comment out line 8, you'll see
-you can `CTRL-C` with impunity and quit the program on the spot.
+Để ý dòng 8, ta bảo chương trình bỏ qua `SIGINT`, signal ngắt được
+raise khi `CTRL-C` được bấm. Bạn bấm bao nhiêu tuỳ thích, signal vẫn
+bị ngó lơ. Nếu bạn comment dòng 8 đi, bạn sẽ thấy có thể `CTRL-C`
+thoải mái và thoát chương trình tại chỗ.
 
 [i[`SIGINT` signal]>]
 [i[`SIG_IGN` macro]>]
 
-## Writing Signal Handlers
+## Viết signal handler
 
-I mentioned you could also write a handler function that gets called
-when the signal is raised.
+Tôi có nói rằng bạn cũng có thể viết một hàm handler được gọi khi
+signal được raise.
 
-These are pretty straightforward, are also very capability-limited when
-it comes to the spec.
+Mấy cái này khá đơn giản, nhưng cũng rất bị giới hạn về năng lực khi
+dính tới spec.
 
 [i[`signal()` function]<]
 
-Before we start, let's look at the function prototype for the `signal()`
-call:
+Trước khi bắt đầu, xem prototype của `signal()`:
 
 ``` {.c}
 void (*signal(int sig, void (*func)(int)))(int);
 ```
 
-Pretty easy to read, right?
+Dễ đọc chưa?
 
-_WRONG!_ `:)`
+_SAI!_ `:)`
 
-Let's take a moment to take it apart for practice.
+Dành chút để tháo nó ra cho quen tay.
 
-`signal()` takes two arguments: an integer `sig` representing the
-signal, and a pointer `func` to the handler (the handler returns `void`
-and takes an `int` as an argument), highlighted below:
+`signal()` nhận hai đối số: một số nguyên `sig` đại diện cho signal,
+và một con trỏ `func` tới handler (handler trả về `void` và nhận một
+`int` làm đối số), tô đậm phía dưới:
 
 ``` {.c}
                 sig          func
@@ -125,19 +123,19 @@ void (*signal(int sig, void (*func)(int)))(int);
 
 [i[`signal()` function]>]
 
-Basically, we're going to pass in the signal number we're interested in
-catching, and we're going to pass a pointer to a function of the form:
+Về cơ bản, ta sẽ truyền vào số signal cần bắt, và truyền một con trỏ
+tới hàm có dạng:
 
 ``` {.c}
 void f(int x);
 ```
 
-that will do the actual catching.
+hàm đó sẽ làm phần bắt signal thực sự.
 
-Now---what about the rest of that prototype? It's basically all the
-return type. See, `signal()` will return whatever you passed as `func`
-on success... so that means it's returning a pointer to a function that
-returns `void` and takes an `int` as an argument.
+Giờ, còn phần còn lại của prototype thì sao? Về cơ bản đó là toàn bộ
+kiểu trả về. Thấy không, `signal()` sẽ trả về bất cứ thứ gì bạn
+truyền làm `func` khi thành công... tức là nó đang trả về một con
+trỏ tới hàm trả về `void` và nhận `int` làm đối số.
 
 ``` {.c}
 returned
@@ -148,14 +146,14 @@ void        pointer to function          takes an int
 void       (*signal(int sig, void (*func)(int)))(int);
 ```
 
-Also, it can return [i[`SIG_ERR` macro]] `SIG_ERR` in case of an error.
+Ngoài ra, nó có thể trả về [i[`SIG_ERR` macro]] `SIG_ERR` khi có
+lỗi.
 
-Let's do an example where we make it so you have to hit `CTRL-C` twice
-to exit.
+Làm một ví dụ bạn phải bấm `CTRL-C` hai lần mới thoát.
 
-I want to be clear that this program engages in undefined behavior in a
-couple ways. But it'll probably work for you, and it's hard to come up
-with portable non-trivial demos.
+Tôi muốn nói rõ rằng chương trình này dính hành vi không xác định
+(undefined behavior) ở vài chỗ. Nhưng nó chắc sẽ chạy với bạn, và
+khó nghĩ ra demo di động mà không trivial.
 
 [i[`signal()` function]<]
 [i[`SIG_INT` signal]<]
@@ -199,15 +197,15 @@ int main(void)
 
 [i[`SIG_INT` signal]>]
 
-One of the things you'll notice is that on line 14 we reset the signal
-handler. This is because C has the option of resetting the signal
-handler to its [i[`SIG_DFL` macro]] `SIG_DFL` behavior before running
-your custom handler. In other words, it could be a one-off. So we reset
-it first thing so that we handle it again for the next one.
+Một điều bạn sẽ để ý là ở dòng 14 ta reset signal handler. Đó là vì
+C có quyền reset signal handler về hành vi [i[`SIG_DFL` macro]]
+`SIG_DFL` trước khi chạy handler tuỳ chỉnh của bạn. Nói cách khác,
+nó có thể chỉ chạy một lần. Nên ta reset ngay lập tức để bắt được
+lần kế tiếp.
 
-We're ignoring the return value from `signal()` in this case. If we'd
-set it to a different handler earlier, it would return a pointer to that
-handler, which we could get like this:
+Ta bỏ qua giá trị trả về của `signal()` trong trường hợp này. Nếu ta
+đã set một handler khác trước đó, nó sẽ trả về con trỏ tới handler
+đó, mà ta có thể lấy kiểu này:
 
 ``` {.c}
 // old_handler is type "pointer to function that takes a single
@@ -220,78 +218,78 @@ old_handler = signal(SIGINT, sigint_handler);
 
 [i[`signal()` function]>]
 
-That said, I'm not sure of a common use case for this. But if you need
-the old handler for some reason, you can get it that way.
+Nói thật tôi không rõ use case phổ biến cho chuyện này. Nhưng nếu
+bạn cần handler cũ vì lý do nào đó, bạn có thể lấy theo cách đó.
 
-Quick note on line 16---that's just to tell the compiler to not warn
-that we're not using this variable. It's like saying, "I know I'm not
-using it; you don't have to warn me."
+Ghi chú nhanh về dòng 16, đó chỉ là cách báo compiler đừng warning
+rằng ta không dùng biến này. Giống như nói, "Tôi biết tôi không dùng
+nó, ông không cần cảnh báo tôi đâu."
 
-And lastly you'll see that I've marked undefined behavior in a couple
-places. More on that in the next section.
+Và cuối cùng bạn sẽ thấy tôi đã đánh dấu hành vi không xác định ở
+vài chỗ. Xem thêm ở phần kế tiếp.
 
-## What Can We Actually Do?
+## Ta thực sự làm được gì?
 
-Turns out we're pretty limited in what we can and can't do in our signal
-handlers. This is one of the reasons why I say you shouldn't even bother
-with this and instead use your OS's signal handling instead (e.g.
-[i[`sigaction()` function]] `sigaction()` for Unix-like systems).
+Hoá ra ta khá bị giới hạn về những gì có thể và không thể làm trong
+signal handler. Đây là một trong những lý do tôi bảo bạn đừng thèm
+dính vào cái này và dùng signal handling của OS thay thế (ví dụ
+[i[`sigaction()` function]] `sigaction()` cho các hệ Unix-like).
 
-Wikipedia goes so far as to say the only really portable thing you can
-do is call `signal()` with `SIG_IGN` or `SIG_DFL` and that's it.
+Wikipedia nói thẳng rằng thứ duy nhất thực sự di động bạn làm được
+là gọi `signal()` với `SIG_IGN` hay `SIG_DFL`, thế thôi.
 
-Here's what we **can't** portably do:
+Đây là những gì ta **không thể** làm một cách di động:
 
 [i[Signal handling--->limitations]<]
 
-* Call any standard library function.
-  * Like `printf()`, for example.
-  * I think it's probably safe to call restartable/reentrant functions,
-    but the spec doesn't allow that liberty.
-* Get or set values from a local `static`, file scope, or thread-local
-  variable.
-  * Unless it's a lock-free atomic object or...
-  * You're assigning into a variable of type `volatile sig_atomic_t`.
+* Gọi bất cứ hàm thư viện chuẩn nào.
+  * Như `printf()` chẳng hạn.
+  * Tôi nghĩ gọi các hàm có thể restart/reentrant là tương đối an
+    toàn, nhưng spec không cho phép cái đặc quyền đó.
+* Lấy hay set giá trị từ một biến `static` cục bộ, scope file, hay
+  thread-local.
+  * Trừ khi nó là lock-free atomic object hoặc...
+  * Bạn đang gán vào biến kiểu `volatile sig_atomic_t`.
 
 [i[`sig_atomic_t` type]<]
 
-That last bit--`sig_atomic_t`--is your ticket to getting data out of a
-signal handler. (Unless you want to use lock-free atomic objects, which
-is outside the scope of this section^[Confusingly, `sig_atomic_t`
-predates the lock-free atomics and is not the same thing.].) It's an
-integer type that might or might not be signed. And it's bounded by what
-you can put in there.
+Cái cuối đó, `sig_atomic_t`, là tấm vé để bạn đưa dữ liệu ra khỏi
+signal handler. (Trừ khi bạn muốn dùng lock-free atomic object, vốn
+nằm ngoài phạm vi phần này^[Gây bối rối là `sig_atomic_t` có trước
+lock-free atomic và không phải cùng một thứ.].) Nó là kiểu số
+nguyên, có thể có dấu hoặc không. Và nó bị giới hạn bởi thứ bạn có
+thể nhét vào.
 
-You can look at the minimum and maximum allowable values in the macros
-`SIG_ATOMIC_MIN` and `SIG_ATOMIC_MAX`^[If `sig_action_t` is signed, the
-range will be at least `-127` to `127`. If unsigned, at least `0` to
-`255`.].
+Bạn có thể xem giá trị min và max cho phép trong macro
+`SIG_ATOMIC_MIN` và `SIG_ATOMIC_MAX`^[Nếu `sig_action_t` có dấu,
+range sẽ ít nhất là `-127` tới `127`. Nếu không dấu, ít nhất `0`
+tới `255`.].
 
-Confusingly, the spec also says you can't refer "to any object with
-static or thread storage duration that is not a lock-free atomic object
-other than by assigning a value to an object declared as `volatile
-sig_atomic_t` [...]"
+Gây bối rối là spec cũng nói bạn không được "refer tới bất kỳ object
+nào có static hay thread storage duration mà không phải lock-free
+atomic object ngoại trừ bằng cách gán giá trị vào một object được
+khai báo là `volatile sig_atomic_t` [...]"
 
-My read on this is that you can't read or write anything that's not a
-lock-free atomic object. Also you can assign to an object that's
+Tôi hiểu ý này là bạn không thể đọc hay ghi bất cứ gì không phải
+lock-free atomic object. Ngoài ra bạn có thể gán vào một object
 `volatile sig_atomic_t`.
 
-But can you read from it? I honestly don't see why not, except that the
-spec is very pointed about mentioning assigning into. But if you have to
-read it and make any kind of decision based on it, you might be opening
-up room for some kind of race conditions.
+Nhưng bạn đọc từ nó được không? Thật lòng tôi không thấy lý do gì
+không được, trừ việc spec rất chăm chỉ nhắc chuyện "gán vào". Nhưng
+nếu bạn phải đọc nó và ra quyết định dựa trên đó, bạn có thể mở ra
+chỗ cho race condition nào đó.
 
 [i[Signal handling--->limitations]>]
 
-With that in mind, we can rewrite our "hit `CTRL-C` twice to exit"
-code to be a little more portable, albeit less verbose on the output.
+Có cái đó trong đầu, ta có thể viết lại đoạn "bấm `CTRL-C` hai lần
+để thoát" sao cho di động hơn chút, tuy output có kiệm lời hơn.
 
-Let's change our `SIGINT` handler to do nothing except increment a value
-that's of type `volatile sig_atomic_t`. So it'll count the number of
-`CTRL-C`s that have been hit.
+Đổi handler `SIGINT` của ta để không làm gì ngoại trừ tăng một giá
+trị kiểu `volatile sig_atomic_t`. Nó sẽ đếm số lần `CTRL-C` đã được
+bấm.
 
-Then in our main loop, we'll check to see if that counter is over `2`,
-then bail out if it is.
+Rồi trong vòng lặp main, ta sẽ kiểm tra xem counter đó đã vượt quá
+`2` chưa, và bail ra nếu có.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -320,18 +318,17 @@ int main(void)
 
 [i[`sig_atomic_t` type]>]
 
-Undefined behavior again? It's my read that this is, because we have to
-read the value in order to increment and store it. Another thread might
-mess with `count` and make us mad. But in this simple case, there is no
-other thread doing that, so we can excuse the transgression and happily
-enjoy the demo.
+Lại hành vi không xác định? Tôi đọc đây là có, vì ta phải đọc giá
+trị để tăng rồi lưu lại. Một thread khác có thể nghịch `count` và
+làm ta phát cáu. Nhưng trong ví dụ đơn giản này, không có thread
+khác làm chuyện đó, nên ta bỏ qua được và tận hưởng demo.
 
-If we only want to postpone the exit by one hitting of `CTRL-C`, we can
-do that without too much trouble. But any more postponement would
-require some ridiculous function chaining.
+Nếu ta chỉ muốn trì hoãn thoát thêm một lần bấm `CTRL-C`, ta làm
+được mà không khổ lắm. Nhưng thêm nữa thì cần mấy chuỗi hàm nhố
+nhăng.
 
-What we'll do is handle it once, and the handler will reset the signal
-to its default behavior (that is, to exit):
+Cái ta sẽ làm là xử lý một lần, và handler sẽ reset signal về hành
+vi mặc định (tức là thoát):
 
 [i[`SIG_DFL` macro]<]
 
@@ -357,19 +354,20 @@ int main(void)
 
 [i[`SIG_DFL` macro]>]
 
-Later when we look at lock-free atomic variables, we'll see a way to fix
-the `count` version (assuming lock-free atomic variables are available
-on your particular system).
+Sau này khi nhìn vào biến lock-free atomic, ta sẽ thấy cách sửa
+phiên bản dùng `count` (giả sử biến lock-free atomic có sẵn trên hệ
+cụ thể của bạn).
 
-This is why at the beginning, I was suggesting checking out your OS's
-built-in signal system as a probably-superior alternative.
+Đó là lý do ngay từ đầu tôi đã gợi ý bạn check signal system tích
+hợp sẵn của OS như phương án nhiều khả năng ngon hơn.
 
-## Friends Don't Let Friends `signal()`
+## Bạn Hiền Không Để Bạn Hiền `signal()`
 
-Again, use your OS's built-in signal handling or the equivalent. It's
-not in the spec, not as portable, but probably is far more capable. Plus
-your OS probably has a number of signals defined that aren't in the C
-spec. And it's difficult to write portable code using `signal()` anyway.
+Lần nữa, dùng signal handling tích hợp sẵn của OS hay cái tương
+đương. Nó không có trong spec, không di động bằng, nhưng có lẽ mạnh
+hơn nhiều. Cộng thêm OS của bạn có lẽ định nghĩa một số signal không
+có trong spec C. Và viết code di động dùng `signal()` dù sao cũng
+khó.
 
 [i[`signal()` function]>]
 [i[Signal handling]>]
