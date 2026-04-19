@@ -1,0 +1,141 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*-vi.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (must already be pushed, e.g. v0.10.5-vi.1)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Releasing tag: $TAG"
+
+      - name: Checkout at tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.tag.outputs.tag }}
+          submodules: recursive
+
+      - name: Read upstream provenance
+        id: upstream
+        run: |
+          # Pull upstream version and commit from UPSTREAM.md for release notes.
+          UPSTREAM_COMMIT="$(grep -oE '\*\*Commit:\*\* `[a-f0-9]+`' UPSTREAM.md | head -1 | sed -E 's/.*`([a-f0-9]+)`.*/\1/')"
+          UPSTREAM_VERSION="$(grep -oE '\*\*Version:\*\* [^(]+' UPSTREAM.md | head -1 | sed -E 's/\*\*Version:\*\* //' | xargs)"
+          echo "commit=$UPSTREAM_COMMIT" >> "$GITHUB_OUTPUT"
+          echo "version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Upstream: $UPSTREAM_VERSION @ $UPSTREAM_COMMIT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build container image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.vi
+          tags: bgc-vi-build:local
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build guide
+        run: |
+          docker run --rm \
+            -v "$PWD:/guide" \
+            -w /guide \
+            -e BGBS_THREADS=4 \
+            bgc-vi-build:local \
+            bash scripts/build_vi.sh
+
+      - name: Package release artifacts
+        id: package
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          STAGE="release/$TAG"
+          rm -rf release && mkdir -p "$STAGE"
+
+          # PDFs
+          cp docs/pdf/*.pdf "$STAGE/"
+
+          # EPUB
+          cp docs/epub/bgc.epub "$STAGE/"
+
+          # HTML bundles (split + split-wide) — already zipped by build.
+          cp docs/html/bgc.zip      "$STAGE/bgc_html.zip"
+          cp docs/html/bgc-wide.zip "$STAGE/bgc_html_wide.zip"
+
+          # Source examples
+          cp docs/source/bgc_source.zip "$STAGE/"
+
+          # Full site tarball for anyone mirroring the whole thing.
+          tar -czf "$STAGE/bgc_site.tar.gz" -C docs .
+
+          ls -la "$STAGE"
+          echo "dir=$STAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          UPSTREAM_VERSION="${{ steps.upstream.outputs.version }}"
+          UPSTREAM_COMMIT="${{ steps.upstream.outputs.commit }}"
+          UPSTREAM_COMMIT_SHORT="$(echo "$UPSTREAM_COMMIT" | cut -c1-10)"
+
+          {
+            echo "# $TAG"
+            echo
+            echo "Vietnamese translation of **Beej's Guide to C Programming**,"
+            echo "based on upstream $UPSTREAM_VERSION"
+            echo "(commit [\`$UPSTREAM_COMMIT_SHORT\`](https://github.com/beejjorgensen/bgc/commit/$UPSTREAM_COMMIT))."
+            echo
+            echo "## Artifacts"
+            echo
+            echo "- HTML: \`bgc_html.zip\` (standard width), \`bgc_html_wide.zip\` (wide)"
+            echo "- EPUB: \`bgc.epub\`"
+            echo "- PDF (US Letter): \`bgc_usl_c_1.pdf\`, \`bgc_usl_c_2.pdf\`, \`bgc_usl_bw_1.pdf\`, \`bgc_usl_bw_2.pdf\`"
+            echo "- PDF (A4): \`bgc_a4_c_1.pdf\`, \`bgc_a4_c_2.pdf\`, \`bgc_a4_bw_1.pdf\`, \`bgc_a4_bw_2.pdf\`"
+            echo "  (\`_c_\` = color, \`_bw_\` = black & white; \`_1\` = single-sided, \`_2\` = double-sided)"
+            echo "- Source examples: \`bgc_source.zip\`"
+            echo "- Full site mirror: \`bgc_site.tar.gz\` (extract and open \`index.html\`)"
+            echo
+            echo "## Reading online"
+            echo
+            echo "Latest build is published at <https://tamnd.github.io/bgc-vi/>."
+            echo
+            echo "## Upstream reference"
+            echo
+            echo "- Repo: <https://github.com/beejjorgensen/bgc>"
+            echo "- Original English: <https://beej.us/guide/bgc/>"
+          } > release_notes.md
+
+          cat release_notes.md
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          body_path: release_notes.md
+          files: ${{ steps.package.outputs.dir }}/*
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
