@@ -3,31 +3,30 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Complex Numbers
+# Số phức
 
 [i[Complex numbers]<]
 
-A tiny primer on [flw[Complex numbers|Complex_number]] stolen directly
-from Wikipedia:
+Một đoạn nhập môn tí hon về [flw[số phức|Complex_number]] ăn cắp
+thẳng từ Wikipedia:
 
-> A **complex number** is a number that can be expressed in the form
-> $a+bi$, where $a$ and $b$ are real numbers [i.e. floating point types
-> in C], and $i$ represents the imaginary unit, satisfying the equation
-> $i^2=−1$. Because no real number satisfies this equation, $i$ is
-> called an imaginary number. For the complex number $a+bi$, $a$ is
-> called the **real part**, and $b$ is called the **imaginary part**.
+> **Số phức** là số có thể được biểu diễn dưới dạng $a+bi$, trong đó
+> $a$ và $b$ là số thực [tức là kiểu dấu chấm động trong C], và $i$
+> đại diện cho đơn vị ảo, thoả mãn phương trình $i^2=−1$. Vì không
+> có số thực nào thoả phương trình này, $i$ được gọi là số ảo. Với
+> số phức $a+bi$, $a$ được gọi là **phần thực**, và $b$ được gọi là
+> **phần ảo**.
 
-But that's as far as I'm going to go. We'll assume that if you're
-reading this chapter, you know what a complex number is and what you
-want to do with them.
+Nhưng tới đây là hết rồi. Ta giả định nếu bạn đọc chương này, bạn
+biết số phức là gì và bạn muốn làm gì với chúng.
 
-And all we need to cover is C's faculties for doing so.
+Và tất cả ta cần lo là tiện ích của C để làm điều đó.
 
-Turns out, though, that complex number support in a compiler is an
-_optional_ feature. Not all compliant compilers can do it. And the ones
-that do, might do it to various degrees of completeness.
+Hoá ra, hỗ trợ số phức trong compiler là tính năng _tuỳ chọn_. Không
+phải compiler tuân chuẩn nào cũng làm được. Và những compiler làm
+được, có thể làm ở các mức độ hoàn chỉnh khác nhau.
 
-You can test if your system supports complex numbers with:
+Bạn có thể check xem hệ của bạn có hỗ trợ số phức không với:
 
 [i[`__STDC_NO_COMPLEX__` macro]<]
 
@@ -41,9 +40,9 @@ You can test if your system supports complex numbers with:
 
 [i[`__STDC_IEC_559_COMPLEX__` macro]<]
 
-Furthermore, there is a macro that indicates adherence to the ISO 60559
-(IEEE 754) standard for floating point math with complex numbers, as
-well as the presence of the `_Imaginary` type.
+Thêm nữa, có một macro báo việc tuân theo chuẩn ISO 60559 (IEEE
+754) cho toán dấu chấm động với số phức, cũng như sự hiện diện của
+kiểu `_Imaginary`.
 
 ``` {.c}
 #if __STDC_IEC_559_COMPLEX__ != 1
@@ -53,14 +52,14 @@ well as the presence of the `_Imaginary` type.
 
 [i[`__STDC_IEC_559_COMPLEX__` macro]>]
 
-More details on that are spelled out in Annex G in the C11 spec.
+Chi tiết thêm về chuyện đó ghi ở Annex G trong spec C11.
 
-## Complex Types
+## Kiểu phức
 
-To use complex numbers, [i[`complex.h` header file]] `#include
+Để dùng số phức, [i[`complex.h` header file]] `#include
 <complex.h>`.
 
-With that, you get at least two types:
+Với cái đó, bạn có ít nhất hai kiểu:
 
 [i[`_Complex` type]]
 [i[`complex` type]<]
@@ -70,13 +69,11 @@ _Complex
 complex
 ```
 
-Those both mean the same thing, so you might as well use the prettier
-`complex`.
+Cả hai đều có cùng nghĩa, nên cứ dùng `complex` cho đẹp.
 
 [i[`complex` type]>]
 
-You also get some types for imaginary numbers if you implementation is
-IEC 60559-compliant:
+Bạn cũng có vài kiểu cho số ảo nếu cài đặt của bạn tuân IEC 60559:
 
 [i[`_Imaginary` type]]
 [i[`imaginary` type]<]
@@ -86,12 +83,11 @@ _Imaginary
 imaginary
 ```
 
-These also both mean the same thing, so you might as well use the
-prettier `imaginary`.
+Cả hai này cũng có cùng nghĩa, nên cứ dùng `imaginary` cho đẹp.
 
 [i[`imaginary` type]>]
 
-You also get values for the imaginary number $i$, itself:
+Bạn cũng có giá trị cho số ảo $i$, chính nó:
 
 [i[`I` macro]<]
 [i[`_Complex_I` macro]<]
@@ -103,54 +99,53 @@ _Complex_I
 _Imaginary_I
 ```
 
-The macro `I` is set to `_Imaginary_I` (if available), or `_Complex_I`.
-So just use `I` for the imaginary number.
+Macro `I` được set thành `_Imaginary_I` (nếu có), hoặc `_Complex_I`.
+Nên cứ dùng `I` cho số ảo.
 
 [i[`I` macro]>]
 [i[`_Complex_I` macro]>]
 
 [i[`__STDC_IEC_559_COMPLEX__` macro]<]
 
-One aside: I've said that if a compiler has `__STDC_IEC_559_COMPLEX__` set to
-`1`, it must support `_Imaginary` types to be compliant. That's my read
-of the spec. However, I don't know of a single compiler that actually
-supports `_Imaginary` even though they have `__STDC_IEC_559_COMPLEX__`
-set. So I'm going to write some code with that type in here I have no
-way of testing. Sorry!
+Lề một chút: tôi đã nói nếu compiler set `__STDC_IEC_559_COMPLEX__`
+thành `1`, nó phải hỗ trợ kiểu `_Imaginary` để tuân chuẩn. Đó là
+cách tôi đọc spec. Tuy nhiên, tôi không biết một compiler nào thực
+sự hỗ trợ `_Imaginary` dù chúng có set
+`__STDC_IEC_559_COMPLEX__`. Nên tôi sẽ viết một số code với kiểu đó
+ở đây mà tôi không có cách nào test. Xin lỗi!
 
 [i[`__STDC_IEC_559_COMPLEX__` macro]>]
 [i[`_Imaginary_I` macro]>]
 
-OK, so now we know there's a `complex` type, how can we use it?
+OK, giờ ta biết có kiểu `complex`, ta dùng nó sao?
 
-## Assigning Complex Numbers
+## Gán số phức
 
 [i[Complex numbers-->declaring]<]
 
-Since the complex number has a real and imaginary part, but both of them
-rely on floating point numbers to store values, we need to also tell C
-what precision to use for those parts of the complex number.
+Vì số phức có phần thực và phần ảo, nhưng cả hai đều dựa vào số dấu
+chấm động để lưu giá trị, ta cũng cần báo C dùng độ chính xác nào
+cho các phần đó của số phức.
 
 [i[`complex float` type]<]
 [i[`complex double` type]<]
 [i[`complex long double` type]<]
 
-We do that by just pinning a `float`, `double`, or `long double` to the
-`complex`, either before or after it.
+Ta làm chuyện đó bằng cách đính kèm `float`, `double`, hay `long
+double` vào `complex`, trước hay sau đều được.
 
 [i[`complex long double` type]>]
 
-Let's define a complex number that uses `float` for its components:
+Định nghĩa một số phức dùng `float` cho các thành phần của nó:
 
 ``` {.c}
 float complex c;   // Spec prefers this way
 complex float c;   // Same thing--order doesn't matter
 ```
 
-So that's great for declarations, but how do we initialize them or
-assign to them?
+Vậy khai báo thì ổn rồi, còn khởi tạo hay gán thì sao?
 
-Turns out we get to use some pretty natural notation. Example!
+Hoá ra ta được dùng ký pháp khá tự nhiên. Ví dụ!
 
 [i[`I` macro]<]
 
@@ -161,23 +156,23 @@ double complex y = 10 + 3*I;
 
 [i[`I` macro]>]
 
-For $5+2i$ and $10+3i$, respectively.
+Cho $5+2i$ và $10+3i$, tương ứng.
 
 [i[`complex float` type]>]
 [i[`complex double` type]>]
 [i[Complex numbers-->declaring]>]
 
-## Constructing, Deconstructing, and Printing
+## Dựng, xé, và in
 
-We're getting there...
+Ta đang tới đó...
 
-We've already seen one way to write a complex number:
+Ta đã thấy một cách viết số phức:
 
 ``` {.c}
 double complex x = 5 + 2*I;
 ```
 
-There's also no problem using other floating point numbers to build it:
+Cũng không vấn đề gì khi dùng số dấu chấm động khác để dựng nó:
 
 ``` {.c}
 double a = 5;
@@ -187,49 +182,48 @@ double complex x = a + b*I;
 
 [i[`CMPLX()` macro]<]
 
-There is also a set of macros to help build these. The above code could
-be written using the `CMPLX()` macro, like so:
+Cũng có một bộ macro để giúp dựng mấy cái này. Code trên có thể được
+viết dùng macro `CMPLX()`, như vầy:
 
 ``` {.c}
 double complex x = CMPLX(5, 2);
 ```
 
-As far as I can tell in my research, these are _almost_ equivalent:
+Theo như tôi tìm hiểu, mấy cái này _gần như_ tương đương:
 
 ``` {.c}
 double complex x = 5 + 2*I;
 double complex x = CMPLX(5, 2);
 ```
 
-But the `CMPLX()` macro will handle negative zeros in the imaginary part
-correctly every time, whereas the other way might convert them to
-positive zeros. I _think_^[This was a harder one to research, and I'll
-take any more information anyone can give me. `I` could be defined as
-`_Complex_I` or `_Imaginary_I`, if the latter exists. `_Imaginary_I`
-will handle signed zeros, but `_Complex_I` _might_ not. This has
-implications with branch cuts and other complex-numbery-mathy things.
-Maybe. Can you tell I'm really getting out of my element here? In any
-case, the `CMPLX()` macros behave as if `I` were defined as
-`_Imaginary_I`, with signed zeros, even if `_Imaginary_I` doesn't exist
-on the system.] This seems to imply that if there's a chance the
-imaginary part will be zero, you should use the macro... but someone
-should correct me on this if I'm mistaken!
+Nhưng macro `CMPLX()` sẽ xử lý zero âm ở phần ảo đúng mỗi lần, còn
+cách kia có thể chuyển chúng thành zero dương. Tôi _nghĩ_^[Cái này
+là cái khó research hơn, và tôi sẽ nhận thêm thông tin ai đó cho
+tôi. `I` có thể được định nghĩa là `_Complex_I` hay `_Imaginary_I`,
+nếu cái sau tồn tại. `_Imaginary_I` sẽ xử lý zero có dấu, nhưng
+`_Complex_I` _có thể_ không. Cái này có hàm ý với branch cut và các
+thứ toán-số-phức khác. Có lẽ. Bạn thấy tôi thực sự ra khỏi khu vực
+chuyên môn chưa? Dù sao, macro `CMPLX()` hành xử như thể `I` được
+định nghĩa là `_Imaginary_I`, với zero có dấu, kể cả khi
+`_Imaginary_I` không tồn tại trên hệ.] Cái này có vẻ hàm ý rằng nếu
+có khả năng phần ảo là zero, bạn nên dùng macro... nhưng ai đó nên
+sửa tôi về điều này nếu tôi nhầm!
 
-The `CMPLX()` macro works on `double` types. There are two other macros
-for `float` and `long double`: [i[`CMPLXF()` macro]] `CMPLXF()` and
-[i[`CMPLXL()` macro]] `CMPLXL()`. (These "f" and "l" suffixes appear in
-virtually all the complex-number-related functions.)
+Macro `CMPLX()` chạy trên kiểu `double`. Có hai macro khác cho
+`float` và `long double`: [i[`CMPLXF()` macro]] `CMPLXF()` và
+[i[`CMPLXL()` macro]] `CMPLXL()`. (Hậu tố "f" và "l" xuất hiện hầu
+như trong tất cả các hàm liên quan tới số phức.)
 
 [i[`CMPLX()` macro]>]
 
-Now let's try the reverse: if we have a complex number, how do we break
-it apart into its real and imaginary parts?
+Giờ thử ngược lại: nếu ta có số phức, làm sao tách nó ra phần thực
+và phần ảo?
 
 [i[`creal()` function]<]
 [i[`cimag()` function]<]
 
-Here we have a couple functions that will extract the real and imaginary
-parts from the number: `creal()` and `cimag()`:
+Ta có một cặp hàm sẽ trích phần thực và phần ảo từ số: `creal()` và
+`cimag()`:
 
 ``` {.c}
 double complex x = 5 + 2*I;
@@ -239,31 +233,32 @@ printf("x = %f + %fi\n", creal(x), cimag(x));
 printf("y = %f + %fi\n", creal(y), cimag(y));
 ```
 
-for the output:
+cho output:
 
 ``` {.default}
 x = 5.000000 + 2.000000i
 y = 10.000000 + 3.000000i
 ```
 
-Note that the `i` I have in the `printf()` format string is a literal
-`i` that gets printed---it's not part of the format specifier. Both
-return values from `creal()` and `cimag()` are `double`.
+Lưu ý rằng chữ `i` tôi có trong chuỗi format của `printf()` là chữ
+`i` theo nghĩa đen được in ra, nó không phải phần của format
+specifier. Cả hai giá trị trả về từ `creal()` và `cimag()` đều là
+`double`.
 
-And as usual, there are `float` and `long double` variants of these
-functions: [i[`crealf()` function]] `crealf()`, [i[`cimagf()` function]]
-`cimagf()`, [i[`creall()` function]] `creall()`, and [i[`cimagl()`
+Và như thường, có các biến thể `float` và `long double` của các hàm
+này: [i[`crealf()` function]] `crealf()`, [i[`cimagf()` function]]
+`cimagf()`, [i[`creall()` function]] `creall()`, và [i[`cimagl()`
 function]] `cimagl()`.
 
 [i[`creal()` function]>]
 [i[`cimag()` function]>]
 
-## Complex Arithmetic and Comparisons
+## Số học và so sánh số phức
 
 [i[Complex numbers-->arithmetic]<]
 
-Arithmetic can be performed on complex numbers, though how this works
-mathematically is beyond the scope of the guide.
+Số học có thể được thực hiện trên số phức, tuy cách nó chạy về mặt
+toán học nằm ngoài phạm vi guide này.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -289,7 +284,7 @@ int main(void)
 }
 ```
 
-for a result of:
+cho kết quả:
 
 ``` {.default}
 x + y = 4.000000 + 6.000000i
@@ -298,7 +293,7 @@ x * y = -5.000000 + 10.000000i
 x / y = 0.440000 + 0.080000i
 ```
 
-You can also compare two complex numbers for equality (or inequality):
+Bạn cũng có thể so sánh hai số phức về bằng nhau (hoặc không bằng):
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -314,39 +309,36 @@ int main(void)
 }
 ```
 
-with the output:
+với output:
 
 ``` {.default}
 x == y = 0
 x != y = 1
 ```
 
-They are equal if both components test equal. Note that as with all
-floating point, they could be equal if they're close enough due to
-rounding error^[The simplicity of this statement doesn't do justice to
-the incredible amount of work that goes into simply understanding how
-floating point actually functions.
+Chúng bằng nhau nếu cả hai thành phần test bằng. Lưu ý rằng như với
+mọi dấu chấm động, chúng có thể bằng nếu đủ gần do lỗi làm tròn^[Sự
+đơn giản của câu này không làm tròn được lượng công sức khủng khiếp
+đổ vào việc chỉ đơn thuần hiểu dấu chấm động thực sự hoạt động thế
+nào.
 https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/].
 
 [i[Complex numbers-->arithmetic]>]
 
-## Complex Math
+## Toán số phức
 
-But wait! There's more than just simple complex arithmetic!
+Nhưng khoan! Còn nhiều hơn chỉ là số học số phức đơn giản!
 
-Here's a summary table of all the math functions available to you with
-complex numbers.
+Đây là bảng tổng hợp mọi hàm toán có sẵn cho bạn với số phức.
 
-I'm only going to list the `double` version of each function, but for
-all of them there is a `float` version that you can get by appending `f`
-to the function name, and a `long double` version that you can get by
-appending `l`.
+Tôi sẽ chỉ liệt kê phiên bản `double` của mỗi hàm, nhưng với tất cả
+chúng đều có phiên bản `float` bạn lấy được bằng cách thêm `f` vào
+tên hàm, và phiên bản `long double` bạn lấy được bằng cách thêm `l`.
 
-For example, the `cabs()` function for computing the absolute value of a
-complex number also has `cabsf()` and `cabsl()` variants. I'm omitting
-them for brevity.
+Ví dụ, hàm `cabs()` dùng tính giá trị tuyệt đối của số phức cũng có
+biến thể `cabsf()` và `cabsl()`. Tôi bỏ chúng cho ngắn.
 
-### Trigonometry Functions
+### Hàm lượng giác
 
 [i[`ccos()` function]]
 [i[`csin()` function]]
@@ -361,14 +353,14 @@ them for brevity.
 [i[`casinh()` function]]
 [i[`catanh()` function]]
 
-|Function|Description|
+|Hàm|Mô tả|
 |-|-|
 |`ccos()`|Cosine|
 |`csin()`|Sine|
 |`ctan()`|Tangent|
 |`cacos()`|Arc cosine|
 |`casin()`|Arc sine|
-|`catan()`|Play _Settlers of Catan_|
+|`catan()`|Chơi _Settlers of Catan_|
 |`ccosh()`|Hyperbolic cosine|
 |`csinh()`|Hyperbolic sine|
 |`ctanh()`|Hyperbolic tangent|
@@ -376,29 +368,29 @@ them for brevity.
 |`casinh()`|Arc hyperbolic sine|
 |`catanh()`|Arc hyperbolic tangent|
 
-### Exponential and Logarithmic Functions
+### Hàm mũ và logarit
 
 [i[`cexp()` function]]
 [i[`clog()` function]]
 
-|Function|Description|
+|Hàm|Mô tả|
 |-|-|
-|`cexp()`|Base-$e$ exponential|
-|`clog()`|Natural (base-$e$) logarithm|
+|`cexp()`|Mũ cơ số $e$|
+|`clog()`|Logarit tự nhiên (cơ số $e$)|
 
-### Power and Absolute Value Functions
+### Hàm luỹ thừa và giá trị tuyệt đối
 
 [i[`cabs()` function]]
 [i[`cpow()` function]]
 [i[`csqrt()` function]]
 
-|Function|Description|
+|Hàm|Mô tả|
 |-|-|
-|`cabs()`|Absolute value|
-|`cpow()`|Power|
-|`csqrt()`|Square root|
+|`cabs()`|Giá trị tuyệt đối|
+|`cpow()`|Luỹ thừa|
+|`csqrt()`|Căn bậc hai|
 
-### Manipulation Functions
+### Hàm thao tác
 
 [i[`creal()` function]]
 [i[`cimag()` function]]
@@ -407,16 +399,16 @@ them for brevity.
 [i[`conj()` function]]
 [i[`cproj()` function]]
 
-|Function|Description|
+|Hàm|Mô tả|
 |-|-|
-|`creal()`|Return real part|
-|`cimag()`|Return imaginary part|
-|`CMPLX()`|Construct a complex number|
-|`carg()`|Argument/phase angle|
-|`conj()`|Conjugate[^4a34]|
-|`cproj()`|Projection on Riemann sphere|
+|`creal()`|Trả phần thực|
+|`cimag()`|Trả phần ảo|
+|`CMPLX()`|Dựng số phức|
+|`carg()`|Argument / góc pha|
+|`conj()`|Liên hợp[^4a34]|
+|`cproj()`|Phép chiếu lên mặt cầu Riemann|
 
-[^4a34]: This is the only one that doesn't begin with an extra leading
-`c`, strangely.
+[^4a34]: Đây là cái duy nhất không bắt đầu bằng chữ `c` thêm đằng
+trước, lạ thay.
 
 [i[Complex numbers]>]
