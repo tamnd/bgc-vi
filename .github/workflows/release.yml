@@ -1,8 +1,9 @@
 name: Release
 
-# Paused during the translation marathon. Re-enable the tag trigger
-# before cutting the first release.
 on:
+  push:
+    tags:
+      - 'v*-vi.*'
   workflow_dispatch:
     inputs:
       tag:
