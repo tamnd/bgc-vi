@@ -3,54 +3,53 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Exiting a Program
+# Thoát khỏi chương trình
 
 [i[Exiting]<]
 
-Turns out there are a lot of ways to do this, and even ways to set up
-"hooks" so that a function runs when a program exits.
+Hóa ra có khá nhiều cách để làm chuyện này, và còn cả cách cài "móc"
+để hàm nào đó chạy khi chương trình thoát.
 
-In this chapter we'll dive in and check them out.
+Trong chương này ta sẽ đào vào và xem chúng.
 
-We already covered the meaning of the exit status code in the [Exit
-Status](#exit-status) section, so jump back there and review if you have
-to.
+Ta đã nói về ý nghĩa của mã exit status trong phần [Exit
+Status](#exit-status), nên nhảy ngược lại đó và xem lại nếu cần.
 
-All the functions in this section are in `<stdlib.h>`.
+Mọi hàm trong phần này nằm ở `<stdlib.h>`.
 
-## Normal Exits
+## Thoát bình thường
 
-We'll start with the regular ways to exit a program, and then jump to
-some of the rarer, more esoteric ones.
+Bắt đầu với các cách thoát thường, rồi nhảy sang vài cái hiếm và
+quái hơn.
 
-When you exit a program normally, all open I/O streams are flushed and
-temporary files removed. Basically it's a nice exit where everything
-gets cleaned up and handled. It's what you want to do almost all the
-time unless you have reasons to do otherwise.
+Khi bạn thoát chương trình bình thường, mọi luồng I/O mở được flush
+và file tạm được xóa. Về cơ bản đây là lối thoát đẹp nơi mọi thứ
+được dọn dẹp và xử lý. Đây là thứ bạn muốn làm gần như mọi lúc, trừ
+khi có lý do khác.
 
-### Returning From `main()`
+### Trở về từ `main()`
 
 [i[Exiting-->return from `main()`]<]
 
-If you've noticed, `main()` has a return type of `int`... and yet I've
-rarely, if ever, been `return`ing anything from `main()` at all.
+Nếu bạn để ý, `main()` có kiểu trả về là `int`... nhưng tôi hiếm
+khi, nếu có, `return` bất cứ gì từ `main()`.
 
-This is because for `main()` only (and I can't stress enough this
-special case _only_ applies to `main()` and no other functions anywhere)
-has an _implicit_ `return 0` if you fall off the end.
+Đó là vì chỉ riêng `main()` (và tôi không thể nhấn mạnh đủ rằng
+trường hợp đặc biệt này _chỉ_ áp dụng cho `main()` chứ không hàm nào
+khác ở đâu) có _ngầm_ `return 0` nếu bạn rơi khỏi đuôi hàm.
 
-You can explicitly `return` from `main()` any time you want, and some
-programmers feel it's more _Right_ to always have a `return` at the end
-of `main()`. But if you leave it off, C will put one there for you.
+Bạn có thể `return` từ `main()` tường minh bất cứ lúc nào bạn muốn,
+và vài lập trình viên cảm thấy nó _Đúng_ hơn khi luôn có `return` ở
+cuối `main()`. Nhưng nếu bạn bỏ đó, C sẽ đặt một cái đó vào giúp
+bạn.
 
-So... here are the `return` rules for `main()`:
+Vậy... đây là luật `return` cho `main()`:
 
-* You can return an exit status from `main()` with a `return` statement.
-  `main()` is the only function with this special behavior. Using
-  `return` in any other function just returns from that function to the
-  caller.
-* If you don't explicitly `return` and just fall off the end of
-  `main()`, it's just as if you'd returned `0` or `EXIT_SUCCESS`.
+* Bạn có thể trả về exit status từ `main()` bằng câu lệnh `return`.
+  `main()` là hàm duy nhất có hành vi đặc biệt này. Dùng `return`
+  trong bất kỳ hàm nào khác chỉ trả về từ hàm đó tới nơi gọi.
+* Nếu bạn không `return` tường minh mà chỉ rơi khỏi đuôi của
+  `main()`, y như bạn đã `return 0` hay `EXIT_SUCCESS`.
 
 [i[Exiting-->return from `main()`]>]
 
@@ -58,23 +57,23 @@ So... here are the `return` rules for `main()`:
 
 [i[Exiting-->return from `main()`]>]
 
-This one has also made an appearance a few times. If you call `exit()`
-from anywhere in your program, it will exit at that point.
+Cái này cũng đã xuất hiện vài lần. Nếu bạn gọi `exit()` từ bất cứ
+đâu trong chương trình, nó sẽ thoát tại điểm đó.
 
-The argument you pass to `exit()` is the exit status.
+Đối số bạn truyền cho `exit()` là exit status.
 
-### Setting Up Exit Handlers with `atexit()`
+### Cài exit handler với `atexit()`
 
 [i[`atexit()` function]<]
 
-You can register functions to be called when a program exits whether by
-returning from `main()` or calling the `exit()` function.
+Bạn có thể đăng ký các hàm được gọi khi chương trình thoát, dù bằng
+cách return từ `main()` hay gọi hàm `exit()`.
 
-A call to `atexit()` with the handler function name will get it done.
-You can register multiple exit handlers, and they'll be called in the
-reverse order of registration.
+Một lời gọi `atexit()` với tên hàm handler sẽ xong việc. Bạn có thể
+đăng ký nhiều exit handler, và chúng sẽ được gọi theo thứ tự ngược
+lại với thứ tự đăng ký.
 
-Here's an example:
+Đây là ví dụ:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -99,7 +98,7 @@ int main(void)
 }
 ```
 
-And the output is:
+Và output là:
 
 ``` {.default}
 About to exit...
@@ -109,18 +108,18 @@ Exit handler 1 called!
 
 [i[`atexit()` function]>]
 
-## Quicker Exits with `quick_exit()`
+## Thoát nhanh hơn với `quick_exit()`
 
 [i[`quick_exit()` function]<]
 
-This is similar to a normal exit, except:
+Cái này tương tự thoát thường, trừ:
 
-* Open files might not be flushed.
-* Temporary files might not be removed.
-* `atexit()` handlers won't be called.
+* File mở có thể không được flush.
+* File tạm có thể không được xóa.
+* Handler `atexit()` sẽ không được gọi.
 
-But there is a way to register exit handlers: call `at_quick_exit()`
-analogously to how you'd call `atexit()`.
+Nhưng có cách để đăng ký exit handler: gọi `at_quick_exit()` tương
+tự cách bạn gọi `atexit()`.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -154,7 +153,7 @@ int main(void)
 }
 ```
 
-Which gives this output:
+Cho ra output:
 
 ``` {.default}
 About to quick exit...
@@ -162,27 +161,28 @@ Quick exit handler 2 called!
 Quick exit handler 1 called!
 ```
 
-It works just like `exit()`/`atexit()`, except for the fact that file
-flushing and cleanup might not be done.
+Nó chạy y như `exit()`/`atexit()`, trừ việc flush file và dọn dẹp có
+thể không được làm.
 
 [i[`quick_exit()` function]>]
 
-## Nuke it from Orbit: `_Exit()`
+## Bắn nó từ quỹ đạo: `_Exit()`
 
 [i[`_Exit()` function]<]
 
-Calling `_Exit()` exits immediately, period. No on-exit callback
-functions are executed. Files won't be flushed. Temp files won't be
-removed.
+Gọi `_Exit()` thoát ngay lập tức, hết chuyện. Không có hàm callback
+on-exit nào được thực thi. File sẽ không được flush. File tạm sẽ
+không được xóa.
 
-Use this if you have to exit _right fargin' now_.
+Dùng cái này nếu bạn phải thoát _ngay tức khắc_.
 
-## Exiting Sometimes: `assert()`
+## Thoát đôi khi: `assert()`
 
-The `assert()` statement is used to insist that something be true, or
-else the program will exit.
+Câu lệnh `assert()` được dùng để ép một điều gì đó phải đúng, không
+thì chương trình sẽ thoát.
 
-Devs often use an assert to catch Should-Never-Happen type errors.
+Dev thường dùng assert để bắt lỗi kiểu Never-Should-Happen (không
+bao giờ nên xảy ra).
 
 ``` {.c}
 #define PI 3.14159
@@ -190,7 +190,7 @@ Devs often use an assert to catch Should-Never-Happen type errors.
 assert(PI > 3);   // Sure enough, it is, so carry on
 ```
 
-versus:
+so với:
 
 ``` {.c}
 goats -= 100;
@@ -198,37 +198,37 @@ goats -= 100;
 assert(goats >= 0);  // Can't have negative goats
 ```
 
-In that case, if I try to run it and `goats` falls under `0`, this
-happens:
+Trong trường hợp đó, nếu tôi cố chạy nó và `goats` tụt dưới `0`,
+chuyện này xảy ra:
 
 ``` {.default}
 goat_counter: goat_counter.c:8: main: Assertion `goats >= 0' failed.
 Aborted
 ```
 
-and I'm dropped back to the command line.
+và tôi bị đá về dòng lệnh.
 
-This isn't very user-friendly, so it's only used for things the user
-will never see. And often people [write their own assert macros that can
-more easily be turned off](#my-assert).
+Cái này không thân thiện lắm với người dùng, nên nó chỉ được dùng
+cho mấy thứ mà người dùng sẽ không bao giờ thấy. Và thường người ta
+[tự viết macro assert riêng có thể tắt dễ hơn](#my-assert).
 
 [i[`_Exit()` function]>]
 
-## Abnormal Exit: `abort()`
+## Thoát bất thường: `abort()`
 
 [i[`abort()` function]<]
 
-You can use this if something has gone horribly wrong and you want to
-indicate as much to the outside environment. This also won't necessarily
-clean up any open files, etc.
+Bạn có thể dùng cái này nếu có gì đó sai khủng khiếp và bạn muốn báo
+như vậy cho môi trường bên ngoài. Cái này cũng không nhất thiết dọn
+dẹp file mở nào.
 
-I've rarely seen this used.
+Tôi hiếm thấy cái này được dùng.
 
-Some foreshadowing about _signals_: this actually works by raising a
-[i[`SIGABRT` signal]] `SIGABRT` which will end the process. 
+Hé lộ chút về _signal_: cái này thực ra hoạt động bằng cách raise
+một [i[`SIGABRT` signal]] `SIGABRT` sẽ kết thúc tiến trình.
 
-What happens after that is up to the system, but on Unix-likes, it was
-common to [flw[dump core|Core_dump]] as the program terminated.
+Chuyện gì xảy ra sau đó tùy hệ thống, nhưng trên các hệ Unix-like,
+thường [flw[dump core|Core_dump]] khi chương trình kết thúc.
 
 [i[`abort()` function]>]
 [i[Exiting]>]
