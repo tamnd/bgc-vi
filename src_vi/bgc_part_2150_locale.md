@@ -3,42 +3,42 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Locale and Internationalization
+# Locale và quốc tế hoá
 
 [i[Locale]<]
 
-_Localization_ is the process of making your app ready to work well in
-different locales (or countries).
+_Localization_ (bản địa hoá) là quá trình làm cho app của bạn sẵn
+sàng hoạt động tốt ở các locale (hay quốc gia) khác nhau.
 
-As you might know, not everyone uses the same character for decimal
-points or for thousands separators... or for currency.
+Như bạn có thể biết, không phải ai cũng dùng cùng ký tự cho dấu thập
+phân hay cho dấu phân cách hàng nghìn, hay cho đơn vị tiền tệ.
 
-These locales have names, and you can select one to use. For example, a
-US locale might write a number like:
+Các locale này có tên, và bạn có thể chọn một cái để dùng. Ví dụ,
+locale Mỹ có thể viết một con số như:
 
 100,000.00
 
-Whereas in Brazil, the same might be written with the commas and decimal
-points swapped:
+Còn ở Brazil, cùng số đó có thể được viết với dấu phẩy và dấu chấm
+đổi chỗ:
 
 100.000,00
 
-Makes it easier to write your code so it ports to other nationalities
-with ease!
+Chuyện này dễ dàng hơn khi bạn viết code sao cho dễ chuyển sang các
+quốc tịch khác!
 
-Well, sort of. Turns out C only has one built-in locale, and it's
-limited. The spec really leaves a lot of ambiguity here; it's hard to be
-completely portable.
+Ừ, kiểu kiểu. Hoá ra C chỉ có đúng một locale sẵn, và nó bị giới
+hạn. Spec chừa ra khá nhiều chỗ mập mờ ở đây; khó mà thật sự
+portable hoàn toàn.
 
-But we'll do our best!
+Nhưng ta sẽ cố gắng hết sức!
 
-## Setting the Localization, Quick and Dirty
+## Đặt localization, nhanh và bẩn
 
-For these calls, include [i[`locale.h` header file]] `<locale.h>`.
+Với các lời gọi này, include [i[`locale.h` header file]] `<locale.h>`.
 
-There is basically one thing you can portably do here in terms of
-declaring a specific locale. This is likely what you want to do if
-you're going to do locale anything:
+Về cơ bản chỉ có một việc bạn có thể làm portable ở đây khi khai báo
+một locale cụ thể. Đây rất có thể là điều bạn muốn làm nếu định đụng
+tới locale:
 
 [i[`setlocale()` function]<]
 
@@ -46,115 +46,113 @@ you're going to do locale anything:
 setlocale(LC_ALL, "");  // Use this environment's locale for everything
 ```
 
-You'll want to call that so that the program gets initialized with your
-current locale.
+Bạn sẽ muốn gọi nó để chương trình được khởi tạo với locale hiện tại
+của bạn.
 
-Getting into more details, there is one more thing you can do and stay
-portable:
+Đi vào chi tiết hơn, có một chuyện nữa bạn làm được mà vẫn portable:
 
 ``` {.c}
 setlocale(LC_ALL, "C");  // Use the default C locale
 ```
 
-but that's called by default every time your program starts, so there's
-not much need to do it yourself.
+nhưng cái đó được gọi mặc định mỗi lần chương trình của bạn khởi
+chạy, nên không mấy khi cần tự gọi.
 
-In that second string, you can specify any locale supported by your
-system. This is completely system-dependent, so it will vary. On my
-system, I can specify this:
+Trong chuỗi thứ hai đó, bạn có thể chỉ định bất kỳ locale nào được
+hệ thống của bạn hỗ trợ. Chuyện này hoàn toàn phụ thuộc hệ, nên sẽ
+khác nhau. Trên hệ của tôi, tôi có thể chỉ định cái này:
 
 ``` {.c}
 setlocale(LC_ALL, "en_US.UTF-8");  // Non-portable!
 ```
 
-And that'll work. But it's only portable to systems which have that
-exact same name for that exact same locale, and you can't guarantee it.
+Và cái đó sẽ chạy. Nhưng nó chỉ portable sang các hệ có đúng cùng
+tên đó cho đúng locale đó, và bạn không thể bảo đảm được.
 
-By passing in an empty string (`""`) for the second argument, you're
-telling C, "Hey, figure out what the current locale on this system is so
-I don't have to tell you."
+Bằng cách truyền chuỗi rỗng (`""`) làm đối số thứ hai, bạn đang nói
+với C, "Này, tự tìm xem locale hiện tại trên hệ này là gì để tôi
+khỏi phải nói cho."
 
 [i[`setlocale()` function]>]
 
-## Getting the Monetary Locale Settings
+## Lấy thiết lập locale cho tiền tệ
 
 [i[Locale-->money]<]
 
-Because moving green pieces of paper around promises to be the key to
-happiness^["This planet has---or rather had---a problem, which was this:
-most of the people living on it were unhappy for pretty much of the
-time. Many solutions were suggested for this problem, but most of these
-were largely concerned with the movement of small green pieces of paper,
-which was odd because on the whole it wasn't the small green pieces of
-paper that were unhappy." ---The Hitchhiker's Guide to the Galaxy,
-Douglas Adams], let's talk about monetary locale. When you're writing
-portable code, you have to know what to type for cash, right? Whether
-that's "$", "€", "¥", or "£".
+Vì di chuyển mấy tờ giấy xanh hứa hẹn là chìa khoá tới hạnh phúc^["
+Hành tinh này có, hay đúng hơn, đã có một vấn đề, đó là: phần lớn
+những người sống trên nó không hạnh phúc gần như suốt cả thời gian.
+Nhiều giải pháp được đề xuất cho vấn đề này, nhưng phần lớn đều liên
+quan đến việc di chuyển các tờ giấy xanh nhỏ, kỳ cục là nhìn chung
+chẳng phải mấy tờ giấy xanh nhỏ không hạnh phúc." The Hitchhiker's
+Guide to the Galaxy, Douglas Adams], hãy nói về locale cho tiền tệ.
+Khi bạn viết code portable, bạn phải biết phải gõ gì cho tiền mặt,
+đúng không? Dù nó là "$", "€", "¥", hay "£".
 
 [i[`localeconv()` function]<]
 
-How can you write that code without going insane? Luckily, once you call
-`setlocale(LC_ALL, "")`, you can just look these up with a call to
+Làm sao viết code đó mà không phát điên? May thay, khi bạn gọi
+`setlocale(LC_ALL, "")`, bạn có thể tra mấy cái này bằng một lời gọi
 `localeconv()`:
 
 ``` {.c}
 struct lconv *x = localeconv();
 ```
 
-This function returns a pointer to a statically-allocated `struct lconv`
-that has all that juicy information you're looking for.
+Hàm này trả về pointer tới một `struct lconv` được cấp phát tĩnh có
+mọi thông tin ngon lành bạn đang tìm.
 
-Here are the fields of `struct lconv` and their meanings.
+Đây là các field của `struct lconv` và nghĩa của chúng.
 
-First, some conventions. An `_p_` means "positive", and `_n_` means
-"negative", and `int_` means "international". Though a lot of these are
-type `char` or `char*`, most (or the strings they point to) are actually
-treated as integers^[Remember that `char` is just a byte-sized
-integer.].
+Trước hết, vài quy ước. `_p_` nghĩa là "positive" (dương), `_n_`
+nghĩa là "negative" (âm), và `int_` nghĩa là "international" (quốc
+tế). Dù nhiều cái có kiểu `char` hoặc `char*`, phần lớn (hoặc các
+chuỗi chúng trỏ tới) thật ra được xem như số nguyên^[Nhớ là `char`
+chỉ là số nguyên cỡ một byte.].
 
-Before we go further, know that `CHAR_MAX` (from `<limits.h>`) is the
-maximum value that can be held in a `char`. And that many of the
-following `char` values use that to indicate the value isn't available
-in the given locale.
+Trước khi đi tiếp, biết rằng `CHAR_MAX` (từ `<limits.h>`) là giá trị
+tối đa lưu được trong một `char`. Và nhiều giá trị `char` dưới đây
+dùng nó để cho biết giá trị không có ở locale đó.
 
-|Field|Description|
+|Field|Mô tả|
 |-----|-----------|
-|`char *mon_decimal_point`|Decimal pointer character for money, e.g. `"."`.|
-|`char *mon_thousands_sep`|Thousands separator character for money, e.g. `","`.|
-|`char *mon_grouping`|Grouping description for money (see below).|
-|`char *positive_sign`|Positive sign for money, e.g. `"+"` or `""`.|
-|`char *negative_sign`|Negative sign for money, e.g. `"-"`.|
-|`char *currency_symbol`|Currency symbol, e.g. `"$"`.|
-|`char frac_digits`|When printing monetary amounts, how many digits to print past the decimal point, e.g. `2`.|
-|`char p_cs_precedes`|`1` if the `currency_symbol` comes before the value for a non-negative monetary amount, `0` if after.|
-|`char n_cs_precedes`|`1` if the `currency_symbol` comes before the value for a negative monetary amount, `0` if after.|
-|`char p_sep_by_space`|Determines the separation of the `currency symbol` from the value for non-negative amounts (see below).|
-|`char n_sep_by_space`|Determines the separation of the `currency symbol` from the value for negative amounts (see below).|
-|`char p_sign_posn`|Determines the `positive_sign` position for non-negative values.|
-|`char n_sign_posn`|Determines the `positive_sign` position for negative values.|
-|`char *int_curr_symbol`|International currency symbol, e.g. `"USD "`.|
-|`char int_frac_digits`|International value for `frac_digits`.|
-|`char int_p_cs_precedes`|International value for `p_cs_precedes`.|
-|`char int_n_cs_precedes`|International value for `n_cs_precedes`.|
-|`char int_p_sep_by_space`|International value for `p_sep_by_space`.|
-|`char int_n_sep_by_space`|International value for `n_sep_by_space`.|
-|`char int_p_sign_posn`|International value for `p_sign_posn`.|
-|`char int_n_sign_posn`|International value for `n_sign_posn`.|
+|`char *mon_decimal_point`|Ký tự dấu thập phân cho tiền, ví dụ `"."`.|
+|`char *mon_thousands_sep`|Ký tự phân cách hàng nghìn cho tiền, ví dụ `","`.|
+|`char *mon_grouping`|Mô tả cách nhóm cho tiền (xem bên dưới).|
+|`char *positive_sign`|Dấu dương cho tiền, ví dụ `"+"` hoặc `""`.|
+|`char *negative_sign`|Dấu âm cho tiền, ví dụ `"-"`.|
+|`char *currency_symbol`|Ký hiệu tiền tệ, ví dụ `"$"`.|
+|`char frac_digits`|Khi in lượng tiền, in bao nhiêu chữ số sau dấu thập phân, ví dụ `2`.|
+|`char p_cs_precedes`|`1` nếu `currency_symbol` đứng trước giá trị cho lượng tiền không âm, `0` nếu sau.|
+|`char n_cs_precedes`|`1` nếu `currency_symbol` đứng trước giá trị cho lượng tiền âm, `0` nếu sau.|
+|`char p_sep_by_space`|Quy định cách ngăn cách `currency symbol` khỏi giá trị cho lượng không âm (xem bên dưới).|
+|`char n_sep_by_space`|Quy định cách ngăn cách `currency symbol` khỏi giá trị cho lượng âm (xem bên dưới).|
+|`char p_sign_posn`|Quy định vị trí của `positive_sign` cho giá trị không âm.|
+|`char n_sign_posn`|Quy định vị trí của `positive_sign` cho giá trị âm.|
+|`char *int_curr_symbol`|Ký hiệu tiền tệ quốc tế, ví dụ `"USD "`.|
+|`char int_frac_digits`|Giá trị quốc tế cho `frac_digits`.|
+|`char int_p_cs_precedes`|Giá trị quốc tế cho `p_cs_precedes`.|
+|`char int_n_cs_precedes`|Giá trị quốc tế cho `n_cs_precedes`.|
+|`char int_p_sep_by_space`|Giá trị quốc tế cho `p_sep_by_space`.|
+|`char int_n_sep_by_space`|Giá trị quốc tế cho `n_sep_by_space`.|
+|`char int_p_sign_posn`|Giá trị quốc tế cho `p_sign_posn`.|
+|`char int_n_sign_posn`|Giá trị quốc tế cho `n_sign_posn`.|
 
 [i[`localeconv()` function]>]
 
-### Monetary Digit Grouping {#monetary-digit-grouping}
+### Nhóm chữ số cho tiền tệ {#monetary-digit-grouping}
 
 [i[`localeconv()` function-->`mon_grouping`]<]
 
-OK, this is a trippy one. `mon_grouping` is a `char*`, so you might be
-thinking it's a string. But in this case, no, it's really an array of
-`char`s. It should always end either with a `0` or `CHAR_MAX`.
+Được rồi, cái này hơi chập cheng. `mon_grouping` là `char*`, nên bạn
+có thể nghĩ nó là chuỗi. Nhưng trong trường hợp này, không, nó thực
+ra là mảng các `char`. Nó luôn phải kết thúc bằng `0` hoặc
+`CHAR_MAX`.
 
-These values describe how to group sets of numbers in currency to the
-_left_ of the decimal (the whole number part).
+Các giá trị này mô tả cách nhóm các tập số trong tiền tệ ở phía
+_trái_ dấu thập phân (phần nguyên).
 
-For example, we might have:
+Ví dụ, ta có thể có:
 
 ``` {.default}
   2   1   0
@@ -162,101 +160,101 @@ For example, we might have:
 $100,000,000.00
 ```
 
-These are groups of three. Group 0 (just left of the decimal) has 3
-digits. Group 1 (next group to the left) has 3 digits, and the last one
-also has 3.
+Đây là các nhóm ba chữ số. Nhóm 0 (ngay bên trái dấu thập phân) có 3
+chữ số. Nhóm 1 (nhóm kế tiếp về trái) có 3 chữ số, và nhóm cuối cũng
+có 3.
 
-So we could describe these groups, from the right (the decimal) to the
-left with a bunch of integer values representing the group sizes:
+Vậy ta có thể mô tả các nhóm này, từ phải (dấu thập phân) sang trái
+bằng một loạt số nguyên đại diện cho kích thước nhóm:
 
 ``` {.default}
 3 3 3
 ```
 
-And that would work for values up to $100,000,000.
+Và chừng đó sẽ ổn với giá trị tới $100,000,000.
 
-But what if we had more? We could keep adding `3`s...
+Nhưng lỡ ta có nhiều hơn? Ta có thể cứ thêm `3`...
 
 ``` {.default}
 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
 ```
 
-but that's crazy. Luckily, we can specify `0` to indicate that the
-previous group size repeats:
+nhưng kiểu đó điên rồ. May thay, ta có thể chỉ định `0` để báo rằng
+kích thước nhóm trước được lặp lại:
 
 ``` {.default}
 3 0
 ```
 
-Which means to repeat every 3. That would handle $100, $1,000, $10,000,
-$10,000,000, $100,000,000,000, and so on.
+Nghĩa là lặp mỗi 3. Cái đó sẽ xử được $100, $1,000, $10,000,
+$10,000,000, $100,000,000,000, và cứ thế.
 
-You can go legitimately crazy with these to indicate some weird
-groupings.
+Bạn có thể chính thức phát khùng với mấy cái này để chỉ ra vài kiểu
+nhóm kỳ cục.
 
-For example:
+Ví dụ:
 
 ``` {.default}
 4 3 2 1 0
 ```
 
-would indicate:
+sẽ cho ra:
 
 ``` {.default}
 $1,0,0,0,0,00,000,0000.00
 ```
 
-One more value that can occur is `CHAR_MAX`. This indicates that no more
-grouping should occur, and can appear anywhere in the array, including
-the first value.
+Một giá trị nữa có thể xuất hiện là `CHAR_MAX`. Cái này báo rằng
+không còn nhóm nào nữa, và có thể xuất hiện ở bất kỳ chỗ nào trong
+mảng, kể cả giá trị đầu.
 
 ``` {.default}
 3 2 CHAR_MAX
 ```
 
-would indicate:
+sẽ cho ra:
 
 ``` {.default}
 100000000,00,000.00
 ```
 
-for example.
+chẳng hạn.
 
-And simply having `CHAR_MAX` in the first array position would tell you
-there was to be no grouping at all.
+Và chỉ cần có `CHAR_MAX` ở vị trí đầu của mảng là báo cho bạn biết
+không có nhóm nào hết.
 
 [i[`localeconv()` function-->`mon_grouping`]>]
 
-### Separators and Sign Position
+### Dấu phân cách và vị trí dấu
 
 [i[`localeconv()` function-->`sep_by_space`]<]
 
-All the `sep_by_space` variants deal with spacing around the currency
-sign. Valid values are:
+Mọi biến thể `sep_by_space` xử lý khoảng trắng quanh ký hiệu tiền
+tệ. Giá trị hợp lệ là:
 
-|Value|Description|
+|Giá trị|Mô tả|
 |:--:|------------|
-|`0`|No space between currency symbol and value.|
-|`1`|Separate the currency symbol (and sign, if any) from the value with a space.|
-|`2`|Separate the sign symbol from the currency symbol (if adjacent) with a space, otherwise separate the sign symbol from the value with a space.|
+|`0`|Không có khoảng trắng giữa ký hiệu tiền tệ và giá trị.|
+|`1`|Tách ký hiệu tiền tệ (và dấu, nếu có) khỏi giá trị bằng một khoảng trắng.|
+|`2`|Tách ký hiệu dấu khỏi ký hiệu tiền tệ (nếu kề nhau) bằng khoảng trắng, ngược lại tách ký hiệu dấu khỏi giá trị bằng khoảng trắng.|
 
-The `sign_posn` variants are determined by the following values:
+Các biến thể `sign_posn` được quyết định bởi các giá trị sau:
 
-|Value|Description|
+|Giá trị|Mô tả|
 |:--:|------------|
-|`0`|Put parens around the value and the currency symbol.|
-|`1`|Put the sign string in front of the currency symbol and value.|
-|`2`|Put the sign string after the currency symbol and value.|
-|`3`|Put the sign string directly in front of the currency symbol.|
-|`4`|Put the sign string directly behind the currency symbol.|
+|`0`|Bọc giá trị và ký hiệu tiền tệ bằng cặp ngoặc.|
+|`1`|Đặt chuỗi dấu trước ký hiệu tiền tệ và giá trị.|
+|`2`|Đặt chuỗi dấu sau ký hiệu tiền tệ và giá trị.|
+|`3`|Đặt chuỗi dấu ngay trước ký hiệu tiền tệ.|
+|`4`|Đặt chuỗi dấu ngay sau ký hiệu tiền tệ.|
 
 [i[`localeconv()` function-->`sep_by_space`]>]
 [i[Locale-->money]>]
 
-### Example Values
+### Ví dụ giá trị
 
-When I get the values on my system, this is what I see (grouping string
-displayed as individual byte values):
+Khi tôi lấy các giá trị trên hệ của mình, đây là thứ tôi thấy (chuỗi
+grouping hiển thị dưới dạng các giá trị byte riêng):
 
 ``` {.c}
 mon_decimal_point  = "."
@@ -282,13 +280,13 @@ int_p_sign_posn    = 1
 int_n_sign_posn    = 1
 ```
 
-## Localization Specifics
+## Chi tiết localization
 
-Notice how we passed the macro `LC_ALL` to `setlocale()` earlier... this
-hints that there might be some variant that allows you to be more
-precise about which _parts_ of the locale you're setting.
+Để ý ta đã truyền macro `LC_ALL` cho `setlocale()` ở trên, chuyện
+này gợi ý có thể có biến thể khác cho phép bạn chính xác hơn về
+_phần nào_ của locale bạn đang đặt.
 
-Let's take a look at the values you can see for these:
+Hãy xem các giá trị bạn có thể thấy cho mấy cái này:
 
 [i[`setlocale()` function-->`LC_ALL` macro]]
 [i[`setlocale()` function-->`LC_COLLATE` macro]]
@@ -297,20 +295,20 @@ Let's take a look at the values you can see for these:
 [i[`setlocale()` function-->`LC_NUMERIC` macro]]
 [i[`setlocale()` function-->`LC_TIME` macro]]
 
-|Macro|Description|
+|Macro|Mô tả|
 |----|--------------|
-|`LC_ALL`|Set all of the following to the given locale.|
-|`LC_COLLATE`|Controls the behavior of the `strcoll()` and `strxfrm()` functions.|
-|`LC_CTYPE`|Controls the behavior of the character-handling functions^[Except for `isdigit()` and `isxdigit()`.].|
-|`LC_MONETARY`|Controls the values returned by `localeconv()`.|
-|`LC_NUMERIC`|Controls the decimal point for the `printf()` family of functions.|
-|`LC_TIME`|Controls time formatting of the `strftime()` and `wcsftime()` time and date printing functions.|
+|`LC_ALL`|Đặt tất cả những cái dưới đây về locale đã cho.|
+|`LC_COLLATE`|Kiểm soát hành vi của hàm `strcoll()` và `strxfrm()`.|
+|`LC_CTYPE`|Kiểm soát hành vi của các hàm xử lý ký tự^[Trừ `isdigit()` và `isxdigit()`.].|
+|`LC_MONETARY`|Kiểm soát giá trị mà `localeconv()` trả về.|
+|`LC_NUMERIC`|Kiểm soát dấu thập phân cho họ hàm `printf()`.|
+|`LC_TIME`|Kiểm soát định dạng thời gian cho các hàm in thời gian và ngày `strftime()` và `wcsftime()`.|
 
-It's pretty common to see [i[`setlocale()` function-->`LC_ALL` macro]]
-`LC_ALL` being set, but, hey, at least you have options.
+Khá phổ biến thấy [i[`setlocale()` function-->`LC_ALL` macro]]
+`LC_ALL` được đặt, nhưng, này, ít nhất bạn có lựa chọn.
 
-Also I should point out that [i[`setlocale()` function-->`LC_CTYPE`
-macro]] `LC_CTYPE` is one of the biggies because it ties into wide
-characters, a significant can of worms that we'll talk about later.
+Cũng nên nói [i[`setlocale()` function-->`LC_CTYPE`
+macro]] `LC_CTYPE` là một trong những cái lớn vì nó gắn với wide
+character, một mớ bùng nhùng ta sẽ nói sau.
 
 [i[Locale]>]
