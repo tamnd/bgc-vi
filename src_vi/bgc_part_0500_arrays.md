@@ -3,7 +3,7 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Arrays {#arrays}
+# Mảng {#arrays}
 
 > _“Should array indices start at 0 or 1?  My compromise of 0.5 was
 > rejected without, I thought, proper consideration.”_
@@ -11,19 +11,19 @@
 > ---Stan Kelly-Bootle, computer scientist
 
 [i[Arrays]<]
-Luckily, C has arrays. I mean, I know it's considered a low-level
-language^[These days, anyway.] but it does at least have the concept of
-arrays built-in. And since a great many languages drew inspiration from C's
-syntax, you're probably already familiar with using `[` and `]` for
-declaring and using arrays.
+May thay, C có mảng. Ý tôi là, tôi biết nó được xem là ngôn ngữ cấp
+thấp^[Ít ra là dạo này.] nhưng ít nhất nó có khái niệm mảng được tích
+hợp sẵn. Và vì khá nhiều ngôn ngữ lấy cảm hứng cú pháp từ C, có lẽ bạn
+đã quen với việc dùng `[` và `]` để khai báo và dùng mảng.
 
-But C only _barely_ has arrays! As we'll find out later, arrays are just
-syntactic sugar in C---they're actually all pointers and stuff deep
-down. _Freak out!_ But for now, let's just use them as arrays. _Phew_.
+Nhưng C chỉ _vừa đủ_ có mảng thôi! Như ta sẽ thấy sau, mảng chỉ là
+đường cú pháp (syntactic sugar) trong C, sâu thẳm bên trong chúng là
+con trỏ và đủ thứ. _Hoảng lên đi!_ Nhưng bây giờ, cứ dùng chúng như
+mảng đã. _Phù_.
 
-## Easy Example
+## Ví dụ dễ
 
-Let's just crank out an example:
+Xắn tay làm ví dụ luôn:
 
 [i[Arrays-->indexing]<]
 ``` {.c .numberLines}
@@ -47,40 +47,39 @@ int main(void)
 }
 ```
 
-When you declare an array, you have to give it a size. And the size has
-to be fixed^[Again, not really, but variable-length arrays---of which
-I'm not really a fan---are a story for another time.].
+Khi khai báo một mảng, bạn phải cho nó kích thước. Và kích thước phải
+cố định^[Lại nữa, không hẳn, nhưng variable-length array, thứ mà tôi
+không khoái lắm, là chuyện để dành dịp khác.].
 
-In the above example, we made an array of 4 `float`s. The value in the
-square brackets in the declaration lets us know that.
+Trong ví dụ trên, ta tạo một mảng 4 `float`. Giá trị trong dấu ngoặc
+vuông ở khai báo cho ta biết điều đó.
 
-Later on in subsequent lines, we access the values in the array, setting
-them or getting them, again with square brackets.
+Ở các dòng sau, ta truy cập các giá trị trong mảng, gán hoặc đọc,
+lại bằng dấu ngoặc vuông.
 [i[Arrays-->indexing]>]
 
-Hopefully this looks familiar from languages you already know!
+Hy vọng cái này quen thuộc từ các ngôn ngữ bạn đã biết!
 
-## Getting the Length of an Array
+## Lấy chiều dài của mảng
 
 [i[Arrays-->getting the length]<]
-You can't...ish. C doesn't record this information^[Since arrays are
-just pointers to the first element of the array under the hood, there's
-no additional information recording the length.]. You have to manage
-it separately in another variable.
+Bạn không thể... ở mức độ nào đó. C không ghi lại thông tin này^[Vì
+mảng, sâu bên dưới, chỉ là con trỏ tới phần tử đầu tiên, không có
+thông tin bổ sung nào ghi lại chiều dài.]. Bạn phải quản lý riêng
+trong một biến khác.
 
-When I say "can't", I actually mean there are some circumstances when
-you _can_. There is a trick to get the number of elements in an array in
-the scope in which an array is declared. But, generally speaking, this
-won't work the way you want if you pass the array to a
-function^[Because when you pass an array to a function, you're actually
-just passing a pointer to the first element of that array, not the
-"entire" array.].
+Khi tôi nói "không thể", thật ra có một số hoàn cảnh bạn _có thể_. Có
+một mẹo để lấy số phần tử của mảng trong scope mà mảng được khai báo.
+Nhưng, nói chung, nó sẽ không hoạt động như bạn mong muốn nếu bạn
+truyền mảng cho hàm^[Vì khi bạn truyền mảng cho hàm, thật ra bạn chỉ
+đang truyền một con trỏ tới phần tử đầu tiên của mảng, chứ không phải
+"toàn bộ" mảng.].
 
-Let's take a look at this trick. The basic idea is that you take the
-[i[`sizeof` operator-->with arrays]<]`sizeof` the array, and then divide
-that by the size of each element to get the length. For example, if an
-`int` is 4 bytes, and the array is 32 bytes long, there must be room for
-$\frac{32}{4}$ or $8$ `int`s in there.
+Xem cái mẹo này. Ý tưởng cơ bản là bạn lấy
+[i[`sizeof` operator-->with arrays]<]`sizeof` mảng, rồi chia cho kích
+thước của mỗi phần tử để ra chiều dài. Ví dụ, nếu một `int` là 4 byte,
+và mảng dài 32 byte, vậy chắc chắn có chỗ cho $\frac{32}{4}$ hay $8$
+`int` trong đó.
 
 ``` {.c}
 int x[12];  // 12 ints
@@ -91,13 +90,13 @@ printf("%zu\n", sizeof(int));  // 4 bytes per int
 printf("%zu\n", sizeof x / sizeof(int));  // 48/4 = 12 ints!
 ```
 
-If it's an array of `char`s, then `sizeof` the array _is_ the number of
-elements, since `sizeof(char)` is defined to be 1. For anything else,
-you have to divide by the size of each element.
+Nếu là mảng `char`, thì `sizeof` mảng _chính là_ số phần tử, vì
+`sizeof(char)` được định nghĩa là 1. Với bất cứ thứ gì khác, bạn phải
+chia cho kích thước của mỗi phần tử.
 
-But this trick only works in the scope in which the array was defined.
-If you pass the array to a function, it doesn't work. Even if you make
-it "big" in the function signature:
+Nhưng mẹo này chỉ hoạt động trong scope mà mảng được định nghĩa. Nếu
+bạn truyền mảng cho hàm, nó không hoạt động. Ngay cả khi bạn làm cho
+nó "to" trong signature của hàm:
 
 ``` {.c}
 void foo(int x[12])
@@ -109,17 +108,17 @@ void foo(int x[12])
 }
 ```
 
-This is because when you "pass" arrays to functions, you're only passing
-a pointer to the first element, and that's what `sizeof` measures. More
-on this in the [Passing Single Dimensional Arrays to
-Functions](#passing1darrays) section, below.
+Đó là vì khi bạn "truyền" mảng cho hàm, bạn chỉ truyền một con trỏ tới
+phần tử đầu tiên, và đó là thứ `sizeof` đo. Sẽ nói thêm ở mục
+[Passing Single Dimensional Arrays to Functions](#passing1darrays) phía
+dưới.
 
-One more thing you can do with `sizeof` and arrays is get the size of an
-array of a fixed number of elements without declaring the array. This is
-like how you can get the size of an `int` with `sizeof(int)`.
+Một thứ nữa bạn có thể làm với `sizeof` và mảng là lấy kích thước của
+một mảng có số phần tử cố định mà không cần khai báo mảng. Giống như
+cách bạn lấy kích thước của `int` bằng `sizeof(int)`.
 
-For example, to see how many bytes would be needed for an array of 48
-`double`s, you can do this:
+Ví dụ, để xem cần bao nhiêu byte cho một mảng 48 `double`, bạn có thể
+làm:
 
 ``` {.c}
 sizeof(double [48]);
@@ -127,10 +126,10 @@ sizeof(double [48]);
 [i[`sizeof` operator-->with arrays]>]
 [i[Arrays-->getting the length]>]
 
-## Array Initializers
+## Khởi tạo mảng
 
 [i[Array initializers]<]
-You can initialize an array with constants ahead of time:
+Bạn có thể khởi tạo mảng bằng hằng số từ trước:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -146,8 +145,8 @@ int main(void)
 }
 ```
 
-You should never have more items in your initializer than there is room
-for in the array, or the compiler will get cranky:
+Đừng bao giờ để nhiều phần tử trong initializer hơn mức mảng chứa
+được, không thì trình biên dịch sẽ khó chịu:
 
 ``` {.zsh}
 foo.c: In function ‘main’:
@@ -157,11 +156,11 @@ foo.c:6:39: warning: excess elements in array initializer
 foo.c:6:39: note: (near initialization for ‘a’)
 ```
 
-But (fun fact!) you can have _fewer_ items in your initializer than
-there is room for in the array. The remaining elements in the array will
-be automatically initialized with zero. This is true in general for all
-types of array initializers: if you have an initializer, anything not
-explicitly set to a value will be set to zero.
+Nhưng (vui đây!) bạn có thể để _ít_ phần tử trong initializer hơn mức
+mảng có. Các phần tử còn lại trong mảng sẽ được tự động khởi tạo bằng
+zero. Điều này đúng với tất cả các dạng khởi tạo mảng: nếu bạn có
+initializer, bất cứ thứ gì không được gán giá trị rõ ràng sẽ được đặt
+thành zero.
 
 ``` {.c}
 int a[5] = {22, 37, 3490};
@@ -171,38 +170,38 @@ int a[5] = {22, 37, 3490};
 int a[5] = {22, 37, 3490, 0, 0};
 ```
 
-It's a common shortcut to see this in an initializer when you want to
-set an entire array to zero:
+Có một mẹo tắt phổ biến bạn hay thấy trong initializer khi muốn đặt
+toàn bộ mảng về zero:
 
 ``` {.c}
 int a[100] = {0};
 ```
 
-Which means, "Make the first element zero, and then automatically make
-the rest zero, as well."
+Nghĩa là, "Đặt phần tử đầu tiên thành zero, rồi tự động đặt phần còn
+lại cũng thành zero."
 
-You can set specific array elements in the initializer, as well, by
-specifying an index for the value! When you do this, C will happily keep
-initializing subsequent values for you until the initializer runs out,
-filling everything else with `0`.
+Bạn cũng có thể đặt phần tử cụ thể của mảng trong initializer, bằng
+cách chỉ định chỉ số cho giá trị! Khi làm thế, C sẽ vui vẻ tiếp tục
+khởi tạo các giá trị kế sau cho bạn đến khi initializer cạn, lấp phần
+còn lại bằng `0`.
 
-To do this, put the index in square brackets with an `=` after, and then
-set the value.
+Để làm vậy, đặt chỉ số trong ngoặc vuông với `=` theo sau, rồi đặt
+giá trị.
 
-Here's an example where we build an array:
+Đây là ví dụ ta dựng một mảng:
 
 ``` {.c}
 int a[10] = {0, 11, 22, [5]=55, 66, 77};
 ```
 
-Because we listed index 5 as the start for `55`, the resulting data in
-the array is:
+Vì ta liệt kê chỉ số 5 là điểm bắt đầu cho `55`, dữ liệu kết quả trong
+mảng là:
 
 ``` {.default}
 0 11 22 0 0 55 66 77 0 0
 ```
 
-You can put simple constant expressions in there, as well.
+Bạn cũng có thể đặt biểu thức hằng số đơn giản vào đó.
 
 ``` {.c}
 #define COUNT 5
@@ -210,14 +209,14 @@ You can put simple constant expressions in there, as well.
 int a[COUNT] = {[COUNT-3]=3, 2, 1};
 ```
 
-which gives us:
+cho ra:
 
 ``` {.default}
 0 0 3 2 1
 ```
 
-Lastly, you can also have C compute the size of the array from the
-initializer, just by leaving the size off:
+Cuối cùng, bạn cũng có thể để C tự tính kích thước mảng từ
+initializer, bằng cách bỏ trống kích thước:
 
 ``` {.c}
 int a[3] = {22, 37, 3490};
@@ -228,15 +227,14 @@ int a[] = {22, 37, 3490};  // Left the size off!
 ```
 [i[Array initializers]>]
 
-## Out of Bounds!
+## Vượt biên!
 
 [i[Arrays-->out of bounds]<]
-C doesn't stop you from accessing arrays out of bounds. It might not
-even warn you.
+C không ngăn bạn truy cập mảng vượt biên. Có khi còn không cảnh báo
+luôn.
 
-Let's steal the example from above and keep printing off the end of the
-array. It only has 5 elements, but let's try to print 10 and see what
-happens:
+Chôm ví dụ phía trên và cứ thế in vượt qua cuối mảng. Nó chỉ có 5 phần
+tử, nhưng cứ thử in 10 xem chuyện gì xảy ra:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -252,7 +250,7 @@ int main(void)
 }
 ```
 
-Running it on my computer prints:
+Chạy trên máy tính của tôi, nó in:
 
 ``` {.default}
 22
@@ -267,31 +265,31 @@ Running it on my computer prints:
 21890
 ```
 
-Yikes! What's that? Well, turns out printing off the end of an array
-results in what C developers call _undefined behavior_. We'll talk more
-about this beast later, but for now it means, "You've done something
-bad, and anything could happen during your program run."
+Hú hồn! Cái gì thế? Hoá ra in vượt qua cuối mảng dẫn đến thứ mà dân C
+gọi là _undefined behavior_ (hành vi không xác định). Ta sẽ nói thêm
+về con quái này sau, nhưng hiện giờ nó nghĩa là, "Bạn đã làm điều gì
+đó xấu, và bất cứ điều gì cũng có thể xảy ra trong lúc chương trình
+chạy."
 
-And by anything, I mean typically things like finding zeroes, finding
-garbage numbers, or crashing. But really the C spec says in this
-circumstance the compiler is allowed to emit code that does
-_anything_^[In the good old MS-DOS days before memory protection was a
-thing, I was writing some particularly abusive C code that deliberately
-engaged in all kinds of undefined behavior. But I knew what I was doing,
-and things were working pretty well. Until I made a misstep that caused
-a lockup and, as I found upon reboot, nuked all my BIOS settings. That
-was fun. (Shout-out to @man for those fun times.)].
+Và "bất cứ điều gì", thường là như tìm thấy zero, tìm thấy số rác, hay
+crash. Nhưng thật ra spec C nói trong trường hợp này trình biên dịch
+được phép sinh code làm _bất cứ thứ gì_^[Trong những ngày xưa tốt đẹp
+của MS-DOS trước khi memory protection ra đời, tôi đang viết một số
+code C đặc biệt bạo lực, cố tình đâm đầu vào đủ loại undefined
+behavior. Nhưng tôi biết mình đang làm gì, và mọi thứ vẫn chạy khá
+tốt. Cho tới khi tôi lỡ bước làm treo máy và, sau khi reboot, phát
+hiện toàn bộ cài đặt BIOS đã bị xoá sạch. Vui đáo để. (Gửi lời tới
+@man vì những lúc vui đó.)].
 
-Short version: don't do anything that causes undefined behavior.
-Ever^[There are a lot of things that cause undefined behavior, not just
-out-of-bounds array accesses. This is what makes the C language so
-_exciting_.].
+Phiên bản ngắn: đừng làm bất cứ thứ gì gây ra undefined behavior. Bao
+giờ^[Có rất nhiều thứ gây undefined behavior, không chỉ truy cập mảng
+vượt biên. Đây chính là thứ làm ngôn ngữ C trở nên _sôi động_.].
 [i[Arrays-->out of bounds]>]
 
-## Multidimensional Arrays
+## Mảng nhiều chiều
 
 [i[Arrays-->multidimensional]<]
-You can add as many dimensions as you want to your arrays.
+Bạn có thể thêm bao nhiêu chiều tuỳ thích cho mảng.
 
 ``` {.c}
 int a[10];
@@ -299,11 +297,12 @@ int b[2][7];
 int c[4][5][6];
 ```
 
-These are stored in memory in [flw[row-major
-order|Row-_and_column-major_order]]. This means with a 2D array, the
-first index listed indicates the row, and the second the column.
+Chúng được lưu trong bộ nhớ theo thứ tự [flw[row-major
+order|Row-_and_column-major_order]]. Nghĩa là với mảng 2D, chỉ số
+đầu tiên được liệt kê chỉ hàng, chỉ số thứ hai chỉ cột.
 
-You can also use initializers on multidimensional arrays by nesting them:
+Bạn cũng có thể dùng initializer trên mảng nhiều chiều bằng cách lồng
+chúng:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -325,7 +324,7 @@ int main(void)
 }
 ```
 
-For output of:
+Cho output:
 
 ``` {.default}
 (0,0) = 0
@@ -340,7 +339,7 @@ For output of:
 (1,4) = 9
 ```
 
-And you can initialize with explicit indexes:
+Và bạn có thể khởi tạo với chỉ số rõ ràng:
 
 ``` {.c}
 // Make a 3x3 identity matrix
@@ -348,7 +347,7 @@ And you can initialize with explicit indexes:
 int a[3][3] = {[0][0]=1, [1][1]=1, [2][2]=1};
 ```
 
-which builds a 2D array like this:
+sẽ dựng một mảng 2D như này:
 
 ``` {.default}
 1 0 0
@@ -357,24 +356,24 @@ which builds a 2D array like this:
 ```
 [i[Arrays-->multidimensional]>]
 
-## Arrays and Pointers
+## Mảng và con trỏ
 
 [i[Arrays-->as pointers]<]
-[_Casually_] So... I kinda might have mentioned up there that arrays
-were pointers, deep down? We should take a shallow dive into that now so
-that things aren't completely confusing. Later on, we'll look at what
-the real relationship between arrays and pointers is, but for now I just
-want to look at passing arrays to functions.
+[_Thản nhiên_] Thì... tôi có lẽ đã đề cập phía trên rằng sâu thẳm bên
+trong mảng là con trỏ nhỉ? Giờ ta nên làm một cú lặn cạn vào chuyện
+đó, để mọi thứ không bị hoàn toàn rối rắm. Sau này, ta sẽ nhìn kỹ mối
+quan hệ thực sự giữa mảng và con trỏ, nhưng bây giờ tôi chỉ muốn xem
+chuyện truyền mảng cho hàm.
 
-### Getting a Pointer to an Array
+### Lấy con trỏ tới một mảng
 
-I want to tell you a secret. Generally speaking, when a C programmer
-talks about a pointer to an array, they're talking about a pointer _to
-the first element_ of the array^[This is technically incorrect, as a
-pointer to an array and a pointer to the first element of an array have
-different types. But we can burn that bridge when we get to it.].
+Tôi muốn kể bạn nghe một bí mật. Nói chung, khi một lập trình viên C
+nói về con trỏ tới một mảng, họ đang nói về con trỏ _tới phần tử đầu
+tiên_ của mảng^[Về kỹ thuật thì không chính xác, vì con trỏ tới một
+mảng và con trỏ tới phần tử đầu tiên của mảng có kiểu khác nhau.
+Nhưng ta sẽ đốt cầu khi đến đó.].
 
-So let's get a pointer to the first element of an array.
+Nào, lấy một con trỏ tới phần tử đầu tiên của mảng.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -391,7 +390,8 @@ int main(void)
 }
 ```
 
-This is so common to do in C that the language allows us a shorthand:
+Chuyện này quá phổ biến trong C, đến nỗi ngôn ngữ cho phép ta một cách
+viết tắt:
 
 ``` {.c .numberLines}
 p = &a[0];  // p points to the array
@@ -401,25 +401,24 @@ p = &a[0];  // p points to the array
 p = a;      // p points to the array, but much nicer-looking!
 ```
 
-Just referring to the array name in isolation is the same as getting a
-pointer to the first element of the array! We're going to use this
-extensively in the upcoming examples.
+Chỉ cần nhắc đến tên mảng đứng một mình là tương đương với lấy một con
+trỏ tới phần tử đầu tiên của mảng! Ta sẽ dùng điều này rộng rãi trong
+các ví dụ sắp tới.
 
-But hold on a second---isn't `p` an `int*`? And `*p` gives us `11`, same
-as `a[0]`? Yessss. You're starting to get a glimpse of how arrays and
-pointers are related in C. (We'll talk about this a lot more in the
-[Pointers II](#pointers2) chapter, under [Array/Pointer
+Nhưng khoan đã, `p` chẳng phải là `int*` sao? Và `*p` cho ta `11`,
+cùng giống `a[0]`? Đúúúúng. Bạn đang bắt đầu thấy thoáng qua mối quan
+hệ giữa mảng và con trỏ trong C. (Ta sẽ nói nhiều hơn về chuyện này
+trong chương [Pointers II](#pointers2), ở mục [Array/Pointer
 Equivalence](#arraypointerequiv).)
 [i[Arrays-->as pointers]>]
 
-### Passing Single Dimensional Arrays to Functions {#passing1darrays}
+### Truyền mảng một chiều cho hàm {#passing1darrays}
 
 [i[Arrays-->passing to functions]<]
-Let's do an example with a single dimensional array. I'm going to write
-a couple functions that we can pass the array to that do different
-things.
+Làm một ví dụ với mảng một chiều. Tôi sẽ viết vài hàm mà ta có thể
+truyền mảng vào để làm việc khác nhau.
 
-Prepare for some mind-blowing function signatures!
+Chuẩn bị cho vài signature hàm làm đầu óc bùng nổ!
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -455,8 +454,8 @@ int main(void)
 }
 ```
 
-All those methods of listing the array as a parameter in the function
-are identical.
+Tất cả các cách liệt kê mảng làm parameter trong hàm đó đều giống hệt
+nhau.
 
 ``` {.c}
 void times2(int *a, int len)
@@ -464,39 +463,39 @@ void times3(int a[], int len)
 void times4(int a[5], int len)
 ```
 
-In usage by C regulars, the first is the most common, by far.
+Trong cách dùng của dân C quen tay, cách đầu tiên phổ biến nhất, bỏ xa
+các cách còn lại.
 
-And, in fact, in the latter situation, the compiler doesn't even care
-what number you pass in (other than it has to be greater than zero^[C11
-§6.7.6.2¶1 requires it be greater than zero. But you might see code out
-there with arrays declared of zero length at the end of `struct`s and
-GCC is particularly lenient about it unless you compile with
-`-pedantic`. This zero-length array was a hackish mechanism for making
-variable-length structures. Unfortunately, it's technically undefined
-behavior to access such an array even though it basically worked
-everywhere. C99 codified a well-defined replacement for it called
-_flexible array members_, which we'll chat about later.]). It doesn't
-enforce anything at all. 
+Và, thật ra, ở tình huống cuối, trình biên dịch thậm chí không quan
+tâm bạn truyền số nào (miễn lớn hơn không^[C11 §6.7.6.2¶1 yêu cầu nó
+phải lớn hơn không. Nhưng bạn có thể thấy code ngoài đời với mảng
+chiều dài bằng không ở cuối các `struct`, và GCC đặc biệt dễ dãi
+chuyện đó trừ khi bạn biên dịch với `-pedantic`. Mảng chiều dài bằng
+không là một cơ chế kiểu hack để tạo struct có chiều dài biến đổi.
+Không may, về kỹ thuật truy cập mảng như vậy là undefined behavior,
+dù nó gần như chạy được ở mọi nơi. C99 chuẩn hoá một phương án thay
+thế được định nghĩa rõ gọi là _flexible array members_, ta sẽ tán
+gẫu chuyện đó sau.]). Nó không ép buộc gì cả.
 
-Now that I've said that, the size of the array in the function
-declaration actually _does_ matter when you're passing multidimensional
-arrays into functions, but let's come back to that.
+Giờ sau khi đã nói vậy, kích thước mảng trong khai báo hàm thật ra
+_có_ ý nghĩa khi bạn truyền mảng nhiều chiều vào hàm, nhưng hãy quay
+lại chuyện đó sau.
 [i[Arrays-->passing to functions]>]
 
-### Changing Arrays in Functions
+### Thay đổi mảng trong hàm
 
 [i[Arrays-->modifying within functions]<]
-We've said that arrays are just pointers in disguise. This means that if
-you pass an array to a function, you're likely passing a pointer to the
-first element in the array.
+Ta đã nói mảng chỉ là con trỏ trá hình. Nghĩa là nếu bạn truyền mảng
+cho hàm, nhiều khả năng bạn đang truyền con trỏ tới phần tử đầu tiên
+của mảng.
 
-But if the function has a pointer to the data, it is able to manipulate
-that data! So changes that a function makes to an array will be visible
-back out in the caller.
+Nhưng nếu hàm có con trỏ tới dữ liệu, nó có thể thao tác trên dữ liệu
+đó! Vậy nên những thay đổi mà hàm làm với mảng sẽ thấy được ở phía
+người gọi.
 
-Here's an example where we pass a pointer to an array to a function,
-the function manipulates the values in that array, and those changes are
-visible out in the caller.
+Đây là ví dụ ta truyền một con trỏ tới mảng cho hàm, hàm thao tác trên
+các giá trị trong mảng đó, và các thay đổi đó thấy được ở phía người
+gọi.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -523,24 +522,23 @@ int main(void)
 }
 ```
 
-Even though we passed the array in as parameter `a` which is type
-`int*`, look at how we access it using array notation with `a[i]`!
-Whaaaat. This is totally allowed.
+Mặc dù ta truyền mảng vào parameter `a` kiểu `int*`, nhìn cách ta truy
+cập nó bằng ký pháp mảng `a[i]`! Cááááái gì. Chuyện này hoàn toàn được
+cho phép.
 
-Later when we talk about the equivalence between arrays and pointers,
-we'll see how this makes a lot more sense. For now, it's enough to know
-that functions can make changes to arrays that are visible out in the
-caller.
+Sau này khi nói về sự tương đương giữa mảng và con trỏ, ta sẽ thấy
+chuyện này hợp lý hơn nhiều. Giờ, đủ để biết rằng hàm có thể thay đổi
+mảng mà thấy được ở phía người gọi.
 [i[Arrays-->modifying within functions]>]
 
-### Passing Multidimensional Arrays to Functions
+### Truyền mảng nhiều chiều cho hàm
 
 [i[Arrays-->passing to functions]<]
-The story changes a little when we're talking about multidimensional
-arrays. C needs to know all the dimensions (except the first one) so it
-has enough information to know where in memory to look to find a value.
+Câu chuyện thay đổi một chút khi ta nói về mảng nhiều chiều. C cần
+biết tất cả các chiều (trừ chiều đầu tiên) để có đủ thông tin biết tìm
+giá trị ở đâu trong bộ nhớ.
 
-Here's an example where we're explicit with all the dimensions:
+Đây là ví dụ ta nói rõ tất cả các chiều:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -565,20 +563,21 @@ int main(void)
 }
 ```
 
-But in this case, these two^[This is also equivalent: `void
-print_2D_array(int (*a)[3])`, but that's more than I want to get into
-right now.] are equivalent:
+Nhưng trong trường hợp này, hai cách này^[Cách này cũng tương đương:
+`void print_2D_array(int (*a)[3])`, nhưng đó là chuyện tôi không muốn
+đi sâu ngay lúc này.] là tương đương:
 
 ``` {.c}
 void print_2D_array(int a[2][3])
 void print_2D_array(int a[][3])
 ```
 
-The compiler really only needs the second dimension so it can figure out
-how far in memory to skip for each increment of the first dimension. In
-general, it needs to know all the dimensions except the first one.
+Trình biên dịch thật ra chỉ cần chiều thứ hai để biết cần nhảy bao xa
+trong bộ nhớ cho mỗi lần tăng chiều đầu tiên. Nói chung, nó cần biết
+tất cả các chiều trừ chiều đầu tiên.
 
-Also, remember that the compiler does minimal compile-time bounds
-checking (if you're lucky), and C does zero runtime checking of bounds.
-No seat belts! Don't crash by accessing array elements out of bounds!
+Ngoài ra, nhớ rằng trình biên dịch chỉ làm kiểm tra biên tối thiểu
+lúc biên dịch (nếu bạn may mắn), và C không kiểm tra biên gì hết lúc
+chạy. Không dây an toàn! Đừng crash bằng cách truy cập phần tử mảng
+vượt biên!
 [i[Arrays-->passing to functions]>] [i[Arrays]>]
