@@ -3,55 +3,56 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Fixed Width Integer Types
+# Kiểu số nguyên bề rộng cố định
 
 [i[Fixed width integers]<]
 
-C has all those small, bigger, and biggest integer types like `int` and
-`long` and all that. And you can look in [the section on
-limits](#limits-macros) to see what the largest int is with `INT_MAX`
-and so on.
+C có đủ các kiểu số nguyên nhỏ, lớn hơn, và lớn nhất kiểu `int`,
+`long` và thế nọ thế kia. Và bạn có thể xem trong [phần giới
+hạn](#limits-macros) để thấy int lớn nhất là gì với `INT_MAX` và
+tương tự.
 
-How big are those types? That is, how many bytes do they take up? We
-could use `sizeof` to get that answer.
+Các kiểu đó to bao nhiêu? Tức là, chúng chiếm mấy byte? Ta có thể
+dùng `sizeof` để ra câu trả lời.
 
-But what if I wanted to go the other way? What if I needed a type that
-was exactly 32 bits (4 bytes) or at least 16 bits or somesuch?
+Nhưng nếu tôi muốn đi ngược lại thì sao? Nếu tôi cần kiểu chính xác
+32 bit (4 byte) hoặc ít nhất 16 bit hay đại loại thế?
 
-How can we declare a type that's a certain size?
+Làm sao khai báo kiểu có kích thước nhất định?
 
-The header [i[`stdint.h` header file]] `<stdint.h>` gives us a way.
+Header [i[`stdint.h` header file]] `<stdint.h>` cho ta cách.
 
-## The Bit-Sized Types
+## Các kiểu theo số bit
 
-For both signed and unsigned integers, we can specify a type that is a
-certain number of bits, with some caveats, of course.
+Với cả số nguyên có dấu và không dấu, ta có thể chỉ định kiểu có số
+bit nhất định, với vài cảnh báo, đương nhiên.
 
-And there are three main classes of these types (in these examples, the
-`N` would be replaced by a certain number of bits):
+Và có ba nhóm chính các kiểu này (trong các ví dụ, `N` sẽ được thay
+bằng số bit cụ thể):
 
-* Integers of exactly a certain size (`intN_t`)
-* Integers that are at least a certain size (`int_leastN_t`)
-* Integers that are at least a certain size and are as fast as possible
+* Số nguyên chính xác kích thước nào đó (`intN_t`)
+* Số nguyên ít nhất kích thước nào đó (`int_leastN_t`)
+* Số nguyên ít nhất kích thước nào đó và nhanh hết mức có thể
   (`int_fastN_t`)[^4582]
 
-[^4582]: Some architectures have different sized data that the CPU and
-RAM can operate with at a faster rate than others. In those cases, if
-you need the fastest 8-bit number, it might give you have a 16- or
-32-bit type instead because that's just faster. So with this, you won't
-know how big the type is, but it will be least as big as you say.
+[^4582]: Một số kiến trúc có dữ liệu kích thước khác mà CPU và RAM
+có thể thao tác với tốc độ nhanh hơn các kiểu khác. Trong các trường
+hợp đó, nếu bạn cần số 8-bit nhanh nhất, có thể nó cho bạn kiểu 16-
+hay 32-bit thay thế vì cái đó chỉ đơn giản là nhanh hơn. Nên với cái
+này, bạn sẽ không biết kiểu to bao nhiêu, nhưng nó sẽ ít nhất to như
+bạn nói.
 
-How much faster is `fast`? Definitely maybe some amount faster.
-Probably. The spec doesn't say how much faster, just that they'll be the
-fastest on this architecture. Most C compilers are pretty good, though,
-so you'll probably only see this used in places where the most possible
-speed needs to be guaranteed (rather than just hoping the compiler is
-producing pretty-dang-fast code, which it is).
+`fast` nhanh hơn bao nhiêu? Chắc chắn có lẽ nhanh hơn một lượng nào
+đó. Có thể. Spec không nói nhanh hơn bao nhiêu, chỉ nói chúng sẽ là
+nhanh nhất trên kiến trúc này. Tuy nhiên, đa số compiler C khá tốt,
+nên bạn chắc sẽ chỉ thấy cái này được dùng ở chỗ cần đảm bảo tốc độ
+tối đa có thể (chứ không chỉ là hy vọng compiler xuất ra code
+đủ-nhanh-phết, mà nó đang làm vậy).
 
-Finally, these unsigned number types have a leading `u` to differentiate
-them.
+Cuối cùng, các kiểu số không dấu này có thêm chữ `u` ở đầu để phân
+biệt.
 
-For example, these types have the corresponding listed meaning:
+Ví dụ, các kiểu này có nghĩa tương ứng được liệt kê:
 
 [i[`int_leastN_t` types]<]
 [i[`uint_leastN_t` types]<]
@@ -69,7 +70,7 @@ int_least8_t y;   // y is at least 8 bits, signed
 uint_fast64_t z;  // z is the fastest representation at least 64 bits, unsigned
 ```
 
-The following types are guaranteed to be defined:
+Các kiểu sau được đảm bảo được định nghĩa:
 
 ``` {.c}
 int_least8_t      uint_least8_t
@@ -83,16 +84,15 @@ int_fast32_t      uint_fast32_t
 int_fast64_t      uint_fast64_t
 ```
 
-There might be others of different widths, as well, but those are
-optional.
+Có thể có các kiểu khác với bề rộng khác, nhưng chúng là tuỳ chọn.
 
-Hey! Where are the fixed types like `int16_t`? Turns out those are
-entirely optional...unless certain conditions are met^[Namely, the
-system has 8, 16, 32, or 64 bit integers with no padding that use two's
-complement representation, in which case the `intN_t` variant for that
-particular number of bits _must_ be defined.]. And if you have an
-average run-of-the-mill modern computer system, those conditions
-probably are met. And if they are, you'll have these types:
+Ê! Các kiểu cố định kiểu `int16_t` đâu? Hoá ra chúng hoàn toàn tuỳ
+chọn... trừ khi có điều kiện nhất định được thoả^[Cụ thể, hệ có số
+nguyên 8, 16, 32, hay 64 bit không padding dùng biểu diễn bù 2,
+trong trường hợp đó biến thể `intN_t` cho số bit cụ thể đó _phải_
+được định nghĩa.]. Và nếu bạn có hệ máy tính hiện đại trung bình
+bình thường, các điều kiện đó khả năng cao được thoả. Và nếu thoả,
+bạn sẽ có các kiểu này:
 
 ``` {.c}
 int8_t      uint8_t
@@ -101,8 +101,8 @@ int32_t     uint32_t
 int64_t     uint64_t
 ```
 
-Other variants with different widths might be defined, but they're
-optional.
+Các biến thể khác với bề rộng khác có thể được định nghĩa, nhưng
+chúng tuỳ chọn.
 
 [i[`int_leastN_t` types]>]
 [i[`uint_leastN_t` types]>]
@@ -111,10 +111,10 @@ optional.
 [i[`intN_t` types]>]
 [i[`uintN_t` types]>]
 
-## Maximum Integer Size Type
+## Kiểu số nguyên kích thước tối đa
 
-There's a type you can use that holds the largest representable integers
-available on the system, both signed and unsigned:
+Có kiểu bạn có thể dùng giữ số nguyên biểu diễn được lớn nhất có sẵn
+trên hệ, cả có dấu và không dấu:
 
 [i[`intmax_t` type]<]
 [i[`uintmax_t` type]<]
@@ -127,16 +127,16 @@ uintmax_t
 [i[`intmax_t` type]>]
 [i[`uintmax_t` type]>]
 
-Use these types when you want to go as big as possible.
+Dùng các kiểu này khi bạn muốn đi to hết mức.
 
-Obviously values from any other integer types of the same sign will fit
-in this type, necessarily.
+Rõ ràng là giá trị từ bất kỳ kiểu số nguyên nào khác cùng dấu sẽ vừa
+vào kiểu này, đương nhiên.
 
-## Using Fixed Size Constants
+## Dùng hằng số kích thước cố định
 
-If you have a constant that you want to have fit in a certain number of
-bits, you can use these macros to automatically append the proper suffix
-onto the number (e.g. `22L` or `3490ULL`).
+Nếu bạn có một hằng mà bạn muốn nó vừa vào số bit nhất định, bạn có
+thể dùng các macro này để tự động thêm hậu tố đúng vào số (ví dụ
+`22L` hay `3490ULL`).
 
 [i[`INTn_C()` macros]<]
 [i[`UINTn_C()` macros]<]
@@ -154,9 +154,9 @@ INTMAX_C(x)   UINTMAX_C(x)
 [i[`INTn_C()` macros]>]
 [i[`UINTMAX_C()` macro]>]
 
-Again, these work only with constant integer values.
+Lại nữa, mấy cái này chỉ chạy với giá trị số nguyên hằng.
 
-For example, we can use one of these to assign constant values like so:
+Ví dụ, ta có thể dùng một trong số đó để gán giá trị hằng như vầy:
 
 ``` {.c}
 uint16_t x = UINT16_C(12);
@@ -166,10 +166,10 @@ intmax_t y = INTMAX_C(3490);
 [i[`UINTn_C()` macros]>]
 [i[`INTMAX_C()` macro]>]
 
-## Limits of Fixed Size Integers
+## Giới hạn của số nguyên kích thước cố định
 
-We also have some limits defined so you can get the maximum and minimum
-values for these types:
+Ta cũng có một số giới hạn được định nghĩa để bạn lấy được giá trị
+lớn nhất và nhỏ nhất cho các kiểu này:
 
 [i[`INTn_MAX` macros]<]
 [i[`INTn_MIN` macros]<]
@@ -212,31 +212,30 @@ INTMAX_MAX         INTMAX_MIN         UINTMAX_MAX
 [i[`INTMAX_MAX` macro]>]
 [i[`UINTMAX_MAX` macro]>]
 
-Note the `MIN` for all the unsigned types is `0`, so, as such, there's
-no macro for it.
+Lưu ý `MIN` cho mọi kiểu không dấu là `0`, nên như vậy, không có
+macro cho nó.
 
 [i[`INTn_MIN` macros]>]
 [i[`INT_LEASTn_MIN` macros]>]
 [i[`INT_FASTn_MIN` macros]>]
 [i[`INTMAX_MIN` macro]>]
 
-## Format Specifiers
+## Format specifier
 
-In order to print these types, you need to send the right format
-specifier to [i[`printf()` function]] `printf()`. (And the same issue
-for getting input with [i[`scanf()` function]] `scanf()`.)
+Để in các kiểu này, bạn cần truyền đúng format specifier cho
+[i[`printf()` function]] `printf()`. (Và vấn đề tương tự khi lấy
+input với [i[`scanf()` function]] `scanf()`.)
 
-But how are you going to know what size the types are under the hood?
-Luckily, once again, C provides some macros to help with this.
+Nhưng làm sao bạn biết được kiểu to bao nhiêu dưới mui? May thay,
+lần nữa, C cung cấp vài macro để giúp chuyện này.
 
-All this can be found in `<inttypes.h>`.
+Tất cả chuyện này có thể thấy trong `<inttypes.h>`.
 
-Now, we have a bunch of macros. Like a complexity explosion of macros.
-So I'm going to stop listing out every one and just put the lowercase
-letter `n` in the place where you should put `8`, `16`, `32`, or `64`
-depending on your needs.
+Giờ, ta có một đống macro. Kiểu một vụ nổ phức tạp của macro. Nên
+tôi sẽ thôi liệt ra từng cái và chỉ đặt chữ thường `n` ở chỗ mà bạn
+nên đặt `8`, `16`, `32`, hay `64` tuỳ nhu cầu.
 
-Let's look at the macros for printing signed integers:
+Nhìn qua các macro cho in số nguyên có dấu:
 
 [i[`PRIdn` macros]<]
 [i[`PRIin` macros]<]
@@ -252,39 +251,38 @@ PRIdn    PRIdLEASTn    PRIdFASTn    PRIdMAX
 PRIin    PRIiLEASTn    PRIiFASTn    PRIiMAX
 ```
 
-Look for the patterns there. You can see there are variants for the
-fixed, least, fast, and max types.
+Nhìn pattern ở đó. Bạn có thể thấy có biến thể cho kiểu fixed,
+least, fast, và max.
 
-And you also have a lowercase `d` and a lowercase `i`. Those correspond
-to the `printf()` format specifiers `%d` and `%i`.
+Và bạn cũng có chữ thường `d` và chữ thường `i`. Các chữ đó tương
+ứng với format specifier `%d` và `%i` của `printf()`.
 
-So if I have something of type:
+Nên nếu tôi có thứ kiểu:
 
 ``` {.c}
 int_least16_t x = 3490;
 ```
 
-I can print that with the equivalent format specifier for `%d` by
-using `PRIdLEAST16`.
+Tôi có thể in cái đó với format specifier tương đương với `%d` bằng
+`PRIdLEAST16`.
 
-But how? How do we use that macro?
+Nhưng sao? Ta dùng macro đó sao?
 
-First of all, that macro specifies a string containing the letter or
-letters `printf()` needs to use to print that type. Like, for example, it could
-be `"d"` or `"ld"`.
+Trước hết, macro đó chỉ định một chuỗi chứa chữ cái hay các chữ cái
+`printf()` cần dùng để in kiểu đó. Ví dụ, nó có thể là `"d"` hay
+`"ld"`.
 
-So all we need to do is embed that in our format string to the
-`printf()` call.
+Nên tất cả ta cần làm là nhúng nó vào chuỗi format của lời gọi
+`printf()`.
 
-To do this, we can take advantage of a fact about C that you might have
-forgotten: adjacent string literals are automatically concatenated to a
-single string. E.g.:
+Để làm chuyện này, ta có thể tận dụng một chuyện về C bạn có thể đã
+quên: chuỗi literal kề nhau được nối tự động thành một chuỗi. Ví dụ:
 
 ``` {.c}
 printf("Hello, " "world!\n");   // Prints "Hello, world!"
 ```
 
-And since these macros are string literals, we can use them like so:
+Và vì các macro này là chuỗi literal, ta có thể dùng chúng như vầy:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -308,7 +306,7 @@ int main(void)
 [i[`PRIdMAX` macro]>]
 [i[`PRIiMAX` macro]>]
 
-We also have a pile of macros for printing unsigned types:
+Ta cũng có một đống macro để in kiểu không dấu:
 
 [i[`PRIon` macros]<]
 [i[`PRIun` macros]<]
@@ -334,11 +332,11 @@ PRIxn    PRIxLEASTn    PRIxFASTn    PRIxMAX
 PRIXn    PRIXLEASTn    PRIXFASTn    PRIXMAX
 ```
 
-In this case, `o`, `u`, `x`, and `X` correspond to the documented format
-specifiers in `printf()`.
+Trong trường hợp này, `o`, `u`, `x`, và `X` tương ứng với các format
+specifier đã documented trong `printf()`.
 
-And, as before, the lowercase `n` should be substituted with `8`, `16`,
-`32`, or `64`.
+Và, như trước, chữ thường `n` nên được thay bằng `8`, `16`, `32`,
+hay `64`.
 
 [i[`PRIon` macros]>]
 [i[`PRIun` macros]>]
@@ -357,9 +355,8 @@ And, as before, the lowercase `n` should be substituted with `8`, `16`,
 [i[`PRIxMAX` macros]>]
 [i[`PRIXMAX` macros]>]
 
-But just when you think you had enough of the macros, it turns out we
-have a complete complementary set of them for [i[`scanf()` function]]
-`scanf()`!
+Nhưng ngay khi bạn tưởng mình đã chán macro, hoá ra ta có một bộ
+hoàn chỉnh đối ứng cho [i[`scanf()` function]] `scanf()`!
 
 [i[`SCNdn` macros]<]
 [i[`SCNin` macros]<]
@@ -411,8 +408,8 @@ SCNxn    SCNxLEASTn    SCNxFASTn    SCNxMAX
 [i[`SCNuMAX` macros]>]
 [i[`SCNxMAX` macros]>]
 
-Remember: when you want to print out a fixed size integer type with
-`printf()` or `scanf()`, grab the correct corresponding format specifer
-from `<inttypes.h>`.
+Nhớ: khi bạn muốn in một kiểu số nguyên kích thước cố định bằng
+`printf()` hay `scanf()`, lấy format specifier tương ứng đúng từ
+`<inttypes.h>`.
 
 [i[Fixed width integers]>]
