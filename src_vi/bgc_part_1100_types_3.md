@@ -3,39 +3,37 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Types III: Conversions
+# Types III: Chuyển đổi
 
 [i[Type conversions]<]
 
-In this chapter, we want to talk all about converting from one type to
-another. C has a variety of ways of doing this, and some might be a
-little different that you're used to in other languages.
+Ở chương này, ta muốn nói hết về chuyện chuyển đổi từ kiểu này sang
+kiểu khác. C có nhiều cách để làm điều này, và một số có thể hơi khác
+bạn quen ở ngôn ngữ khác.
 
-Before we talk about how to make conversions happen, let's talk about
-how they work when they _do_ happen.
+Trước khi nói cách ép chuyển đổi xảy ra, hãy bàn về cách chúng hoạt
+động khi chúng _đã_ xảy ra.
 
-## String Conversions
+## Chuyển đổi chuỗi
 
 [i[Type conversions-->strings]<]
 
-Unlike many languages, C doesn't do string-to-number (and vice-versa)
-conversions in quite as streamlined a manner as it does numeric
-conversions.
+Khác nhiều ngôn ngữ, C không làm chuyển đổi chuỗi-sang-số (và ngược
+lại) theo kiểu gọn gàng như với chuyển đổi số.
 
-For these, we'll have to call functions to do the dirty work.
+Với mấy thứ này, ta phải gọi hàm để làm việc bẩn.
 
-### Numeric Value to String
+### Giá trị số sang chuỗi
 
-When we want to convert a number to a string, we can use either
-`sprintf()` (pronounced _SPRINT-f_) or `snprintf()`
-(_s-n-print-f_)^[They're the same except `snprintf()` allows you to
-specify a maximum number of bytes to output, preventing the overrunning
-of the end of your string. So it's safer.]
+Khi muốn chuyển số sang chuỗi, ta có thể dùng `sprintf()` (phát âm là
+_SPRINT-f_) hoặc `snprintf()` (_s-n-print-f_)^[Chúng giống nhau, chỉ
+khác `snprintf()` cho phép bạn chỉ định số byte xuất tối đa, tránh
+tràn cuối chuỗi. Nên an toàn hơn.]
 
-These basically work like `printf()`, except they output to a string
-instead, and you can print that string later, or whatever.
+Mấy cái này về cơ bản hoạt động như `printf()`, chỉ khác chúng xuất
+ra chuỗi, và bạn có thể in chuỗi đó sau, hay gì tuỳ ý.
 
-For example, turning part of the value π into a string:
+Ví dụ, biến một phần giá trị π thành chuỗi:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -54,31 +52,29 @@ int main(void)
 }
 ```
 
-So you can use `%d` or `%u` like you're used to for integers.
+Bạn có thể dùng `%d` hay `%u` như bạn quen cho số nguyên.
 
-### String to Numeric Value
+### Chuỗi sang giá trị số
 
-There are a couple families of functions to do this in C. We'll call
-these the `atoi` (pronounced _a-to-i_) family and the `strtol`
-(_stir-to-long_) family.
+Có hai họ hàm làm việc này trong C. Ta sẽ gọi chúng là họ `atoi` (phát
+âm _a-to-i_) và họ `strtol` (_stir-to-long_).
 
-For basic conversion from a string to a number, try the `atoi` functions
-from `<stdlib.h>`. These have bad error-handling characteristics
-(including undefined behavior if you pass in a bad string), so use them
-carefully.
+Để chuyển đổi cơ bản từ chuỗi sang số, thử các hàm `atoi` từ
+`<stdlib.h>`. Chúng có đặc tính xử lý lỗi tệ (kể cả undefined behavior
+nếu bạn truyền chuỗi xấu), nên dùng cẩn thận.
 
-|Function|Description|
+|Hàm|Mô tả|
 |:-|:-|
-|`atoi`|String to `int`|
-|`atof`|String to `float`|
-|`atol`|String to `long int`|
-|`atoll`|String to `long long int`|
+|`atoi`|Chuỗi sang `int`|
+|`atof`|Chuỗi sang `float`|
+|`atol`|Chuỗi sang `long int`|
+|`atoll`|Chuỗi sang `long long int`|
 
-Though the spec doesn't cop to it, the `a` at the beginning of the
-function stands for [flw[ASCII|ASCII]], so really `atoi()` is
-"ASCII-to-integer", but saying so today is a bit ASCII-centric.
+Dù spec không thừa nhận, chữ `a` đầu tên hàm là viết tắt của
+[flw[ASCII|ASCII]], nên thực ra `atoi()` là "ASCII-to-integer", nhưng
+nói thế giờ hơi quy ASCII về làm trung tâm.
 
-Here's an example converting a string to a `float`:
+Ví dụ chuyển chuỗi sang `float`:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -95,36 +91,37 @@ int main(void)
 }
 ```
 
-But, like I said, we get undefined behavior from weird things like this:
+Nhưng, như đã nói, ta có undefined behavior từ những chuyện lạ lùng
+như:
 
 ``` {.c}
 int x = atoi("what");  // "What" ain't no number I ever heard of
 ```
 
-(When I run that, I get `0` back, but you really shouldn't count on that
-in any way. You could get something completely different.)
+(Khi chạy cái đó, tôi nhận về `0`, nhưng bạn thật sự không nên trông
+cậy vào đó bằng bất cứ cách nào. Có thể bạn nhận về thứ hoàn toàn
+khác.)
 
-For better error handling characteristics, let's check out all those
-`strtol` functions, also in `<stdlib.h>`. Not only that, but they
-convert to more types and more bases, too!
+Để có đặc tính xử lý lỗi tốt hơn, xem đống hàm `strtol`, cũng trong
+`<stdlib.h>`. Không chỉ thế, chúng còn chuyển sang nhiều kiểu và
+nhiều cơ số hơn!
 
-|Function|Description|
+|Hàm|Mô tả|
 |:-|:-|
-|`strtol`|String to `long int`|
-|`strtoll`|String to `long long int`|
-|`strtoul`|String to `unsigned long int`|
-|`strtoull`|String to `unsigned long long int`|
-|`strtof`|String to `float`|
-|`strtod`|String to `double`|
-|`strtold`|String to `long double`|
+|`strtol`|Chuỗi sang `long int`|
+|`strtoll`|Chuỗi sang `long long int`|
+|`strtoul`|Chuỗi sang `unsigned long int`|
+|`strtoull`|Chuỗi sang `unsigned long long int`|
+|`strtof`|Chuỗi sang `float`|
+|`strtod`|Chuỗi sang `double`|
+|`strtold`|Chuỗi sang `long double`|
 
-These functions all follow a similar pattern of use, and are a lot of
-people's first experience with pointers to pointers! But never
-fret---it's easier than it looks.
+Các hàm này đều đi theo mẫu dùng tương tự, và là trải nghiệm đầu tiên
+của nhiều người với con-trỏ-tới-con-trỏ! Nhưng đừng lo, dễ hơn trông
+thấy nhiều.
 
-Let's do an example where we convert a string to an `unsigned long`,
-discarding error information (i.e. information about bad characters in
-the input string):
+Ví dụ chuyển chuỗi sang `unsigned long`, bỏ qua thông tin lỗi (tức
+thông tin về ký tự sai trong chuỗi đầu vào):
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -143,14 +140,13 @@ int main(void)
 }
 ```
 
-Notice a couple things there. Even though we didn't deign to capture any
-information about error characters in the string, `strtoul()` won't give
-us undefined behavior; it will just return `0`.
+Chú ý vài thứ. Dù ta không hạ cố lấy thông tin gì về ký tự lỗi trong
+chuỗi, `strtoul()` không cho ta undefined behavior; nó chỉ trả về
+`0`.
 
-Also, we specified that this was a decimal (base 10) number.
+Ta cũng chỉ định đây là số thập phân (base 10).
 
-Does this mean we can convert numbers of different bases? Sure! Let's do
-binary!
+Thế nghĩa là ta có thể chuyển số ở cơ số khác? Chắc rồi! Làm nhị phân!
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -168,15 +164,14 @@ int main(void)
 }
 ```
 
-OK, that's all fun and games, but what's with that `NULL` in there?
-What's that for?
+Được rồi, vui thú đó, nhưng cái `NULL` trong đó là gì? Để làm gì?
 
-That helps us figure out if an error occurred in the processing of the
-string. It's a pointer to a pointer to a `char`, which sounds scary, but
-isn't once you wrap your head around it.
+Nó giúp ta biết có lỗi xảy ra khi xử lý chuỗi hay không. Là một con
+trỏ tới con trỏ tới `char`, nghe đáng sợ, nhưng không còn đáng sợ khi
+bạn ghép được trong đầu.
 
-Let's do an example where we feed in a deliberately bad number, and
-we'll see how `strtol()` lets us know where the first invalid digit is.
+Làm ví dụ với số xấu cố tình, xem `strtol()` báo cho ta vị trí của chữ
+số hợp lệ đầu tiên thế nào.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -202,15 +197,14 @@ int main(void)
 }
 ```
 
-So there we have `strtoul()` modifying what `badchar` points to in order
-to show us where things went wrong^[We have to pass a pointer to
-`badchar` to `strtoul()` or it won't be able to modify it in any way
-we can see, analogous to why you have to pass a pointer to an `int` to a
-function if you want that function to be able to change that value of
-that `int`.].
+Thế là `strtoul()` chỉnh cái `badchar` trỏ tới để báo cho ta chỗ có
+chuyện không hay^[Ta phải truyền con trỏ tới `badchar` cho `strtoul()`
+chứ không nó không chỉnh được theo cách ta thấy, tương tự lý do bạn
+phải truyền con trỏ tới `int` cho hàm nếu muốn hàm đó có thể đổi giá
+trị của `int` đó.].
 
-But what if nothing goes wrong? In that case, `badchar` will point to
-the `NUL` terminator at the end of the string. So we can test for it:
+Nhưng nếu không có gì trục trặc thì sao? Trường hợp đó, `badchar` sẽ
+trỏ tới ký tự kết chuỗi `NUL` ở cuối chuỗi. Nên ta có thể kiểm tra:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -236,61 +230,60 @@ int main(void)
 }
 ```
 
-So there you have it. The `atoi()`-style functions are good in a
-controlled pinch, but the `strtol()`-style functions give you far more
-control over error handling and the base of the input.
+Vậy là xong. Hàm kiểu `atoi()` tốt khi tình huống gấp có kiểm soát,
+nhưng hàm kiểu `strtol()` cho bạn kiểm soát tốt hơn hẳn về xử lý lỗi
+và cơ số đầu vào.
 
 [i[Type conversions-->strings]>]
 
-## `char` Conversions
+## Chuyển đổi `char`
 
 [i[Type conversions-->`char`]<]
 
-What if you have a single character with a digit in it, like `'5'`...
-Is that the same as the value `5`?
+Nếu bạn có một ký tự chứa chữ số, như `'5'`... có giống giá trị `5`
+không?
 
-Let's try it and see.
+Thử xem.
 
 ``` {.c}
 printf("%d %d\n", 5, '5');
 ```
 
-On my UTF-8 system, this prints:
+Trên hệ thống UTF-8 của tôi, cái này in:
 
 ``` {.default}
 5 53
 ```
 
-So... no. And 53? What is that? That's the UTF-8 (and ASCII) code point
-for the character symbol `'5'`^[Each character has a value associated
-with it for any given character encoding scheme.]
+Vậy... không. Còn 53? Là gì? Đó là code point trong UTF-8 (và ASCII)
+cho ký tự `'5'`^[Mỗi ký tự có một giá trị gắn với nó ứng với sơ đồ
+mã hoá ký tự cụ thể nào đó.]
 
-So how do we convert the character `'5'` (which apparently has value 53)
-into the value `5`?
+Vậy làm sao chuyển ký tự `'5'` (có giá trị 53 rõ ràng) thành giá trị
+`5`?
 
-With one clever trick, that's how!
+Bằng một trick lanh lợi, đây này!
 
-The C Standard guarantees that these character will have code points
-that are in sequence and in this order:
+Chuẩn C đảm bảo các ký tự này có code point liên tiếp và theo thứ tự
+này:
 
 ``` {.default}
 0  1  2  3  4  5  6  7  8  9
 ```
 
-Ponder for a second--how can we use that? Spoilers ahead...
+Nghĩ một giây, ta có thể tận dụng thế nào? Spoiler ở dưới...
 
-Let's take a look at the characters and their code points in UTF-8:
+Xem các ký tự và code point của chúng trong UTF-8:
 
 ``` {.default}
 0  1  2  3  4  5  6  7  8  9
 48 49 50 51 52 53 54 55 56 57
 ```
 
-You see there that `'5'` is `53`, just like we were getting. And `'0'`
-is `48`.
+Bạn thấy `'5'` là `53`, y như ta đã có. Và `'0'` là `48`.
 
-So we can subtract `'0'` from any digit character to get its numeric
-value:
+Nên ta có thể trừ `'0'` khỏi bất kỳ ký tự chữ số nào để lấy giá trị
+số của nó:
 
 ``` {.c}
 char c = '6';
@@ -300,7 +293,7 @@ int x = c;  // x has value 54, the code point for '6'
 int y = c - '0'; // y has value 6, just like we want
 ```
 
-And we can convert the other way, too, just by adding the value on.
+Và ta cũng có thể chuyển chiều kia, chỉ việc cộng giá trị vào.
 
 ``` {.c}
 int x = 6;
@@ -311,14 +304,13 @@ printf("%d\n", c);  // prints 54
 printf("%c\n", c);  // prints 6 with %c
 ```
 
-You might think this is a weird way to do this conversion, and by
-today's standards, it certainly is. But back in the olden days when
-computers were made literally out of wood, this was the method for doing
-this conversion. And it wasn't broke, so C never fixed it.
+Bạn có thể nghĩ đây là cách lạ lùng để chuyển đổi, và theo chuẩn ngày
+nay, đúng là thế. Nhưng hồi xưa khi máy tính được làm bằng gỗ theo
+đúng nghĩa đen, đây là cách chuyển đổi. Và không hư, nên C chưa sửa.
 
 [i[Type conversions-->`char`]>]
 
-## Numeric Conversions
+## Chuyển đổi số
 
 [i[Type conversions-->numeric]<]
 
@@ -326,88 +318,81 @@ this conversion. And it wasn't broke, so C never fixed it.
 
 [i[Type conversions-->Boolean]]
 
-If you convert a zero to `bool`, the result is `0`. Otherwise it's `1`.
+Nếu bạn chuyển một số 0 sang `bool`, kết quả là `0`. Ngược lại là `1`.
 
-### Integer to Integer Conversions
+### Chuyển giữa số nguyên
 
 [i[Type conversions-->integer]<]
 
-If an integer type is converted to unsigned and doesn't fit in it, the
-unsigned result wraps around odometer-style until it fits in the
-unsigned^[In practice, what's probably happening on your implementation
-is that the high-order bits are just being dropped from the result, so a
-16-bit number `0x1234` being converted to an 8-bit number ends up as
-`0x0034`, or just `0x34`.].
+Nếu kiểu số nguyên được chuyển sang unsigned mà không vừa, kết quả
+unsigned sẽ wrap-around kiểu công-tơ-mét cho tới khi vừa kiểu
+unsigned^[Trong thực tế, cái nhiều khả năng đang xảy ra trên cài đặt
+của bạn là các bit bậc cao bị bỏ khỏi kết quả, nên số 16-bit `0x1234`
+khi chuyển sang số 8-bit sẽ thành `0x0034`, hay chỉ `0x34`.].
 
-If an integer type is converted to a signed number and doesn't fit, the
-result is implementation-defined! Something documented will happen, but
-you'll have to look it up^[Again, in practice, what will likely happen
-on your system is that the bit pattern for the original will be
-truncated and then just used to represent the signed number, two's
-complement. For example, my system takes an `unsigned char` of `192` and
-converts it to `signed char` `-64`. In two's complement, the bit pattern
-for both these numbers is binary `11000000`.]
+Nếu kiểu số nguyên được chuyển sang số signed mà không vừa, kết quả
+là implementation-defined! Chuyện gì đó có ghi sẽ xảy ra, nhưng bạn
+phải tra tài liệu^[Lần nữa, trong thực tế, cái có khả năng xảy ra
+trên hệ thống của bạn là mẫu bit của số gốc sẽ bị cắt rồi dùng luôn
+để biểu diễn số signed, two's complement. Ví dụ, hệ của tôi lấy một
+`unsigned char` `192` và chuyển thành `signed char` `-64`. Trong
+two's complement, mẫu bit cho cả hai số này là nhị phân `11000000`.]
 
-### Integer and Floating Point Conversions
+### Chuyển số nguyên và số dấu phẩy động
 
 [i[Type conversions-->floating point]<]
 
-If a floating point type is converted to an integer type, the fractional
-part is discarded with prejudice^[Not really---it's just discarded
-regularly.].
+Nếu kiểu dấu phẩy động được chuyển sang kiểu nguyên, phần lẻ bị vứt
+đi không thương tiếc^[Thật ra không, cứ vứt như thường.].
 
-But---and here's the catch---if the number is too large to fit in the
-integer, you get undefined behavior. So don't do that.
+Nhưng, và đây là bẫy, nếu số quá lớn không vừa kiểu nguyên, bạn có
+undefined behavior. Nên đừng làm thế.
 
-Going From integer or floating point to floating point, C makes a best
-effort to find the closest floating point number to the integer that it
-can.
+Đi từ số nguyên hay dấu phẩy động sang dấu phẩy động, C cố gắng hết
+sức để tìm số dấu phẩy động gần nhất với số nguyên.
 
-Again, though, if the original value can't be represented, it's undefined
+Lần nữa, nếu giá trị gốc không biểu diễn được, đó là undefined
 behavior.
 
 [i[Type conversions-->floating point]>]
 [i[Type conversions-->integer]>]
 
-## Implicit Conversions
+## Chuyển đổi ngầm
 
 [i[Type conversions-->implicit]<]
 
-These are conversions the compiler does automatically for you when you
-mix and match types.
+Đây là các chuyển đổi compiler tự làm cho bạn khi bạn trộn các kiểu.
 
-### The Integer Promotions {#integer-promotions}
+### Integer Promotions {#integer-promotions}
 
-In a number of places, if an `int` can be used to represent a value from
-`char` or `short` (signed or unsigned), that value is _promoted_ up to
-`int`. If it doesn't fit in an `int`, it's promoted to `unsigned int`.
+Ở nhiều chỗ, nếu một `int` có thể dùng để biểu diễn giá trị từ `char`
+hay `short` (signed hay unsigned), giá trị đó được _promote_ (nâng)
+lên `int`. Nếu không vừa `int`, nó được nâng lên `unsigned int`.
 
-This is how we can do something like this:
+Đó là cách ta làm được chuyện như:
 
 ``` {.c}
 char x = 10, y = 20;
 int i = x + y;
 ```
 
-In that case, `x` and `y` get promoted to `int` by C before the math
-takes place.
+Trường hợp đó, `x` và `y` được C nâng lên `int` trước khi phép toán
+diễn ra.
 
-The integer promotions take place during The Usual Arithmetic
-Conversions, with variadic functions^[Functions with a variable number
-of arguments.], unary `+` and `-` operators, or when passing values to
-functions without prototypes^[This is rarely done because the compiler
-will complain and having a prototype is the _Right Thing_ to do. I think
-this still works for historic reasons, before prototypes were a thing.].
+Integer promotion xảy ra trong The Usual Arithmetic Conversions, với
+hàm variadic^[Hàm có số đối số thay đổi.], toán tử `+` và `-` đơn,
+hoặc khi truyền giá trị cho hàm không có prototype^[Hiếm làm vì
+compiler sẽ than phiền và có prototype là _Cách làm đúng_. Tôi nghĩ
+cái này vẫn chạy vì lý do lịch sử, trước khi prototype ra đời.].
 
 ### The Usual Arithmetic Conversions {#usual-arithmetic-conversions}
 
-These are automatic conversions that C does around numeric operations
-that you ask for. (That's actually what they're called, by the way, by
-C11 §6.3.1.8.) Note that for this section, we're just talking about
-numeric types---strings will come later.
+Đây là các chuyển đổi tự động C làm quanh các phép toán số bạn yêu
+cầu. (Tên gọi thật sự là thế, nhân tiện, theo C11 §6.3.1.8.) Chú ý ở
+mục này, ta chỉ nói kiểu số, chuỗi sẽ bàn sau.
 
-These conversions answer questions about what happens when you mix
-types, like this:
+Các chuyển đổi này trả lời câu hỏi chuyện gì xảy ra khi bạn trộn
+kiểu, như:
 
 ``` {.c}
 int x = 3 + 1.2;   // Mixing int and double
@@ -419,34 +404,34 @@ float y = 12 * 2;  // Mixing float and int
                    // 24.0 is stored in y
 ```
 
-Do they become `int`s? Do they become `float`s? How does it work?
+Chúng thành `int`? Chúng thành `float`? Hoạt động thế nào?
 
-Here are the steps, paraphrased for easy consumption.
+Đây là các bước, diễn giải lại cho dễ nuốt.
 
-1. If one thing in the expression is a floating type, convert the other
-   things to that floating type.
+1. Nếu có một thứ trong biểu thức là kiểu dấu phẩy động, chuyển các
+   thứ khác sang kiểu dấu phẩy động đó.
 
-2. Otherwise, if both types are integer types, perform the integer
-   promotions on each, then make the operand types as big as they need
-   to be hold the common largest value. Sometimes this involves changing
-   signed to unsigned.
+2. Ngược lại, nếu cả hai đều là kiểu nguyên, thực hiện integer
+   promotion trên mỗi cái, rồi làm kiểu của các toán hạng đủ lớn để
+   chứa giá trị lớn chung. Đôi khi việc này liên quan đến chuyện đổi
+   signed sang unsigned.
 
-If you want to know the gritty details, check out C11 §6.3.1.8. But you
-probably don't.
+Nếu muốn biết chi tiết vụn, xem C11 §6.3.1.8. Nhưng chắc bạn không
+muốn đâu.
 
-Just generally remember that int types become float types if there's a
-floating point type anywhere in there, and the compiler makes an effort
-to make sure mixed integer types don't overflow.
+Nhớ đại khái là kiểu int thành kiểu float nếu có kiểu dấu phẩy động
+ở đâu trong đó, và compiler cố gắng đảm bảo các kiểu int trộn không
+bị tràn.
 
-Finally, if you convert from one floating point type to another, the
-compiler will try to make an exact conversion. If it can't, it'll do the
-best approximation it can. If the number is too large to fit in the type
-you're converting into, _boom_: undefined behavior!
+Cuối cùng, nếu bạn chuyển từ kiểu dấu phẩy động này sang kiểu dấu
+phẩy động khác, compiler sẽ cố chuyển đổi chính xác. Nếu không được,
+nó sẽ làm xấp xỉ tốt nhất có thể. Nếu số quá lớn không vừa kiểu bạn
+đang chuyển qua, _bùm_: undefined behavior!
 
 ### `void*`
 
-The `void*` type is interesting because it can be converted from or to
-any pointer type.
+Kiểu `void*` thú vị vì nó có thể chuyển từ hay sang bất kỳ kiểu con
+trỏ nào.
 
 ``` {.c}
 int x = 10;
@@ -458,17 +443,16 @@ int *q = p;    // p is void*, but we store it in an int*
 
 [i[Type conversions-->implicit]>]
 
-## Explicit Conversions
+## Chuyển đổi tường minh
 
 [i[Type conversions-->explicit]<]
 
-These are conversions from type to type that you have to ask for; the
-compiler won't do it for you.
+Đây là các chuyển đổi từ kiểu sang kiểu mà bạn phải yêu cầu, compiler
+sẽ không tự làm.
 
-You can convert from one type to another by assigning one type to
-another with an `=`.
+Bạn có thể chuyển từ kiểu này sang kiểu khác bằng cách gán với `=`.
 
-You can also convert explicitly with a _cast_.
+Bạn cũng có thể chuyển tường minh bằng _cast_.
 
 [i[Type conversions-->numeric]>]
 
@@ -476,31 +460,30 @@ You can also convert explicitly with a _cast_.
 
 [i[Type conversions-->casting]<]
 
-You can explicitly change the type of an expression by putting a new
-type in parentheses in front of it. Some C devs frown on the practice
-unless absolutely necessary, but it's likely you'll come across some C
-code with these in it.
+Bạn có thể đổi tường minh kiểu của biểu thức bằng cách đặt một kiểu
+mới trong ngoặc trước nó. Vài dev C cau mày với cách này trừ khi thật
+sự cần, nhưng bạn có khả năng gặp một ít code C có cast bên trong.
 
-Let's do an example where we want to convert an `int` into a `long` so
-that we can store it in a `long`.
+Làm ví dụ muốn chuyển `int` sang `long` để lưu trong `long`.
 
-Note: this example is contrived and the cast in this case is completely
-unnecessary because the `x + 12` expression would automatically be
-changed to `long int` to match the wider type of `y`.
+Chú ý: ví dụ này bịa đặt và cast ở đây hoàn toàn không cần vì biểu
+thức `x + 12` sẽ tự chuyển sang `long int` để hợp với kiểu rộng hơn
+của `y`.
 
 ``` {.c}
 int x = 10;
 long int y = (long int)x + 12;
 ```
 
-In that example, even those `x` was type `int` before, the expression
-`(long int)x` has type `long int`. We say, "We cast `x` to `long int`."
+Trong ví dụ đó, mặc dù `x` là kiểu `int` trước đó, biểu thức
+`(long int)x` có kiểu `long int`. Ta nói, "Ta cast `x` sang `long
+int`."
 
-More commonly, you might see a cast being used to convert a `void*`
-into a specific pointer type so it can be dereferenced.
+Thường gặp hơn, bạn có thể thấy cast được dùng để chuyển `void*`
+thành kiểu con trỏ cụ thể để có thể dereference.
 
-A callback from the built-in `qsort()` function might display this
-behavior since it has `void*`s passed into it:
+Callback từ hàm có sẵn `qsort()` có thể thể hiện hành vi này vì nó
+có `void*` được truyền vào:
 
 ``` {.c}
 int compar(const void *elem1, const void *elem2)
@@ -511,7 +494,7 @@ int compar(const void *elem1, const void *elem2)
 }
 ```
 
-But you could also clearly write it with an assignment:
+Nhưng bạn cũng có thể viết rõ ràng bằng phép gán:
 
 ``` {.c}
 int compar(const void *elem1, const void *elem2)
@@ -523,9 +506,9 @@ int compar(const void *elem1, const void *elem2)
 }
 ```
 
-One place you'll see casts more commonly is to avoid a warning when
-printing pointer values with the rarely-used `%p` which gets picky with
-anything other than a `void*`:
+Một chỗ bạn thấy cast phổ biến hơn là để tránh warning khi in giá trị
+con trỏ với `%p` hiếm dùng, cái này khó tính với bất cứ thứ gì không
+phải `void*`:
 
 ``` {.c}
 int x = 3490;
@@ -534,21 +517,21 @@ int *p = &x;
 printf("%p\n", p);
 ```
 
-generates this warning:
+sinh ra warning này:
 
 ``` {.default}
 warning: format ‘%p’ expects argument of type ‘void *’, but argument
          2 has type ‘int *’
 ```
 
-You can fix it with a cast:
+Bạn có thể fix bằng cast:
 
 ``` {.c}
 printf("%p\n", (void *)p);
 ```
 
-Another place is with explicit pointer changes, if you don't want to use
-an intervening `void*`, but these are also pretty uncommon:
+Chỗ khác là với đổi con trỏ tường minh, nếu không muốn dùng `void*`
+ở giữa, nhưng cái này cũng khá hiếm:
 
 ``` {.c}
 long x = 3490;
@@ -556,18 +539,17 @@ long *p = &x;
 unsigned char *c = (unsigned char *)p;
 ```
 
-A third place it's often required is with the character conversion
-functions in
+Chỗ thứ ba thường yêu cầu là với các hàm chuyển đổi ký tự trong
 [fl[`<ctype.h>`|https://beej.us/guide/bgclr/html/split/ctype.html]]
-where you should cast questionably-signed values to `unsigned char` to
-avoid undefined behavior.
+ở đó bạn nên cast các giá trị signedness đáng ngờ sang `unsigned
+char` để tránh undefined behavior.
 
-Again, casting is rarely _needed_ in practice. If you find yourself
-casting, there might be another way to do the same thing, or maybe
-you're casting unnecessarily.
+Một lần nữa, cast hiếm khi _cần_ trong thực tế. Nếu bạn thấy mình
+đang cast, có khả năng có cách khác làm cùng chuyện đó, hoặc có thể
+bạn đang cast không cần thiết.
 
-Or maybe it is necessary. Personally, I try to avoid it, but am not
-afraid to use it if I have to.
+Hoặc có thể là cần. Cá nhân tôi, tôi cố tránh, nhưng không ngại dùng
+nếu phải.
 
 [i[Type conversions-->explicit]>]
 [i[Type conversions-->casting]>]
