@@ -3,102 +3,100 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Variables and Statements
+# Biến và câu lệnh
 
 > _"It takes all kinds to make a world, does it not, Padre?"_ \
 > _"So it does, my son, so it does."_
 >
 > ---Pirate Captain Thomas Bartholomew Red to the Padre, Pirates
 
-There sure can be lotsa stuff in a C program.
+Một chương trình C có thể chứa đủ thứ trên đời.
 
-Yup.
+Ừ đấy.
 
-And for various reasons, it'll be easier for all of us if we classify
-some of the types of things you can find in a program, so we can be
-clear what we're talking about.
+Và vì nhiều lý do, sẽ dễ cho tất cả chúng ta nếu phân loại một vài thứ
+hay gặp trong chương trình, để ai nấy đều rõ chúng ta đang nói về cái
+gì.
 
-## Variables
+## Biến
 
-[i[Variables]<]It's said that "variables hold values". But another way to
-think about it is that a variable is a human-readable name that refers
-to some data in memory.
+[i[Variables]<]Người ta hay nói "biến giữ giá trị". Nhưng một cách nghĩ
+khác là: biến là một cái tên dễ đọc đối với con người, dùng để tham
+chiếu tới một mẩu dữ liệu nào đó trong bộ nhớ.
 
-We're going to take a second here and take a peek down the rabbit hole
-that is pointers. Don't worry about it.
+Chúng ta sẽ dừng lại một nhịp để he hé nhìn xuống cái hang thỏ mang tên
+pointer (con trỏ). Đừng lo lắng gì cả.
 
-You can think of memory as a big array of bytes^[A "byte" is typically
-an 8-bit binary number. Think of it as an integer that can only hold the
-values from 0 to 255, inclusive. Technically, C allows bytes to be any
-number of bits and if you want to unambiguously refer to an 8-bit
-number, you should use the term _octet_. But programmers are going to
-assume you mean 8-bits when you say "byte" unless you specify
-otherwise.]. Data is stored in this "array"^[I'm seriously
-oversimplifying how modern memory works, here. But the mental model
-works, so please forgive me.]. If a number is larger than a single byte,
-it is stored in multiple bytes. Because memory is like an array, each
-byte of memory can be referred to by its index. This index into memory
-is also called an _address_, or a _location_, or a _pointer_.
+Bạn có thể hình dung bộ nhớ như một mảng khổng lồ gồm các byte^[Một
+"byte" thường là một số nhị phân 8 bit. Cứ coi như một số nguyên chỉ có
+thể chứa giá trị từ 0 đến 255. Về mặt kỹ thuật, C cho phép byte có số
+bit bất kỳ, và nếu muốn chỉ rõ ràng một số 8 bit, bạn nên dùng từ
+_octet_. Nhưng lập trình viên mặc nhiên hiểu "byte" là 8 bit trừ khi
+bạn nói rõ khác đi.]. Dữ liệu được lưu trong "mảng" này^[Tôi đang đơn
+giản hoá cực độ cách bộ nhớ hiện đại hoạt động. Nhưng mô hình tưởng
+tượng này vẫn dùng được, nên xin thứ lỗi.]. Nếu một số lớn hơn một
+byte, nó được lưu trong nhiều byte. Vì bộ nhớ giống như một mảng, mỗi
+byte có thể được tham chiếu qua chỉ số của nó. Chỉ số này vào bộ nhớ
+còn được gọi là _address_ (địa chỉ), _location_ (vị trí), hay
+_pointer_ (con trỏ).
 
-When you have a variable in C, the value of that variable is in memory
-_somewhere_, at some address. Of course. After all, where else would it
-be? But it's a pain to refer to a value by its numeric address, so we
-make a name for it instead, and that's what the variable is.
+Khi bạn có một biến trong C, giá trị của biến đó nằm trong bộ nhớ ở
+_đâu đó_, tại một địa chỉ nào đó. Dĩ nhiên. Chứ nó còn ở chỗ nào được
+nữa? Nhưng nhắc tới một giá trị bằng địa chỉ số thì thật khổ sở, nên
+ta đặt cho nó cái tên, và cái tên đó chính là biến.
 
-The reason I'm bringing all this up is twofold:
+Lý do tôi nói hết đống này có hai:
 
-1. It's going to make it easier to understand pointer variables
-   later---they're variables that hold the address of other variables!
-2. Also, it's going to make it easier to understand pointers later.
+1. Nó sẽ giúp bạn dễ hiểu biến con trỏ sau này, chúng là biến chứa địa
+   chỉ của các biến khác!
+2. Và nó cũng giúp bạn dễ hiểu con trỏ sau này.
 
-So a variable is a name for some data that's stored in memory at some
-address.
+Tóm lại, biến là một cái tên cho mẩu dữ liệu được lưu trong bộ nhớ ở
+một địa chỉ nào đó.
 
-### Variable Names
+### Tên biến
 
-[i[Variables]<]You can use any characters in the range 0-9, A-Z, a-z,
-and underscore for variable names, with the following rules:
+[i[Variables]<]Bạn có thể dùng các ký tự trong khoảng 0-9, A-Z, a-z, và
+dấu gạch dưới cho tên biến, với các luật sau:
 
-* You can't start a variable with a digit 0-9.
-* You can't start a variable name with two underscores.
-* You can't start a variable name with an underscore followed by a
-  capital A-Z.
+* Không được bắt đầu tên biến bằng chữ số 0-9.
+* Không được bắt đầu tên biến bằng hai dấu gạch dưới.
+* Không được bắt đầu tên biến bằng một dấu gạch dưới rồi tới chữ hoa
+  A-Z.
 
-For Unicode, just try it. There are some rules in the spec in §D.2 that
-talk about which Unicode codepoint ranges are allowed in which parts of
-identifiers, but that's too much to write about here and is probably
-something you'll never have to think about anyway.[i[Variables]>]
+Với Unicode thì cứ thử xem. Trong spec §D.2 có vài luật nói về dải
+codepoint Unicode nào được phép ở phần nào của định danh, nhưng viết
+hết ra thì dài quá, và có lẽ đời bạn cũng chẳng cần nghĩ tới.[i[Variables]>]
 
-### Variable Types
+### Kiểu biến
 
-[i[Types]]Depending on which languages you already have in your toolkit,
-you might or might not be familiar with the idea of types. But C's kinda
-picky about them, so we should do a refresher.
+[i[Types]]Tuỳ vào ngôn ngữ bạn đã biết, có thể bạn đã quen với khái
+niệm type (kiểu), có thể chưa. Nhưng C hơi khó tính ở chỗ này, nên ta
+nên ôn lại một chút.
 
-Some example types, some of the most basic:
+Vài kiểu ví dụ, thuộc loại cơ bản nhất:
 
 [i[`int` type]][i[`float` type]][i[`char` type]][i[`char *` type]]
 
-|Type|Example|C Type|
+|Kiểu|Ví dụ|Kiểu C|
 |:---|------:|:-----|
-|Integer|`3490`|`int`|
-|Floating point|`3.14159`|`float`^[I'm lying here a little. Technically `3.14159` is of type `double`, but we're not there yet and I want you to associate `float` with "Floating Point", and C will happily coerce that type into a `float`. In short, don't worry about it until later.]|
-|Character (single)|`'c'`|`char`|
-|String|`"Hello, world!"`|`char *`^[Read this as "pointer to a char" or "char pointer". "Char" for character. Though I can't find a study, it seems anecdotally most people pronounce this as "char", a minority say "car", and a handful say "care". We'll talk more about pointers later.]|
+|Số nguyên|`3490`|`int`|
+|Số dấu phẩy động|`3.14159`|`float`^[Tôi đang nói dối một chút ở đây. Về kỹ thuật `3.14159` là kiểu `double`, nhưng ta chưa tới chỗ đó và tôi muốn bạn gắn `float` với "Floating Point", và C sẽ vui vẻ ép kiểu đó thành `float`. Tóm lại, đừng bận tâm tới khi gặp lại sau.]|
+|Ký tự (đơn)|`'c'`|`char`|
+|Chuỗi|`"Hello, world!"`|`char *`^[Đọc là "pointer to a char" hoặc "char pointer" (con trỏ tới char). "Char" là viết tắt của character (ký tự). Dù tôi không tìm thấy nghiên cứu nào, theo quan sát thì đa số đọc là "char", một thiểu số đọc "car", và lác đác đọc "care". Ta sẽ nói kỹ hơn về con trỏ sau.]|
 
-C makes an effort to convert automatically between most numeric types
-when you ask it to. But other than that, all conversions are manual,
-notably between string and numeric.
+C cố gắng tự động chuyển đổi giữa hầu hết các kiểu số khi bạn yêu cầu.
+Ngoài chuyện đó, mọi phép chuyển đổi đều phải làm bằng tay, đặc biệt
+là giữa chuỗi và số.
 
-Almost all of the types in C are variants on these types.
+Gần như mọi kiểu trong C đều là biến thể của những kiểu trên.
 
-Before you can use a variable, you have to _declare_ that variable and
-tell C what type the variable holds. Once declared, the type of variable
-cannot be changed later at runtime. What you set it to is what it is
-until it falls out of scope and is reabsorbed into the universe.
+Trước khi dùng một biến, bạn phải _khai báo_ (declare) biến đó và cho
+C biết biến chứa kiểu gì. Một khi đã khai báo, kiểu của biến không thể
+đổi sau này lúc chạy chương trình. Đặt là gì thì nó là thế cho đến khi
+rơi ra khỏi scope (phạm vi) và bị vũ trụ hấp thụ lại.
 
-Let's take our previous "Hello, world" code and add a couple variables
-to it:
+Hãy lấy code "Hello, world" trước đó và thêm vài biến vào:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -112,28 +110,28 @@ int main(void)
 }
 ```
 
-There! We've declared a couple of variables. We haven't used them yet,
-and they're both uninitialized. One holds an integer number, and the
-other holds a floating point number (a real number, basically, if you
-have a math background).
+Đó! Ta đã khai báo vài biến. Chưa dùng đến, và cả hai đều chưa được
+khởi tạo. Một biến giữ số nguyên, biến kia giữ số dấu phẩy động (về cơ
+bản là số thực, nếu bạn có nền toán).
 
-[i[Variables-->uninitialized]]Uninitialized variables have indeterminate
-value^[Colloquially, we say they have "random" values, but they aren't
-truly---or even pseudo-truly---random numbers.]. They have to be
-initialized or else you must assume they contain some nonsense number.
+[i[Variables-->uninitialized]]Biến chưa được khởi tạo có giá trị không
+xác định^[Nói chung ta bảo chúng có giá trị "ngẫu nhiên", nhưng thật ra
+không phải số ngẫu nhiên thật, thậm chí cũng chẳng phải ngẫu nhiên giả
+lập.]. Chúng phải được khởi tạo, nếu không bạn phải giả định chúng
+chứa một số nhảm nào đó.
 
-> This is one of the places C can "get you". Much of the time, in my
-> experience, the indeterminate value is zero... but it can vary from
-> run to run! Never assume the value will be zero, even if you see it
-> is. _Always_ explicitly initialize variables to some value before you
-> use them^[This isn't strictly 100% true. When we get to learning about
-> static storage duration, you'll find the some variables are
-> initialized to zero automatically. But the safe thing to do is always
-> initialize them.].
+> Đây là một trong những chỗ C có thể "cắn" bạn. Theo kinh nghiệm của
+> tôi, phần lớn trường hợp cái giá trị không xác định đó là số
+> không... nhưng nó có thể khác nhau giữa các lần chạy! Đừng bao giờ
+> giả định giá trị sẽ là 0, kể cả khi bạn thấy đúng là 0. _Luôn luôn_
+> khởi tạo biến một cách rõ ràng trước khi dùng^[Điều này không hoàn
+> toàn đúng 100%. Khi tới phần static storage duration (thời gian lưu
+> trữ tĩnh), bạn sẽ thấy một số biến được tự động khởi tạo về 0. Nhưng
+> cách an toàn là luôn tự khởi tạo.].
 
-What's this? You want to store some numbers in those variables? Insanity!
+Khoan, bạn muốn lưu số vào mấy biến đó à? Điên rồ!
 
-Let's go ahead and do that:
+Thì cứ làm đi:
 [i[`=` assignment operator]]
 
 ``` {.c .numberLines}
@@ -147,21 +145,19 @@ int main(void)
 }
 ```
 
-Killer. We've stored a value. Let's print it.
+Đỉnh. Ta vừa lưu một giá trị. Giờ in nó ra nào.
 
-[i[`printf()` function]<]We're going to do that by passing _two_ amazing
-arguments to the `printf()` function. The first argument is a string
-that describes what to print and how to print it (called the _format
-string_), and the second is the value to print, namely whatever is in
-the variable `i`.
+[i[`printf()` function]<]Ta sẽ in bằng cách truyền _hai_ đối số tuyệt
+vời cho hàm `printf()`. Đối số thứ nhất là một chuỗi mô tả cần in gì
+và in như thế nào (gọi là _format string_), và đối số thứ hai là giá
+trị cần in, cụ thể là thứ đang nằm trong biến `i`.
 
-`printf()` hunts through the format string for a variety of special
-sequences which start with a percent sign (`%`) that tell it what to
-print. For example, if it finds a `%d`, it looks to the next parameter
-that was passed, and prints it out as an integer. If it finds a `%f`, it
-prints the value out as a float. If it finds a `%s`, it prints a string.
+`printf()` quét chuỗi format tìm các chuỗi đặc biệt bắt đầu bằng dấu
+phần trăm (`%`) để biết phải in gì. Ví dụ, khi gặp `%d`, nó nhìn vào
+tham số kế tiếp và in ra dưới dạng số nguyên. Gặp `%f` thì in dưới
+dạng float. Gặp `%s` thì in chuỗi.
 
-As such, we can print out the value of various types like so:
+Nhờ vậy, ta có thể in ra giá trị của nhiều kiểu khác nhau như này:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -176,38 +172,38 @@ int main(void)
 }
 ```
 
-And the output will be:
+Và output sẽ là:
 
 ``` {.default}
 Hello, world!  i = 2 and f = 3.14!
 ```
 
-In this way, `printf()` might be similar to various types of format
-strings or parameterized strings in other languages you're familiar
-with.  [i[`printf()` function]>]
+Kiểu này, `printf()` có thể giống với các loại chuỗi format hay chuỗi
+tham số hoá trong những ngôn ngữ khác mà bạn đã quen.
+[i[`printf()` function]>]
 
-***NOTE:*** In the following sections, I just assume that you've
-declared the variables ahead of time. If the example uses integers `i`
-and `j`, just assume somewhere above the example I had:
+***LƯU Ý:*** Trong các mục tiếp theo, tôi mặc định bạn đã khai báo các
+biến từ trước. Nếu ví dụ dùng số nguyên `i` và `j`, cứ giả định đâu đó
+phía trên ví dụ tôi đã có:
 
 ``` {.c}
 int i, j;
 ```
 
-### Boolean Types
+### Kiểu Boolean
 
-[i[Boolean types]<]C has Boolean types, true or false?
+[i[Boolean types]<]C có kiểu Boolean, true hay false?
 
 `1`!
 
-Historically, C didn't have a Boolean type, and some might argue it
-still doesn't.
+Về lịch sử, C không có kiểu Boolean, và vài người có thể tranh cãi là
+bây giờ vẫn chưa có.
 
-In C, `0` means "false", and non-zero means "true".
+Trong C, `0` nghĩa là "false", và khác không nghĩa là "true".
 
-So `1` is true. And `-37` is true. And `0` is false.
+Nên `1` là true. `-37` cũng true. Và `0` là false.
 
-You can just declare Boolean types as `int`s:
+Bạn có thể khai báo Boolean như `int`:
 
 ``` {.c}
 int x = 1;
@@ -217,9 +213,9 @@ if (x) {
 }
 ```
 
-In C23, you get actual `bool`, `true`, and `false`. Before that, if you
-have a modern-enough version of C, you can `#include
-<stdbool.h>`[i[`stdbool.h` header file]] to get the same thing.
+Trong C23, bạn có `bool`, `true`, và `false` thực sự. Trước đó, nếu bạn
+có phiên bản C đủ mới, có thể `#include <stdbool.h>`[i[`stdbool.h` header file]]
+để có thứ tương tự.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -234,40 +230,39 @@ int main(void) {
 }
 ```
 
-While technically you should be setting a `bool` variable to `true`,
-`false`, or the result of some expression that evaluates to true or
-false, you can actually convert all kinds of things to `bool`. There are
-some specific rules, but zero-ish things tend to evaluate to `false`,
-and non-zero-ish things to true.
+Về lý thuyết bạn nên gán biến `bool` là `true`, `false`, hoặc kết quả
+của biểu thức trả ra true/false, nhưng thật ra bạn có thể ép đủ thứ
+thành `bool`. Có vài luật cụ thể, nhưng đại khái thứ nào giống-số-không
+thường thành `false`, còn thứ khác-không thì thành true.
 
-But be careful if you mix and match since the numeric value of `true` is
-`1`, probably[^B1CA], and if you're relying on some other positive value
-to be true, you might get a mismatch. For example:
+Nhưng cẩn thận nếu bạn trộn lẫn, vì giá trị số của `true` là `1`, gần
+như chắc chắn[^B1CA], và nếu bạn trông cậy vào một giá trị dương khác
+mang nghĩa true, bạn có thể bị lệch. Ví dụ:
 
 ``` {.c .numberLines}
 printf("%d\n", true == 12);  // Prints "0", false!
 ```
 
-[^B1CA]: Technically just one bit of a `char` is used to represent the
-    `bool`, so it can either be zero or one. Except that what goes in
-    the remaining (padding) bits of the `char` is unspecified. For
-    `false`, it must surely be all zero. But for `true`, I'm uncertain
-    that it must all be zero.
+[^B1CA]: Về kỹ thuật chỉ một bit của `char` được dùng để biểu diễn
+    `bool`, nên nó chỉ có thể là 0 hoặc 1. Chỉ là các bit còn lại
+    (padding) của `char` thì không được quy định rõ. Với `false`, chắc
+    chắn phải toàn 0. Nhưng với `true`, tôi không chắc là nó phải toàn
+    0 hay không.
 
 [i[Boolean types]>]
 
-## Operators and Expressions {#operators}
+## Toán tử và biểu thức {#operators}
 
-C operators should be familiar to you from other languages. Let's blast
-through some of them here.
+Các toán tử trong C chắc đã quen thuộc với bạn từ ngôn ngữ khác. Ta
+lướt nhanh qua một số ở đây.
 
-(There are a bunch more details than this, but we're going to do enough
-in this section to get started.)
+(Có cả đống chi tiết hơn thế này, nhưng trong mục này ta sẽ làm đủ để
+bắt đầu thôi.)
 
 
-### Arithmetic
+### Số học
 
-[i[Arithmetic Operators]()]Hopefully these are familiar:
+[i[Arithmetic Operators]()]Hy vọng mấy cái này quen thuộc:
 [i[`+` addition operator]] [i[`-` subtraction operator]]
 [i[`*` multiplication operator]] [i[`/` division operator]]
 [i[`%` modulus operator]]
@@ -280,8 +275,8 @@ i = i / 2;  // Division
 i = i % 5;  // Modulo (division remainder)
 ```
 
-There are shorthand variants for all of the above. Each of those lines
-could more tersely be written as:
+Có các biến thể viết tắt cho tất cả mấy dòng trên. Mỗi dòng có thể viết
+ngắn gọn hơn như sau:
 [i[`+=` assignment operator]] [i[`-=` assignment operator]]
 [i[`*=` assignment operator]] [i[`/=` assignment operator]]
 [i[`%=` assignment operator]]
@@ -294,17 +289,17 @@ i /= 2;  // Same as "i = i / 2"
 i %= 5;  // Same as "i = i % 5"
 ```
 
-There is no exponentiation. You'll have to use one of the
-`pow()`[i[pow()]T] function variants from `math.h`.
+Không có toán tử luỹ thừa. Bạn sẽ phải dùng một trong các biến thể của
+hàm `pow()`[i[pow()]T] trong `math.h`.
 
-Let's get into some of the weirder stuff you might not have in your
-other languages![i[Arithmetic Operators]>]
+Giờ thì nhảy vào mấy thứ lạ hơn mà có thể ngôn ngữ khác của bạn không
+có![i[Arithmetic Operators]>]
 
-### Ternary Operator
+### Toán tử ba ngôi
 
-[i[`?:` ternary operator]<]C also includes the _ternary operator_. This
-is an expression whose value depends on the result of a conditional
-embedded in it.
+[i[`?:` ternary operator]<]C cũng có _toán tử ba ngôi_ (ternary
+operator). Đây là một biểu thức mà giá trị của nó phụ thuộc vào kết
+quả của một điều kiện được nhúng trong biểu thức.
 
 ``` {.c}
 // If x > 10, add 17 to y. Otherwise add 37 to y.
@@ -312,8 +307,8 @@ embedded in it.
 y += x > 10? 17: 37;
 ```
 
-What a mess! You'll get used to it the more you read it. To help out a
-bit, I'll rewrite the above expression using `if` statements:
+Rối thật! Đọc nhiều sẽ quen. Để giúp một chút, tôi viết lại biểu thức
+trên bằng câu lệnh `if`:
 
 ``` {.c}
 // This expression:
@@ -328,62 +323,60 @@ else
     y += 37;
 ```
 
-Compare those two until you see each of the components of the ternary
-operator.
+So sánh hai đoạn cho tới khi bạn nhận ra từng thành phần của toán tử
+ba ngôi.
 
-Or, another example that prints if a number stored in `x` is odd or
-even:
+Hoặc một ví dụ khác, in ra xem số trong `x` là chẵn hay lẻ:
 
 ``` {.c}
 printf("The number %d is %s.\n", x, x % 2 == 0? "even": "odd");
 ```
 
-The `%s` format specifier in `printf()`[i[printf()]T] means print a
-string. If the expression `x % 2` evaluates to `0`, the value of the
-entire ternary expression evaluates to the string `"even"`. Otherwise it
-evaluates to the string `"odd"`. Pretty cool!
+Format specifier `%s` trong `printf()`[i[printf()]T] nghĩa là in một
+chuỗi. Nếu biểu thức `x % 2` cho ra `0`, giá trị của toàn bộ biểu thức
+ba ngôi là chuỗi `"even"`. Ngược lại là chuỗi `"odd"`. Khá ngầu!
 
-It's important to note that the ternary operator isn't flow control like
-the `if` statement is. It's just an expression that evaluates to a value.
+Cần lưu ý rằng toán tử ba ngôi không phải flow control (điều khiển
+luồng) như câu lệnh `if`. Nó chỉ là một biểu thức cho ra một giá trị.
 [i[`?:` ternary operator]>]
 
-### Pre-and-Post Increment-and-Decrement
+### Tăng giảm tiền tố và hậu tố
 
 [i[`++` increment operator]<] [i[`--` decrement operator]<]
-Now, let's mess with another thing that you might not have seen.
+Giờ nghịch tiếp một thứ mà có lẽ bạn chưa thấy.
 
-These are the legendary post-increment and post-decrement operators:
+Đây là cặp toán tử huyền thoại post-increment và post-decrement:
 
 ``` {.c}
 i++;        // Add one to i (post-increment)
 i--;        // Subtract one from i (post-decrement)
 ```
 
-Very commonly, these are just used as shorter versions of:
+Thường thì chúng được dùng như phiên bản ngắn của:
 
 ``` {.c}
 i += 1;        // Add one to i
 i -= 1;        // Subtract one from i
 ```
 
-but they're more subtly different than that, the clever scoundrels.
+nhưng tinh ý hơn thì chúng khác một chút, mấy anh bạn ranh mãnh này.
 
-Let's take a look at this variant, pre-increment and pre-decrement:
+Xem luôn biến thể pre-increment và pre-decrement:
 
 ``` {.c}
 ++i;        // Add one to i (pre-increment)
 --i;        // Subtract one from i (pre-decrement)
 ```
 
-With pre-increment and pre-decrement, the value of the variable is
-incremented or decremented _before_ the expression is evaluated. Then
-the expression is evaluated with the new value.
+Với pre-increment và pre-decrement, giá trị của biến được tăng hoặc
+giảm _trước_ khi biểu thức được tính. Sau đó biểu thức được tính với
+giá trị mới.
 
-With post-increment and post-decrement, the value of the expression is
-first computed with the value as-is, and _then_ the value is incremented
-or decremented after the value of the expression has been determined.
+Với post-increment và post-decrement, giá trị của biểu thức được tính
+trước bằng giá trị hiện tại, _rồi sau đó_ giá trị mới được tăng hay
+giảm sau khi giá trị của biểu thức đã được xác định.
 
-You can actually embed them in expressions, like this:
+Bạn có thể nhúng chúng vào biểu thức như sau:
 
 ``` {.c}
 i = 10;
@@ -392,7 +385,7 @@ j = 5 + i++;  // Compute 5 + i, _then_ increment i
 printf("%d, %d\n", i, j);  // Prints 11, 15
 ```
 
-Let's compare this to the pre-increment operator:
+So sánh với toán tử pre-increment:
 
 ``` {.c}
 i = 10;
@@ -401,42 +394,42 @@ j = 5 + ++i;  // Increment i, _then_ compute 5 + i
 printf("%d, %d\n", i, j);  // Prints 11, 16
 ```
 
-This technique is used frequently with array and pointer access and
-manipulation. It gives you a way to use the value in a variable, and
-also increment or decrement that value before or after it is used.
+Kỹ thuật này được dùng rất thường xuyên khi truy cập và thao tác mảng
+và con trỏ. Nó cho bạn cách dùng giá trị trong một biến, đồng thời
+tăng hoặc giảm giá trị đó trước hoặc sau khi dùng.
 
-But by far the most common place you'll see this is in a `for` loop:
+Nhưng chỗ bạn hay thấy nhất là trong vòng lặp `for`:
 
 ``` {.c}
 for (i = 0; i < 10; i++)
     printf("i is %d\n", i);
 ```
 
-But more on that later.
+Để sau nói tiếp.
 [i[`++` increment operator]>] [i[`--` decrement operator]>]
 
-### The Comma Operator
+### Toán tử dấu phẩy
 
 [i[`,` comma operator]<]
-This is an uncommonly-used way to separate expressions that will run
-left to right:
+Đây là một cách ít dùng để ngăn các biểu thức sẽ được chạy từ trái
+sang phải:
 
 ``` {.c}
 x = 10, y = 20;  // First assign 10 to x, then 20 to y
 ```
 
-Seems a bit silly, since you could just replace the comma with a
-semicolon, right?
+Nghe hơi vô nghĩa, vì bạn có thể thay dấu phẩy bằng dấu chấm phẩy
+đúng không?
 
 ``` {.c}
 x = 10; y = 20;  // First assign 10 to x, then 20 to y
 ```
 
-But that's a little different. The latter is two separate expressions,
-while the former is a single expression!
+Nhưng hai cái hơi khác nhau đấy. Cái sau là hai biểu thức riêng biệt,
+còn cái trước là một biểu thức duy nhất!
 
-With the comma operator, the value of the comma expression is the value
-of the rightmost expression:
+Với toán tử dấu phẩy, giá trị của biểu thức dấu phẩy là giá trị của
+biểu thức ngoài cùng bên phải:
 
 ``` {.c}
 x = (1, 2, 3);
@@ -444,22 +437,22 @@ x = (1, 2, 3);
 printf("x is %d\n", x);  // Prints 3, because 3 is rightmost in the comma list
 ```
 
-But even that's pretty contrived. One common place the comma operator is
-used is in `for` loops to do multiple things in each section of the
-statement:
+Nhưng ngay cả thế cũng khá gượng gạo. Một chỗ phổ biến hay dùng toán
+tử dấu phẩy là trong vòng lặp `for` để làm nhiều việc trong từng phần
+của câu lệnh:
 
 ``` {.c}
 for (i = 0, j = 10; i < 100; i++, j++)
     printf("%d, %d\n", i, j);
 ```
 
-We'll revisit that later.
+Ta sẽ quay lại phần này sau.
 [i[`,` comma operator]>]
 
-### Conditional Operators
+### Toán tử điều kiện
 
 [i[Conditional Operators]<]
-For Boolean values, we have a raft of standard operators:
+Với giá trị Boolean, ta có cả loạt toán tử chuẩn:
 [i[Comparison operators]] [i[`==` equality operator]]
 [i[`!=` inequality operator]] [i[`<` less than operator]]
 [i[`>` greater than operator]] [i[`<=` less or equal operator]]
@@ -474,10 +467,10 @@ a <= b;  // True if a is less than or equal to b
 a >= b;  // True if a is greater than or equal to b
 ```
 
-Don't mix up assignment (`=`) with comparison (`==`)! Use two equals to
-compare, one to assign.
+Đừng lẫn phép gán (`=`) với phép so sánh (`==`)! Hai dấu bằng là so
+sánh, một dấu bằng là gán.
 
-We can use the comparison expressions with `if` statements:
+Ta có thể dùng biểu thức so sánh với câu lệnh `if`:
 
 ``` {.c}
 if (a <= 10)
@@ -485,22 +478,22 @@ if (a <= 10)
 ```
 [i[Conditional Operators]>]
 
-### Boolean Operators
+### Toán tử Boolean
 
 [i[Boolean Operators]<]
-We can chain together or alter conditional expressions with Boolean
-operators for _and_, _or_, and _not_.
+Ta có thể nối hoặc biến đổi các biểu thức điều kiện bằng toán tử
+Boolean cho _and_, _or_, và _not_.
 [i[`&&` boolean AND]]
 [i[`!` boolean NOT]]
 [i[`||` boolean OR]]
 
-|Operator|Boolean meaning|
+|Toán tử|Nghĩa Boolean|
 |:------:|:-------------:|
 |`&&`|and|
 |`||`|or|
 |`!`|not|
 
-An example of Boolean "and":
+Ví dụ Boolean "and":
 
 ``` {.c}
 // Do something if x less than 10 and y greater than 20:
@@ -509,57 +502,55 @@ if (x < 10 && y > 20)
     printf("Doing something!\n");
 ```
 
-An example of Boolean "not":
+Ví dụ Boolean "not":
 
 ``` {.c}
 if (!(x < 12))
     printf("x is not less than 12\n");
 ```
 
-`!` has higher precedence than the other Boolean operators, so we have
-to use parentheses in that case.
+`!` có độ ưu tiên cao hơn các toán tử Boolean khác, nên trong trường
+hợp này ta phải dùng dấu ngoặc.
 
-Of course, that's just the same as:
+Dĩ nhiên, thế thì cũng chỉ tương đương:
 
 ``` {.c}
 if (x >= 12)
     printf("x is not less than 12\n");
 ```
 
-but I needed the example!
+nhưng tôi cần ví dụ mà!
 [i[Boolean Operators]>]
 
-### The `sizeof` Operator {#sizeof-operator}
+### Toán tử `sizeof` {#sizeof-operator}
 
 [i[`sizeof` operator]<]
-This operator tells you the size (in bytes) that a
-particular variable or data type uses in memory.
+Toán tử này cho bạn biết kích thước (tính bằng byte) mà một biến hoặc
+một kiểu dữ liệu cụ thể chiếm trong bộ nhớ.
 
-More particularly, it tells you the size (in bytes) that the _type of a
-particular expression_ (which might be just a single variable) uses in
-memory.
+Chính xác hơn, nó cho biết kích thước (tính bằng byte) mà _kiểu của
+một biểu thức cụ thể_ (có thể chỉ là một biến đơn) chiếm trong bộ nhớ.
 
-This can be different on different systems, except for `char`[i[`char`
-type]] and its variants (which are always 1 byte).
+Con số này có thể khác nhau trên các hệ thống khác nhau, trừ `char`[i[`char`
+type]] và các biến thể của nó (luôn là 1 byte).
 
-And this might not seem very useful now, but we'll be making references
-to it here and there, so it's worth covering.
+Và có thể hiện tại trông nó chưa hữu ích lắm, nhưng ta sẽ nhắc tới
+đây đó, nên đáng nói qua.
 
-Since this computes the number of bytes needed to store a type, you
-might think it would return an `int`. Or... since the size can't be
-negative, maybe an `unsigned`?
+Vì nó tính số byte cần để lưu một kiểu, bạn có thể nghĩ nó sẽ trả về
+một `int`. Hoặc... vì kích thước không thể âm, có lẽ trả về `unsigned`?
 
 [i[`size_t` type]<]
-But it turns out C has a special type to represent the return value from
-`sizeof`. It's `size_t`, pronounced "_size tee_"^[The `_t` is short for
-`type`.]. All we know is that it's an unsigned integer type that can
-hold the size in bytes of anything you can give to `sizeof`.
+Hoá ra C có một kiểu đặc biệt cho giá trị trả về từ `sizeof`. Đó là
+`size_t`, đọc là "_size tee_"^[Chữ `_t` là viết tắt của `type`.]. Tất
+cả những gì ta biết là nó là kiểu số nguyên unsigned có thể chứa kích
+thước tính bằng byte của bất cứ thứ gì bạn đưa vào `sizeof`.
 
-`size_t` shows up a lot of different places where counts of things are
-passed or returned. Think of it as a value that represents a count.
+`size_t` xuất hiện ở rất nhiều nơi khi ta truyền hoặc trả về đếm số
+lượng. Cứ coi nó như một giá trị đại diện cho một phép đếm.
 [i[`size_t` type]>]
 
-You can take the `sizeof` a variable or expression:
+Bạn có thể lấy `sizeof` của một biến hoặc biểu thức:
 
 ``` {.c}
 int a = 999;
@@ -574,59 +565,60 @@ printf("%zu\n", sizeof 3.14);   // Prints 8 on my system
 // If you need to print out negative size_t values, use %zd
 ```
 
-Remember: it's the size in bytes of the _type_ of the expression, not
-the size of the expression itself. That's why the size of `2+7` is the
-same as the size of `a`---they're both type `int`. We'll revisit this
-number `4` in the very next block of code...
+Nhớ nhé: đó là kích thước tính bằng byte của _kiểu_ của biểu thức, chứ
+không phải kích thước của chính biểu thức. Đó là lý do kích thước của
+`2+7` bằng với kích thước của `a`, cả hai đều kiểu `int`. Ta sẽ gặp
+lại con số `4` ở khối code kế tiếp...
 
-...Where we'll see you can take the `sizeof` a type (note the
-parentheses are required around a type name, unlike an expression):
+...Ở đó bạn sẽ thấy có thể lấy `sizeof` của một kiểu (lưu ý cần dấu
+ngoặc quanh tên kiểu, khác với biểu thức):
 
 ``` {.c}
 printf("%zu\n", sizeof(int));   // Prints 4 on my system
 printf("%zu\n", sizeof(char));  // Prints 1 on all systems
 ```
 
-It's important to note that `sizeof` is a _compile-time_
-operation^[Except for with variable length arrays---but that's a story
-for another time.]. The result of the expression is determined entirely
-at compile-time, not at runtime.
+Một điều quan trọng cần nhớ: `sizeof` là phép toán _thời điểm biên
+dịch_ (compile-time)^[Trừ trường hợp variable length array, nhưng
+chuyện đó để dịp khác.]. Kết quả của biểu thức được xác định toàn bộ
+lúc biên dịch, chứ không phải lúc chạy.
 
-We'll make use of this later on.
+Ta sẽ tận dụng điều này sau.
 [i[`sizeof` operator]>]
 
 
-## Flow Control
+## Điều khiển luồng
 
 [i[Flow Control]<]
-Booleans are all good, but of course we're nowhere if we can't control
-program flow. Let's take a look at a number of constructs: `if`, `for`,
-`while`, and `do-while`.
+Boolean thì tốt, nhưng chẳng đi tới đâu nếu ta không điều khiển được
+luồng chương trình. Hãy nhìn qua một số cấu trúc: `if`, `for`,
+`while`, và `do-while`.
 
-First, a general forward-looking note about statements and blocks of
-statements brought to you by your local friendly C developer:
+Trước hết, một ghi chú chung hướng về phía trước, về câu lệnh và khối
+câu lệnh, gửi tới bạn bởi lập trình viên C thân thiện ở khu phố của
+bạn:
 
-After something like an `if` or `while` statement, you can either put a single
-statement to be executed, or a block of statements to all be executed in
-sequence.
+Sau một thứ như `if` hay `while`, bạn có thể đặt một câu lệnh duy nhất
+để thực thi, hoặc một khối các câu lệnh thực thi lần lượt theo thứ tự.
 
 [i[`if` statement]<]
-Let's start with a single statement:
+Bắt đầu với một câu lệnh đơn:
 
 ``` {.c}
 if (x == 10) printf("x is 10\n");
 ```
 
-This is also sometimes written on a separate line. (Whitespace is largely
-irrelevant in C---it's not like Python.)
+Cái này cũng đôi khi được viết trên một dòng riêng. (Whitespace trong
+C phần lớn không có ý nghĩa, không như Python.)
 
 ``` {.c}
 if (x == 10)
     printf("x is 10\n");
 ```
 
-But what if you want multiple things to happen due to the conditional?
-You can use squirrelly braces to mark a _block_ or _compound statement_.
+Nhưng nếu bạn muốn nhiều thứ xảy ra do điều kiện thì sao? Bạn có thể
+dùng dấu ngoặc nhọn ngoằn ngoèo để đánh dấu một _block_ hay _compound
+statement_ (khối hay câu lệnh ghép).
 
 ``` {.c}
 if (x == 10) {
@@ -635,8 +627,8 @@ if (x == 10) {
 }
 ```
 
-It's a really common style to _always_ use squirrelly braces even if
-they aren't necessary:
+Có một phong cách khá phổ biến là _luôn luôn_ dùng ngoặc nhọn ngay cả
+khi không cần thiết:
 
 ``` {.c}
 if (x == 10) {
@@ -644,9 +636,9 @@ if (x == 10) {
 }
 ```
 
-Some devs feel the code is easier to read and avoids errors like this
-where things visually look like they're in the `if` block, but actually
-they aren't.
+Một số dev thấy code dễ đọc hơn và tránh được lỗi kiểu như ví dụ sau,
+nhìn qua thì có vẻ cả hai dòng đều nằm trong khối `if`, nhưng thực ra
+không phải:
 
 ``` {.c}
 // BAD ERROR EXAMPLE
@@ -656,20 +648,20 @@ if (x == 10)
     printf("This happens ALWAYS\n");  // Surprise!! Unconditional!
 ```
 
-`while` and `for` and the other looping constructs work the same way as
-the examples above. If you want to do multiple things in a loop or after
-an `if`, wrap them up in squirrelly braces.
+`while` và `for` và các cấu trúc lặp khác hoạt động giống như các ví
+dụ trên. Nếu bạn muốn làm nhiều việc trong vòng lặp hoặc sau `if`, cứ
+bọc chúng trong ngoặc nhọn.
 
-In other words, the `if` is going to run the one thing after the `if`.
-And that one thing can be a single statement or a block of statements.
+Nói cách khác, `if` sẽ chạy đúng một thứ ngay sau nó. Và "một thứ" đó
+có thể là một câu lệnh đơn hoặc một khối các câu lệnh.
 [i[`if` statement]>]
 
 
-### The `if`-`else` statement {#ifstat}
+### Câu lệnh `if`-`else` {#ifstat}
 
 [i[`if`-`else` statement]<]
-We've already been using `if` for multiple examples, since it's likely
-you've seen it in a language before, but here's another:
+Ta đã dùng `if` trong nhiều ví dụ rồi, vì có lẽ bạn đã thấy nó trong
+ngôn ngữ nào đó, nhưng đây là thêm một ví dụ nữa:
 
 ``` {.c}
 int i = 10;
@@ -682,16 +674,14 @@ if (i > 10) {
 if (i <= 10) printf("i is less than or equal to 10.\n");
 ```
 
-In the example code, the message will print if `i` is greater than 10,
-otherwise execution continues to the next line. Notice the squirrley
-braces after the `if` statement; if the condition is true, either the
-first statement or expression right after the if will be executed, or
-else the collection of code in the squirlley braces after the `if` will
-be executed. This sort of _code block_ behavior is common to all
-statements.
+Trong code ví dụ, thông báo sẽ được in nếu `i` lớn hơn 10, còn không
+thì chạy tiếp xuống dòng kế. Để ý các dấu ngoặc nhọn sau câu lệnh
+`if`. Nếu điều kiện đúng, hoặc là câu lệnh/biểu thức đầu tiên ngay sau
+`if` sẽ chạy, hoặc là khối code trong dấu ngoặc nhọn sau `if` sẽ chạy.
+Hành vi _khối code_ (code block) này đúng với mọi câu lệnh.
 
-Of course, because C is fun this way, you can also do something if the
-condition is false with an `else` clause on your `if`:
+Dĩ nhiên, vì C cũng vui theo kiểu này, bạn có thể làm gì đó khi điều
+kiện sai bằng mệnh đề `else`:
 
 ``` {.c}
 int i = 99;
@@ -704,8 +694,8 @@ else {
 }
 ```
 
-And you can even cascade these to test a variety of conditions, like
-this:
+Và bạn thậm chí có thể xâu chuỗi để kiểm tra nhiều điều kiện khác
+nhau, như này:
 
 ``` {.c}
 int i = 99;
@@ -726,21 +716,20 @@ else
     printf("i is some crazy number I've never heard of.\n");
 ```
 
-Though if you're going that route, be sure to check out the
-[`switch`](#switch-statement) statement for a potentially better
-solution. The catch is `switch` only works with equality comparisons
-with constant numbers. The above `if`-`else` cascade could check
-inequality, ranges, variables, or anything else you can craft in a
-conditional expression.
+Dù nếu đi hướng đó, nhớ xem câu lệnh [`switch`](#switch-statement) để
+có giải pháp có khả năng tốt hơn. Cái gượng là `switch` chỉ làm việc
+với so sánh bằng với hằng số. Cascade `if`-`else` ở trên có thể so
+sánh bất đẳng, khoảng, biến, hay bất cứ thứ gì bạn dựng được trong
+biểu thức điều kiện.
 [i[`if`-`else` statement]>]
 
-### The `while` statement {#whilestat}
+### Câu lệnh `while` {#whilestat}
 
 [i[`while` statement]<]
-`while` is your average run-of-the-mill looping
-construct. Do a thing while a condition expression is true.
+`while` là cấu trúc lặp bình dân. Làm một việc trong khi biểu thức
+điều kiện còn đúng.
 
-Let's do one!
+Làm một cái nào!
 
 ``` {.c}
 // Print the following output:
@@ -761,11 +750,11 @@ while (i < 10) {
 printf("All done!\n");
 ```
 
-That gets you a basic loop. C also has a `for` loop which would have
-been cleaner for that example.
+Thế là bạn có một vòng lặp cơ bản. C cũng có `for` có lẽ sẽ gọn hơn
+cho ví dụ đó.
 
-A not-uncommon use of `while` is for infinite loops where you repeat
-while true:
+Một kiểu không hiếm gặp khi dùng `while` là lặp vô hạn, lặp khi điều
+kiện luôn đúng:
 
 ``` {.c}
 while (1) {
@@ -775,19 +764,18 @@ while (1) {
 [i[`while` statement]>]
 
 
-### The `do-while` statement {#dowhilestat}
+### Câu lệnh `do-while` {#dowhilestat}
 
 [i[`do`-`while` statement]<]
-So now that we've gotten the `while` statement under control, let's take
-a look at its closely related cousin, `do-while`.
+Giờ đã thuần được `while`, hãy ngó qua ông anh họ gần của nó,
+`do-while`.
 
-They are basically the same, except if the loop condition is false on
-the first pass, `do-while` will execute once, but `while` won't execute
-at all. In other words, the test to see whether or not to execute the
-block happens at the _end_ of the block with `do-while`. It happens at
-the _beginning_ of the block with `while`.
+Về cơ bản hai thằng giống nhau, chỉ khác là nếu điều kiện sai ngay lần
+đầu, `do-while` vẫn chạy một lần, còn `while` không chạy lần nào.
+Nói cách khác, phép kiểm tra xem có thực thi khối hay không xảy ra ở
+_cuối_ khối với `do-while`. Còn với `while` là ở _đầu_ khối.
 
-Let's see by example:
+Xem ví dụ:
 
 ``` {.c}
 // Using a while statement:
@@ -815,19 +803,18 @@ do {
 printf("All done!\n");
 ```
 
-Notice that in both cases, the loop condition is false right away. So in
-the `while`, the loop fails, and the following block of code is never
-executed. With the `do-while`, however, the condition is checked _after_
-the block of code executes, so it always executes at least once. In this
-case, it prints the message, increments `i`, then fails the condition,
-and continues to the "All done!" output.
+Để ý rằng trong cả hai trường hợp, điều kiện lặp là sai ngay từ đầu.
+Thế nên với `while`, vòng lặp thất bại và khối code sau đó không bao
+giờ chạy. Còn với `do-while`, điều kiện được kiểm tra _sau khi_ khối
+code chạy, nên nó luôn chạy ít nhất một lần. Ở đây, nó in thông báo,
+tăng `i`, rồi kiểm tra thấy điều kiện sai, và chạy tiếp tới dòng "All
+done!".
 
-The moral of the story is this: if you want the loop to execute at least
-once, no matter what the loop condition, use `do-while`.
+Bài học rút ra là: nếu bạn muốn vòng lặp chạy ít nhất một lần, bất kể
+điều kiện lặp thế nào, hãy dùng `do-while`.
 
-All these examples might have been better done with a `for` loop. Let's
-do something less deterministic---repeat until a certain random number
-comes up!
+Tất cả ví dụ trên có lẽ đã tốt hơn nếu dùng `for`. Làm một cái đỡ tiền
+định hơn: lặp cho đến khi một số ngẫu nhiên nhất định xuất hiện!
 
 ``` {.c .numberLines}
 #include <stdio.h>   // For printf
@@ -844,28 +831,26 @@ int main(void)
 }
 ```
 
-Side note: did you run that more than once? If you did, did you notice
-the same sequence of numbers came up again. And again. And again? This
-is because `rand()` is a pseudorandom number generator that must be
-_seeded_ with a different number in order to generate a different
-sequence. Look up the
+Ghi chú bên lề: bạn có chạy cái đó nhiều lần không? Nếu có, bạn có để
+ý chính dãy số đó lại xuất hiện. Lại. Và lại? Đó là vì `rand()` là một
+bộ sinh số giả ngẫu nhiên, nó cần được _seed_ (gieo mầm) bằng một số
+khác nhau để sinh dãy khác nhau. Xem hàm
 [fl[`srand()`|https://beej.us/guide/bgclr/html/split/stdlib.html#man-srand]]
-function for more details. [i[`do`-`while` statement]>]
+để biết chi tiết. [i[`do`-`while` statement]>]
 
-### The `for` statement {#forstat}
+### Câu lệnh `for` {#forstat}
 
 [i[`for` statement]<]
-Welcome to one of the most popular loops in the world! The `for`
-loop!
+Chào mừng đến với một trong những vòng lặp phổ biến nhất thế giới!
+Vòng lặp `for`!
 
-This is a great loop if you know the number of times you want to loop in
-advance.
+Đây là vòng lặp tuyệt vời nếu bạn biết trước số lần cần lặp.
 
-You could do the same thing using just a `while` loop, but the `for`
-loop can help keep the code cleaner.
+Bạn có thể làm việc tương tự chỉ với `while`, nhưng `for` giúp code
+sạch hơn.
 
-Here are two pieces of equivalent code---note how the `for` loop is just
-a more compact representation:
+Đây là hai đoạn code tương đương, để ý `for` chỉ là cách biểu diễn gọn
+hơn:
 
 ``` {.c}
 // Print numbers between 0 and 9, inclusive...
@@ -885,26 +870,25 @@ for (i = 0; i < 10; i++) {
 }
 ```
 
-That's right, folks---they do exactly the same thing. But you can see
-how the `for` statement is a little more compact and easy on the eyes.
-(JavaScript users will fully appreciate its C origins at this point.)
+Đúng vậy, thưa các bạn, hai đoạn làm chính xác cùng một việc. Nhưng
+bạn có thể thấy `for` gọn hơn và dễ nhìn hơn. (Dân JavaScript lúc này
+sẽ thấy rõ nguồn gốc C của nó.)
 
-It's split into three parts, separated by semicolons. The first is the
-initialization, the second is the loop condition, and the third is what
-should happen at the end of the block if the loop condition is true. All
-three of these parts are optional.
+Nó được chia thành ba phần, ngăn bởi dấu chấm phẩy. Phần đầu là khởi
+tạo, phần hai là điều kiện lặp, và phần ba là thứ xảy ra ở cuối khối
+nếu điều kiện lặp còn đúng. Cả ba phần đều tuỳ chọn.
 
 ``` {.c}
 for (initialize things; loop if this is true; do this after each loop)
 ```
 
-Note that the loop will not execute even a single time if the loop
-condition starts off false.
+Lưu ý rằng vòng lặp sẽ không chạy dù chỉ một lần nếu điều kiện lặp sai
+ngay từ đầu.
 
 > **`for`-loop fun fact!**
 >
-> You can use the comma operator to do multiple things in each clause of
-> the `for` loop!
+> Bạn có thể dùng toán tử dấu phẩy để làm nhiều việc trong từng vế của
+> `for`!
 >
 > ``` {.c}
 > for (i = 0, j = 999; i < 10; i++, j--) {
@@ -913,7 +897,7 @@ condition starts off false.
 > ```
 
 <!-- ` -->
-An empty `for` will run forever:
+Một `for` rỗng sẽ chạy mãi mãi:
 
 ``` {.c}
 for(;;) {  // "forever"
@@ -925,21 +909,20 @@ for(;;) {  // "forever"
 ```
 [i[`for` statement]>]
 
-### The `switch` Statement {#switch-statement}
+### Câu lệnh `switch` {#switch-statement}
 
 [i[`switch` statement]<]
-Depending on what languages you're coming from, you might or might not
-be familiar with `switch`, or C's version might even be more restrictive
-than you're used to. This is a statement that allows you to take a
-variety of actions depending on the value of an integer expression.
+Tuỳ ngôn ngữ bạn đang dùng, có thể bạn quen hoặc chưa quen với
+`switch`, hoặc phiên bản C của nó có thể chặt chẽ hơn bạn tưởng. Đây
+là câu lệnh cho phép bạn thực hiện nhiều hành động khác nhau tuỳ thuộc
+vào giá trị của một biểu thức số nguyên.
 
-Basically, it evaluates an expression to an integer value, jumps to the
-[i[`case` statement]<]`case` that corresponds to that value. Execution
-resumes from that point. If a `break`[i[`break` statement]<] statement is
-encountered, then execution jumps out of the `switch`.
+Cơ bản là nó tính biểu thức ra một giá trị số nguyên, rồi nhảy đến
+[i[`case` statement]<]`case` tương ứng với giá trị đó. Thực thi tiếp
+tục từ điểm ấy. Nếu gặp câu lệnh `break`[i[`break` statement]<], thực
+thi nhảy ra khỏi `switch`.
 
-Here's an example where, for a given number of goats, we print out a
-gut-feel of how many goats that is.
+Đây là ví dụ, với một số dê cho trước, ta in ra cảm nhận về số dê đó.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -968,18 +951,18 @@ int main(void)
 }
 ```
 
-In that example, the `switch` will jump to the `case 2` and execute from
-there. When (if) it hits a `break`, it jumps out of the `switch`.
+Trong ví dụ đó, `switch` nhảy tới `case 2` và chạy từ đó. Khi (nếu)
+gặp `break`, nó nhảy ra khỏi `switch`.
 [i[`break` statement]>]
 
-Also, you might see that `default`[i[`default` label]] label there at
-the bottom. This is what happens when no cases match.
+Bạn cũng có thể thấy nhãn `default`[i[`default` label]] ở dưới cùng.
+Cái này chạy khi không `case` nào khớp.
 
-Every `case`, including `default`, is optional. And they can occur in
-any order, but it's really typical for `default`, if any, to be listed
-last.[i[`case` statement]>]
+Mọi `case`, kể cả `default`, đều tuỳ chọn. Và chúng có thể xuất hiện
+theo bất kỳ thứ tự nào, nhưng thông thường `default`, nếu có, được đặt
+cuối cùng.[i[`case` statement]>]
 
-So the whole thing acts like an `if`-`else` cascade:
+Cho nên toàn bộ hoạt động như một cascade `if`-`else`:
 
 ``` {.c}
 if (goat_count == 0)
@@ -992,23 +975,23 @@ else
     printf("You have a bona fide plethora of goats!\n");
 ```
 
-With some key differences:
+Với vài điểm khác biệt chủ chốt:
 
-* `switch` is often faster to jump to the correct code (though the spec
-  makes no such guarantee).
-* `if`-`else` can do things like relational conditionals like `<` and
-  `>=` and floating point and other types, while `switch` cannot.
+* `switch` thường nhảy tới đoạn code đúng nhanh hơn (dù spec không bảo
+  đảm điều đó).
+* `if`-`else` có thể làm các so sánh quan hệ như `<` và `>=`, cộng số
+  dấu phẩy động và các kiểu khác, còn `switch` thì không.
 
-There's one more neat thing about switch that you sometimes see that is
-quite interesting: _fall through_.
+Còn một thứ khá thú vị về switch đôi khi bạn sẽ thấy: _fall through_
+(rơi xuyên qua).
 
 [i[`break` statement]<]
-Remember how `break` causes us to jump out of the switch?
+Nhớ `break` làm ta nhảy ra khỏi switch chứ?
 
 [i[Fall through]<]
-Well, what happens if we _don't_ `break`?
+Thế, chuyện gì xảy ra nếu ta _không_ `break`?
 
-Turns out we just keep on going into the next `case`! Demo!
+Hoá ra ta cứ tiếp tục chạy xuống `case` kế tiếp! Demo!
 
 ``` {.c}
 switch (x) {
@@ -1024,34 +1007,32 @@ switch (x) {
 }
 ```
 
-If `x == 1`, this `switch` will first hit `case 1`, it'll print the `1`,
-but then it just continues on to the next line of code... which prints
-`2`!
+Nếu `x == 1`, `switch` này trước hết trúng `case 1`, nó in `1`, nhưng
+rồi cứ chạy tiếp xuống dòng code kế... in ra `2`!
 
-And then, at last, we hit a `break` so we jump out of the `switch`.
+Rồi, cuối cùng, ta gặp `break` nên nhảy ra khỏi `switch`.
 
-if `x == 2`, then we just hit the `case 2`, print `2`, and `break` as
-normal.
+nếu `x == 2`, thì ta chỉ trúng `case 2`, in `2`, và `break` như thường.
 
-Not having a `break` is called _fall through_.
+Không có `break` được gọi là _fall through_.
 
-ProTip: _ALWAYS_ put a comment in the code where you intend to fall
-through, like I did above. It will save other programmers from wondering
-if you meant to do that.
+ProTip: _LUÔN LUÔN_ đặt comment trong code chỗ bạn chủ ý fall through,
+như tôi đã làm phía trên. Nó sẽ cứu lập trình viên khác khỏi thắc mắc
+bạn có cố ý làm thế không.
 [i[Fall through]>]
 
-In fact, this is one of the common places to introduce bugs in C
-programs: forgetting to put a `break` in your `case`. You gotta do it if
-you don't want to just roll into the next case^[This was considered
-such a hazard that the designers of the Go Programming Language made
-`break` the default; you have to explicitly use Go's `fallthrough`
-statement if you want to fall into the next case.].
+Thực tế, đây là một trong những chỗ phổ biến phát sinh bug trong
+chương trình C: quên đặt `break` trong `case`. Bạn phải đặt nó nếu
+không muốn rơi tiếp xuống case kế^[Chuyện này được xem là nguy hiểm
+đến mức những người thiết kế ngôn ngữ Go đã đặt `break` làm mặc định;
+bạn phải dùng rõ ràng câu lệnh `fallthrough` của Go nếu muốn rơi sang
+case kế.].
 [i[`break` statement]>]
 
-Earlier I said that `switch` works with integer types---keep it that
-way. Don't use floating point or string types in there. One loophole-ish
-thing here is that you can use character types because those are
-secretly integers themselves. So this is perfectly acceptable:
+Ở trên tôi đã nói `switch` làm việc với kiểu số nguyên, cứ giữ như
+thế. Đừng dùng số dấu phẩy động hay kiểu chuỗi trong đó. Một kẽ hở ở
+đây là bạn có thể dùng kiểu ký tự vì ký tự bí mật là số nguyên. Nên
+đoạn này hoàn toàn chấp nhận được:
 
 ``` {.c}
 char c = 'b';
@@ -1071,7 +1052,7 @@ switch (c) {
 }
 ```
 
-Finally, you can use [i[`enum` keyword]]`enum`s in `switch` since they
-are also integer types. But more on that in the `enum` chapter.
+Cuối cùng, bạn có thể dùng [i[`enum` keyword]]`enum` trong `switch` vì
+chúng cũng là kiểu số nguyên. Nhưng để sau, ở chương `enum`.
 
 [i[`switch` statement]>] [i[`break` statement]>] [i[Flow Control]>]
