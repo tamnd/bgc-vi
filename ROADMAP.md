@@ -28,7 +28,7 @@ Programming (Vietnamese).
 | bgc_part_1500_cpp.md | The C Preprocessor | done |
 | bgc_part_1600_structs2.md | `struct`s II: More Fun with `struct`s | done |
 | bgc_part_1700_strings2.md | Characters and Strings II | done |
-| bgc_part_1800_enum.md | Enumerated Types: `enum` | not started |
+| bgc_part_1800_enum.md | Enumerated Types: `enum` | done |
 | bgc_part_1900_ptrptr.md | Pointers III: Pointers to Pointers and More | not started |
 | bgc_part_2000_bitwise.md | Bitwise Operations | not started |
 | bgc_part_2100_variadic.md | Variadic Functions | not started |
