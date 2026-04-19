@@ -3,7 +3,7 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Functions {#functions}
+# Hàm {#functions}
 
 > _"Sir, not in an environment such as this. That's why I've also been
 > programmed for over thirty secondary functions that---"_
@@ -12,15 +12,15 @@
 > now-unimpressive number of additional functions, _Star Wars_ script
 
 [i[Functions]<]
-Very much like other languages you're used to, C has the concept of
-_functions_.
+Rất giống với các ngôn ngữ khác bạn đã quen, C có khái niệm _function_
+(hàm).
 
-Functions can accept a variety of _arguments_[i[Function arguments]] and
-return a value. One important thing, though: the arguments and return
-value types are predeclared---because that's how C likes it!
+Hàm có thể nhận nhiều loại _argument_ (đối số)[i[Function arguments]]
+và trả về một giá trị. Có một điều quan trọng: kiểu của đối số và giá
+trị trả về phải được khai báo trước, vì C thích thế!
 
-Let's take a look at a function. This is a function that takes an `int`
-as an argument, and returns[i[`return` statement]] an `int`.
+Hãy nhìn một hàm. Đây là hàm nhận một `int` làm đối số, và trả
+về[i[`return` statement]] một `int`.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -32,19 +32,18 @@ int plus_one(int n)  // The "definition"
  
 ```
 
-The `int` before the `plus_one` indicates the return type.
+Chữ `int` trước `plus_one` chỉ kiểu trả về.
 
-The `int n` indicates that this function takes one `int` argument,
-stored in _parameter_ `n`[i[Function parameters]]. A parameter is a
-special type of local variable into which the arguments are copied.
+`int n` chỉ rằng hàm nhận một đối số `int`, được lưu trong _parameter_
+(tham số) `n`[i[Function parameters]]. Parameter là một loại biến cục
+bộ đặc biệt mà đối số được sao chép vào.
 
-I'm going to drive home the point that the arguments are copied into the
-parameters, here. Lots of things in C are easier to understand if you
-know that the parameter is a _copy_ of the argument, not the argument
-itself. More on that in a minute.
+Tôi sẽ nhấn mạnh rằng đối số được _sao chép_ vào parameter. Nhiều thứ
+trong C dễ hiểu hơn nếu bạn biết parameter là một _bản sao_ của đối
+số, chứ không phải bản thân đối số. Nói thêm sau một chút.
 
-Continuing the program down into `main()`, we can see the call to the
-function, where we assign the return value into local variable `j`:
+Đi tiếp xuống `main()`, ta có thể thấy lời gọi hàm, nơi ta gán giá trị
+trả về vào biến cục bộ `j`:
 
 ``` {.c .numberLines startFrom="8"}
 int main(void)
@@ -57,20 +56,20 @@ int main(void)
 }
 ```
 
-> Before I forget, notice that I defined the function before I used it.
-> If I hadn't done that, the compiler wouldn't know about it yet when it
-> compiles `main()` and it would have given an unknown function call
-> error. There is a more proper way to do the above code with _function
-> prototypes_, but we'll talk about that later.
+> Trước khi quên, để ý rằng tôi đã định nghĩa hàm trước khi dùng nó.
+> Nếu không làm vậy, trình biên dịch sẽ chưa biết gì về hàm khi biên
+> dịch `main()` và sẽ văng lỗi gọi hàm không xác định. Có cách chuẩn
+> chỉnh hơn để viết đoạn code trên bằng _function prototype_ (nguyên
+> mẫu hàm), nhưng sẽ nói sau.
 
-Also notice that `main()`[i[`main()` function]] is a function!
+Để ý luôn rằng `main()`[i[`main()` function]] cũng là một hàm!
 
-It returns an `int`.
+Nó trả về `int`.
 
-But what's this `void`[i[`void` type]] thing? This is a keyword that's
-used to indicate that the function accepts no arguments.
+Nhưng cái `void`[i[`void` type]] này là gì? Đây là một keyword dùng để
+nói rằng hàm không nhận đối số nào.
 
-You can also return `void` to indicate that you don't return a value:
+Bạn cũng có thể trả về `void` để nói rằng bạn không trả về giá trị nào:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -88,24 +87,22 @@ int main(void)
 }
 ```
 
-## Passing by Value {#passvalue}
+## Truyền theo giá trị {#passvalue}
 
-[i[Pass by value]()]I'd mentioned earlier that when you pass an argument
-to a function, a copy of that argument gets made and stored in the
-corresponding parameter.
+[i[Pass by value]()]Tôi đã nói trước đó rằng khi bạn truyền một đối số
+cho hàm, một bản sao của đối số đó được tạo ra và lưu vào parameter
+tương ứng.
 
-If the argument is a variable, a copy of the value of that variable gets
-made and stored in the parameter.
+Nếu đối số là một biến, một bản sao của giá trị biến đó được tạo ra và
+lưu vào parameter.
 
-More generally, the entire argument expression is evaluated and its
-value determined. That value is copied to the parameter.
+Tổng quát hơn, toàn bộ biểu thức đối số được tính ra giá trị. Giá trị
+đó được sao chép vào parameter.
 
-In any case, the value in the parameter is its own thing. It is
-independent of whatever values or variables you used as arguments when
-you made the function call.
+Trong mọi trường hợp, giá trị trong parameter là của riêng nó. Nó độc
+lập với bất kỳ giá trị hay biến nào bạn dùng làm đối số khi gọi hàm.
 
-So let's look at an example here. Study it and see if you can determine
-the output before running it:
+Hãy xem một ví dụ. Nghiên cứu và thử đoán output trước khi chạy:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -125,68 +122,64 @@ int main(void)
 }
 ```
 
-At first glance, it looks like `i` is `10`, and we pass it to the
-function `increment()`. There the value gets incremented, so when we
-print it, it must be `11`, right?
+Thoạt nhìn, có vẻ `i` là `10`, và ta truyền nó vào hàm `increment()`.
+Ở đó giá trị được tăng, nên khi in ra phải là `11` đúng không?
 
 > _"Get used to disappointment."_
 >
 > ---Dread Pirate Roberts, _The Princess Bride_
 
-But it's not `11`---it prints `10`! How?
+Nhưng không phải `11`, nó in ra `10`! Sao thế?
 
-It's all about the fact that the expressions you pass to functions get
-_copied_ onto their corresponding parameters. The parameter is a copy,
-not the original.
+Mọi chuyện nằm ở việc biểu thức bạn truyền vào hàm được _sao chép_ vào
+parameter tương ứng. Parameter là bản sao, không phải bản gốc.
 
-So `i` is `10` out in `main()`. And we pass it to `increment()`. The
-corresponding parameter is called `a` in that function.
+Vậy `i` là `10` ngoài `main()`. Và ta truyền nó vào `increment()`.
+Parameter tương ứng có tên là `a` trong hàm đó.
 
-And the copy happens, as if by assignment. Loosely, `a = i`. So at that
-point, `a` is `10`. And out in `main()`, `i` is also `10`.
+Và phép sao chép xảy ra, như thể là một phép gán. Đại khái, `a = i`.
+Nên tại thời điểm đó, `a` là `10`. Và ngoài `main()`, `i` cũng là
+`10`.
 
-Then we increment `a` to `11`. But we're not touching `i` at all! It
-remains `10`.
+Rồi ta tăng `a` lên `11`. Nhưng ta không chạm vào `i` chút nào! Nó vẫn
+là `10`.
 
-Finally, the function is complete. All its local variables are discarded
-(bye, `a`!) and we return to `main()`, where `i` is still `10`.
+Cuối cùng, hàm kết thúc. Tất cả biến cục bộ bị bỏ đi (chào nhé, `a`!)
+và ta quay lại `main()`, nơi `i` vẫn là `10`.
 
-And we print it, getting `10`, and we're done.
+Rồi ta in ra, được `10`, và xong.
 
-This is why in the previous example with the `plus_one()` function, we
-`return`ed the locally modified value so that we could see it again in
-`main()`.
+Đây là lý do trong ví dụ trước với hàm `plus_one()`, ta đã `return`
+giá trị đã bị sửa cục bộ để có thể thấy nó lại trong `main()`.
 
-Seems a little bit restrictive, huh? Like you can only get one piece of
-data back from a function, is what you're thinking. There is, however,
-another way to get data back; C folks call it _passing by reference_ and
-that's a story we'll tell another time.
+Nghe hạn chế nhỉ? Kiểu như bạn chỉ lấy về được một mẩu dữ liệu từ hàm,
+bạn đang nghĩ vậy đấy. Tuy nhiên, còn một cách khác để lấy dữ liệu về;
+dân C gọi cách đó là _passing by reference_ (truyền theo tham chiếu)
+và đó là câu chuyện để dành dịp khác.
 
-But no fancy-schmancy name will distract you from the fact that
-_EVERYTHING_ you pass to a function _WITHOUT EXCEPTION_ is copied into
-its corresponding parameter, and the function operates on that local
-copy, _NO MATTER WHAT_. Remember that, even when we're talking about
-this so-called passing by reference.
+Nhưng đừng để cái tên hoa lá cành đó đánh lừa bạn khỏi sự thật rằng
+_MỌI THỨ_ bạn truyền vào hàm, _KHÔNG NGOẠI LỆ_, đều được sao chép vào
+parameter tương ứng, và hàm thao tác trên bản sao cục bộ đó, _BẤT KỂ
+THẾ NÀO_. Nhớ lấy, ngay cả khi ta đang nói về cái gọi là truyền theo
+tham chiếu.
 [i[Pass by value]>]
 
-## Function Prototypes {#prototypes}
+## Function Prototype {#prototypes}
 
-[i[Function prototypes]<]So if you recall back in the ice age a few
-sections ago, I mentioned that you had to define the function before you
-used it, otherwise the compiler wouldn't know about it ahead of time,
-and would bomb out with an error.
+[i[Function prototypes]<]Nếu bạn còn nhớ từ thời kỳ băng hà vài mục
+trước, tôi có nói rằng bạn phải định nghĩa hàm trước khi dùng nó,
+không thì trình biên dịch sẽ chưa biết gì về hàm, và sẽ văng lỗi.
 
-This isn't quite strictly true. You can notify the compiler in advance
-that you'll be using a function of a certain type that has a certain
-parameter list. That way the function can be defined anywhere (even in a
-different file), as long as the _function prototype_ has been declared
-before you call that function.
+Điều này không hoàn toàn nghiêm ngặt đúng. Bạn có thể báo trước cho
+trình biên dịch rằng bạn sẽ dùng một hàm có kiểu nhất định với danh
+sách parameter nhất định. Như thế, hàm có thể được định nghĩa ở đâu
+cũng được (kể cả ở file khác), miễn là _function prototype_ đã được
+khai báo trước khi bạn gọi hàm đó.
 
-Fortunately, the function prototype is really quite easy. It's
-merely a copy of the first line of the function definition with a
-semicolon tacked on the end for good measure. For example, this code
-calls a function that is defined later, because a prototype has been
-declared first:
+May thay, function prototype thực ra khá dễ. Nó chỉ là bản sao của
+dòng đầu tiên trong định nghĩa hàm, kèm thêm dấu chấm phẩy ở cuối cho
+chắc ăn. Ví dụ, đoạn code này gọi một hàm được định nghĩa ở phía sau,
+vì prototype đã được khai báo trước:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -211,38 +204,37 @@ int foo(void)  // This is the definition, just like the prototype!
 }
 ```
 
-If you don't declare your function before you use it (either with a
-prototype or its definition), you're performing something called an
-_implicit declaration_[i[Implicit declaration]]. This was allowed in the
-first C standard (C89), and that standard has rules about it, but is no
-longer allowed today. And there is no legitimate reason to rely on it in
-new code.
+Nếu bạn không khai báo hàm trước khi dùng (bằng prototype hoặc bằng
+định nghĩa), bạn đang làm một thứ gọi là _implicit declaration_ (khai
+báo ngầm)[i[Implicit declaration]]. Chuyện này được cho phép trong
+chuẩn C đầu tiên (C89), và chuẩn đó có quy định cho nó, nhưng ngày nay
+không còn được phép nữa. Và không có lý do chính đáng nào để trông cậy
+vào nó trong code mới.
 
-You might notice something about the sample code we've been using... That
-is, we've been using the good old `printf()` function without defining
-it or declaring a prototype! How do we get away with this lawlessness?
-We don't, actually. There is a prototype; it's in that header file
-`stdio.h` that we included with `#include`, remember? So we're still
-legit, officer![i[Function prototypes]>]
+Bạn có thể để ý một điều về các đoạn code mẫu ta đã dùng... Đó là ta
+đã dùng hàm `printf()` cũ kỹ mà tốt lành mà không định nghĩa cũng
+không khai báo prototype! Làm sao ta thoát được sự vô luật pháp này?
+Thật ra ta không thoát đâu. Có prototype; nó nằm trong file header
+`stdio.h` mà ta đã kèm vào bằng `#include`, nhớ không? Nên ta vẫn hợp
+pháp đó, thưa ông cảnh sát![i[Function prototypes]>]
 
-## Empty Parameter Lists
+## Danh sách parameter rỗng
 
 [i[Empty parameter lists]]
-You might see these from time to time in older code, but you shouldn't
-ever code one up in new code. Always use `void`[i[`void` type]] to
-indicate that a function takes no parameters. There's never^[Never say
-"never".] a reason to skip this in modern code.
+Bạn có thể thấy cái này đây đó trong code cũ, nhưng không bao giờ nên
+viết nó trong code mới. Luôn dùng `void`[i[`void` type]] để chỉ rằng
+hàm không nhận parameter nào. Không bao giờ^[Đừng bao giờ nói "không
+bao giờ".] có lý do để bỏ qua chuyện này trong code hiện đại.
 
-If you're good at just remembering to put `void` in for empty parameter
-lists in functions and prototypes, you can skip the rest of this
-section.
+Nếu bạn giỏi nhớ việc bỏ `void` vào cho danh sách parameter rỗng trong
+hàm và prototype, bạn có thể bỏ qua phần còn lại của mục này.
 
-There are two contexts for this:
+Có hai bối cảnh cho chuyện này:
 
-* Omitting all parameters where the function is defined
-* Omitting all parameters in a prototype
+* Bỏ hết parameter khi định nghĩa hàm
+* Bỏ hết parameter trong prototype
 
-Let's look at a potential function definition first:
+Trước tiên xem định nghĩa hàm tiềm tàng:
 
 ``` {.c}
 void foo()  // Should really have a `void` in there
@@ -251,24 +243,22 @@ void foo()  // Should really have a `void` in there
 }
 ```
 
-While the spec spells out that the behavior in this instance is _as-if_
-you'd indicated `void` (C11 §6.7.6.3¶14), the `void` type is there for a
-reason. Use it.
+Dù spec có nói hành vi trong trường hợp này _như thể_ bạn đã ghi
+`void` (C11 §6.7.6.3¶14), kiểu `void` ở đó có lý do. Hãy dùng nó.
 
-But in the case of a function prototype, there is a _significant_
-difference between using `void`[i[`void` type-->in function prototypes]]
-and not:
+Nhưng trong trường hợp function prototype, có một khác biệt _đáng kể_
+giữa dùng `void`[i[`void` type-->in function prototypes]] và không:
 
 ``` {.c}
 void foo();
 void foo(void);  // Not the same!
 ```
 
-Leaving `void` out of the prototype indicates to the compiler that there
-is no additional information about the parameters to the function. It
-effectively turns off all that type checking.
+Bỏ `void` khỏi prototype báo cho trình biên dịch rằng không có thông
+tin thêm về các parameter của hàm. Nó hiệu quả tắt hết mọi kiểm tra
+kiểu.
 
-With a prototype **definitely** use `void` when you have an empty
-parameter list.
+Với prototype, **chắc chắn** dùng `void` khi bạn có danh sách
+parameter rỗng.
 
 [i[Functions]>]
