@@ -12,7 +12,7 @@ Programming (Vietnamese).
 | bgc_part_0200_var_stat.md | Variables and Statements | done |
 | bgc_part_0300_functions.md | Functions | done |
 | bgc_part_0400_pointers.md | Pointers, Cower In Fear! | done |
-| bgc_part_0500_arrays.md | Arrays | not started |
+| bgc_part_0500_arrays.md | Arrays | done |
 | bgc_part_0600_strings.md | Strings | not started |
 | bgc_part_0700_structs.md | Structs | not started |
 | bgc_part_0725_io.md | File Input/Output | not started |
