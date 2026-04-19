@@ -3,30 +3,28 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Multithreading
+# Đa luồng (Multithreading)
 
 [i[Multithreading]<]
 
-C11 introduced, formally, multithreading to the C language. It's very
-eerily similar to [flw[POSIX threads|POSIX_Threads]], if you've ever
-used those.
+C11 chính thức đưa đa luồng vào ngôn ngữ C. Nó giống kỳ lạ với
+[flw[POSIX threads|POSIX_Threads]] nếu bạn đã từng dùng thứ đó.
 
-And if you've not, no worries. We'll talk it through.
+Còn nếu chưa, đừng lo. Ta sẽ đi qua từng bước.
 
-Do note, however, that I'm not intending this to be a full-blown classic
-multithreading how-to^[I'm more a fan of shared-nothing, myself, and my
-skills with classic multithreading constructs are rusty, to say the
-least.]; you'll have to pick up a different very thick book for that,
-specifically. Sorry!
+Lưu ý là tôi không định làm hướng dẫn đa luồng đầy đủ kiểu cổ
+điển^[Bản thân tôi thích kiểu shared-nothing hơn, và kỹ năng của tôi
+với mấy construct đa luồng cổ điển nói nhẹ là đã cũ.]; bạn phải tìm
+một cuốn sách thật dày khác dành riêng cho chuyện đó. Xin lỗi nhé!
 
 [i[`__STDC_NO_THREADS__` macro]<]
 
-Threading is an optional feature. If a C11+ compiler defines
-`__STDC_NO_THREADS__`, threads will **not** be present in the library.
-Why they decided to go with a negative sense in that macro is beyond me,
-but there we are.
+Threads là tính năng tuỳ chọn. Nếu compiler C11+ định nghĩa
+`__STDC_NO_THREADS__`, threads sẽ **không** có trong thư viện. Tại
+sao họ quyết định đi theo nghĩa phủ định trong cái macro đó thì tôi
+chịu, nhưng nó là vậy.
 
-You can test for it like this:
+Bạn có thể kiểm tra nó như vầy:
 
 ``` {.c}
 #ifdef __STDC_NO_THREADS__
@@ -38,11 +36,11 @@ You can test for it like this:
 
 [i[`gcc` compiler-->with threads]<]
 
-Also, you might need to specify certain linker options when building. In
-the case of Unix-likes, try appending a `-lpthreads` to the end of the
-command line to link the `pthreads` library^[Yes, `pthreads` with a
-"`p`". It's short for POSIX threads, a library that C11 borrowed
-liberally from for its threads implementation.]:
+Ngoài ra, bạn có thể cần chỉ định tuỳ chọn linker khi build. Trong
+trường hợp hệ Unix-like, thử thêm `-lpthreads` vào cuối dòng lệnh để
+link thư viện `pthreads`^[Đúng, `pthreads` với "`p`". Viết tắt cho
+POSIX threads, thư viện mà C11 đã vay mượn rất nhiều cho cách hiện
+thực threads của nó.]:
 
 ``` {.zsh}
 gcc -std=c11 -o foo foo.c -lpthreads
@@ -50,115 +48,111 @@ gcc -std=c11 -o foo foo.c -lpthreads
 
 [i[`gcc` compiler-->with threads]>]
 
-If you're getting linker errors on your system, it could be because the
-appropriate library wasn't included.
+Nếu bạn gặp lỗi linker trên hệ thống, có thể là do thư viện phù hợp
+không được include.
 
 
-## Background
+## Bối cảnh
 
-Threads are a way to have all those shiny CPU cores you paid for do work
-for you in the same program.
+Threads là cách để bạn dùng tất cả các CPU core bóng loáng mà bạn đã
+trả tiền cùng làm việc cho bạn trong cùng một chương trình.
 
-Normally, a C program just runs on a single CPU core. But if you know
-how to split up the work, you can give pieces of it to a number of
-threads and have them do the work simultaneously.
+Bình thường một chương trình C chỉ chạy trên một CPU core. Nhưng
+nếu bạn biết chia công việc ra, bạn có thể đưa từng phần cho một số
+threads và để chúng làm song song.
 
-Though the spec doesn't say it, on your system it's very likely that C
-(or the OS at its behest) will attempt to balance the threads over all
-your CPU cores.
+Dù spec không nói, rất có khả năng trên hệ thống của bạn, C (hay OS
+thay mặt nó) sẽ cố cân bằng threads trên tất cả các CPU core.
 
-And if you have more threads than cores, that's OK. You just won't
-realize all those gains if they're all trying to compete for CPU time.
+Và nếu bạn có nhiều threads hơn cores, không sao. Chỉ là bạn sẽ
+không nhận được tất cả lợi ích đó nếu chúng đều cạnh tranh thời gian
+CPU.
 
-## Things You Can Do
+## Những thứ bạn làm được
 
-You can create a thread. It will begin running the function you specify.
-The parent thread that spawned it will also continue to run.
+Bạn có thể tạo một thread. Nó sẽ bắt đầu chạy hàm bạn chỉ định.
+Thread cha tạo ra nó cũng sẽ tiếp tục chạy.
 
-And you can wait for the thread to complete. This is called _joining_.
+Và bạn có thể đợi thread kết thúc. Cái này gọi là _joining_.
 
-Or if you don't care when the thread completes and don't want to wait,
-you can _detach it_.
+Hoặc nếu bạn không quan tâm khi nào thread kết thúc và không muốn
+đợi, bạn có thể _detach_ nó.
 
-A thread can explicitly _exit_, or it can implicitly call it quits by
-returning from its main function.
+Một thread có thể _exit_ tường minh, hoặc có thể ngầm kết thúc bằng
+cách return từ hàm chính của nó.
 
-A thread can also _sleep_ for a period of time, doing nothing while
-other threads run.
+Một thread cũng có thể _sleep_ một khoảng thời gian, không làm gì
+trong khi thread khác chạy.
 
-The `main()` program is a thread, as well.
+Chương trình `main()` cũng là một thread.
 
-Additionally, we have thread local storage, mutexes, and conditional
-variables. But more on those later. Let's just look at the basics for
-now.
+Ngoài ra, ta có thread local storage, mutexes, và condition
+variables. Nhưng mấy cái đó để sau. Giờ cứ xem phần cơ bản đã.
 
-## Data Races and the Standard Library
+## Data Race và thư viện chuẩn
 
 [i[Multithreading-->and the standard library]<]
 
-Some of the functions in the standard library (e.g. `asctime()` and
-`strtok()`) return or use `static` data elements that aren't threadsafe.
-But in general unless it's said otherwise, the standard library makes
-an effort to be so^[Per §7.1.4¶5.].
+Một số hàm trong thư viện chuẩn (ví dụ `asctime()` và `strtok()`)
+trả về hoặc dùng các phần tử dữ liệu `static` không threadsafe. Nhưng
+nhìn chung trừ khi có nói khác, thư viện chuẩn cố gắng làm nó
+threadsafe^[Theo §7.1.4¶5.].
 
-But keep an eye out. If a standard library function is maintaining state
-between calls in a variable you don't own, or if a function is returning
-a pointer to a thing that you didn't pass in, it's not threadsafe.
+Nhưng để ý nhé. Nếu một hàm thư viện chuẩn giữ trạng thái giữa các
+lần gọi trong một biến bạn không sở hữu, hay một hàm trả về con trỏ
+tới thứ gì đó mà bạn không truyền vào, thì nó không threadsafe.
 
 [i[Multithreading-->and the standard library]>]
 
-## Creating and Waiting for Threads
+## Tạo và đợi Threads
 
-Let's hack something up!
+Hack gì đó lên thôi!
 
-We'll make some threads (create) and wait for them to complete (join).
+Ta sẽ tạo vài threads và đợi chúng hoàn thành (join).
 
-We have a tiny bit to understand first, though.
+Có vài thứ cần hiểu trước đã.
 
-Every single thread is identified by an opaque variable of type
-[i[`thrd_t` type]] `thrd_t`. It's a unique identifier per thread in your
-program. When you create a thread, it's given a new ID.
+Mỗi thread được xác định bằng một biến mờ (opaque) kiểu
+[i[`thrd_t` type]] `thrd_t`. Đây là ID duy nhất của từng thread
+trong chương trình. Khi bạn tạo thread, nó được cấp ID mới.
 
-Also when you make the thread, you have to give it a pointer to a
-function to run, and a pointer to an argument to pass to it (or `NULL`
-if you don't have anything to pass).
+Cũng vậy khi bạn tạo thread, bạn phải đưa cho nó con trỏ đến một hàm
+để chạy, và một con trỏ đến tham số để truyền cho nó (hoặc `NULL`
+nếu không có gì để truyền).
 
-The thread will begin execution on the function you specify.
+Thread sẽ bắt đầu thực thi ở hàm bạn chỉ định.
 
-When you want to wait for a thread to complete, you have to specify its
-thread ID so C knows which one to wait for.
+Khi bạn muốn đợi một thread hoàn thành, bạn phải chỉ định thread ID
+của nó để C biết đợi cái nào.
 
-So the basic idea is:
+Nên ý tưởng cơ bản là:
 
-1. Write a function to act as the thread's "`main`". It's not
-   `main()`-proper, but analogous to it. The thread will start running
-   there.
-2. From the main thread, launch a new thread with [i[`thrd_create()`
-   function]]`thrd_create()`, and pass it a pointer to the function to
-   run.
-3. In that function, have the thread do whatever it has to do.
-4. Meantimes, the main thread can continue doing whatever _it_ has to
-   do.
-5. When the main thread decides to, it can wait for the child thread to
-   complete by calling [i[`thrd_join()` function]] `thrd_join()`.
-   Generally you **must** `thrd_join()` the thread to clean up after it
-   or else you'll leak memory^[Unless you `thrd_detach()`. More on this
-   later.]
+1. Viết một hàm đóng vai "`main`" của thread. Không phải `main()`
+   chính gốc, nhưng tương tự. Thread sẽ bắt đầu chạy ở đó.
+2. Từ thread chính, launch thread mới với [i[`thrd_create()`
+   function]]`thrd_create()`, và truyền cho nó con trỏ đến hàm cần
+   chạy.
+3. Trong hàm đó, cho thread làm bất cứ gì nó phải làm.
+4. Cùng lúc đó, thread chính có thể tiếp tục làm bất cứ gì _nó_ cần
+   làm.
+5. Khi thread chính quyết định, nó có thể đợi thread con hoàn thành
+   bằng cách gọi [i[`thrd_join()` function]] `thrd_join()`. Thường
+   thì bạn **phải** `thrd_join()` thread để dọn dẹp nó nếu không bạn
+   sẽ leak bộ nhớ^[Trừ khi bạn `thrd_detach()`. Sẽ nói thêm sau.]
 
 [i[`thrd_create()` function]<]
 [i[`thrd_start_t` type]<]
 
-`thrd_create()` takes a pointer to the function to run, and it's of type
-`thrd_start_t`, which is `int (*)(void *)`. That's Greek for "a pointer
-to a function that takes an `void*` as an argument, and returns an
-`int`."
+`thrd_create()` nhận con trỏ đến hàm cần chạy, và nó có kiểu
+`thrd_start_t`, tức là `int (*)(void *)`. Đó là tiếng Hy Lạp cho
+"con trỏ đến một hàm nhận `void*` làm tham số và trả về `int`."
 
 [i[`thrd_join()` function]<]
 
-Let's make a thread!  We'll launch it from the main thread with
-`thrd_create()` to run a function, do some other things, then wait for
-it to complete with `thrd_join()`. I've named the thread's main function
-`run()`, but you can name it anything as long as the types match
+Hãy tạo một thread! Ta sẽ launch nó từ thread chính bằng
+`thrd_create()` để chạy một hàm, làm vài thứ khác, rồi đợi nó hoàn
+thành với `thrd_join()`. Tôi đặt tên hàm chính của thread là `run()`,
+nhưng bạn có thể đặt tên gì cũng được miễn kiểu khớp với
 `thrd_start_t`.
 
 ``` {.c .numberLines}
@@ -210,14 +204,14 @@ int main(void)
 
 [i[`thrd_start_t` type]>]
 
-See how we did the `thrd_create()` there to call the `run()` function?
-Then we did other things in `main()` and then stopped and waited for the
-thread to complete with `thrd_join()`.
+Thấy cách ta làm `thrd_create()` ở đó để gọi hàm `run()` không?
+Rồi ta làm những việc khác trong `main()` rồi dừng và đợi thread
+hoàn thành với `thrd_join()`.
 
 [i[`thrd_create()` function]>]
 [i[`thrd_join()` function]>]
 
-Sample output (yours might vary):
+Kết quả mẫu (của bạn có thể khác):
 
 ``` {.default}
 Launching a thread
@@ -227,13 +221,12 @@ THREAD: Running thread with arg 3490
 Thread exited with return value 12
 ```
 
-The `arg` that you pass to the function has to have a lifetime long
-enough so that the thread can pick it up before it goes away. Also, it
-needs to not be overwritten by the main thread before the new thread can
-use it.
+`arg` bạn truyền cho hàm phải có lifetime đủ dài để thread có thể
+lấy nó trước khi nó biến mất. Và nó cần không bị thread chính ghi đè
+trước khi thread mới kịp dùng.
 
-Let's look at an example that launches 5 threads. One thing to note here
-is how we use an array of `thrd_t`s to keep track of all the thread IDs.
+Xem ví dụ launch 5 threads. Một thứ cần lưu ý ở đây là cách ta dùng
+mảng `thrd_t` để theo dõi tất cả thread ID.
 
 [i[`thrd_create()` function]<]
 [i[`thrd_join()` function]<]
@@ -285,13 +278,13 @@ int main(void)
 
 [i[`thrd_join()` function]>]
 
-When I run the threads, I count `i` up from 0 to 4. And pass a pointer
-to it to `thrd_create()`. This pointer ends up in the `run()` routine
-where we make a copy of it.
+Khi tôi chạy các threads, tôi đếm `i` từ 0 đến 4 và truyền con trỏ
+tới nó cho `thrd_create()`. Con trỏ này đi tới hàm `run()` nơi ta
+tạo một bản sao.
 
 [i[`thrd_create()` function]>]
 
-Simple enough? Here's the output:
+Đủ đơn giản chưa? Đây là output:
 
 ``` {.default}
 Launching threads...
@@ -310,22 +303,22 @@ Thread 5 complete!
 All threads complete!
 ```
 
-Whaaa---? Where's `THREAD 0`? And why do we have a `THREAD 5` when
-clearly `i` is never more than `4` when we call `thrd_create()`? And two
-`THREAD 2`s? Madness!
+Cái giiiiiì? `THREAD 0` đâu rồi? Và sao có `THREAD 5` khi rõ ràng
+`i` không bao giờ lớn hơn `4` lúc gọi `thrd_create()`? Và hai
+`THREAD 2`? Điên rồi!
 
-This is getting into the fun land of [i[Multithreading-->race
-conditions]] _race conditions_. The main thread is modifying `i` before
-the thread has a chance to copy it. Indeed, `i` makes it all the way to
-`5` and ends the loop before the last thread gets a chance to copy it.
+Đây là đang bước vào vùng đất vui vẻ của [i[Multithreading-->race
+conditions]] _race conditions_. Thread chính đang sửa `i` trước khi
+thread có cơ hội copy nó. Thực ra `i` đi tới tận `5` và kết thúc
+vòng lặp trước khi thread cuối cùng có cơ hội copy nó.
 
-We've got to have a per-thread variable that we can refer to so we can
-pass it in as the `arg`.
+Ta cần có biến per-thread để tham chiếu sao cho có thể truyền vào
+làm `arg`.
 
-We could have a big array of them. Or we could `malloc()` space (and
-free it somewhere---maybe in the thread itself.)
+Có thể có mảng lớn. Hoặc có thể `malloc()` chỗ (và free nó ở đâu đó,
+có thể trong chính thread.)
 
-Let's give that a shot:
+Thử vậy xem:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -365,15 +358,14 @@ int main(void)
     // ...
 ```
 
-Notice on lines 27-30 we `malloc()` space for an `int` and copy the
-value of `i` into it. Each new thread gets its own freshly-`malloc()`d
-variable and we pass a pointer to that to the `run()` function.
+Chú ý trên dòng 27-30 ta `malloc()` chỗ cho một `int` và copy giá
+trị của `i` vào đó. Mỗi thread mới nhận biến `malloc()`-mới-toanh
+của riêng mình và ta truyền con trỏ tới nó cho hàm `run()`.
 
-Once `run()` makes its own copy of the `arg` on line 7, it `free()`s the
-`malloc()`d `int`. And now that it has its own copy, it can do with it
-what it pleases.
+Khi `run()` tạo bản copy của `arg` ở dòng 7, nó `free()` cái `int`
+đã `malloc()`. Và giờ nó có bản sao riêng, muốn làm gì thì làm.
 
-And a run shows the result:
+Và chạy cho thấy kết quả:
 
 ``` {.default}
 Launching threads...
@@ -392,23 +384,23 @@ Thread 4 complete!
 All threads complete!
 ```
 
-There we go! Threads 0-4 all in effect!
+Đấy! Threads 0-4 đều có mặt!
 
-Your run might vary---how the threads get scheduled to run is beyond the
-C spec. We see in the above example that thread 4 didn't even begin
-until threads 0-1 had completed. Indeed, if I run this again, I likely
-get different output. We cannot guarantee a thread execution order.
+Lần chạy của bạn có thể khác, thread được schedule chạy thế nào nằm
+ngoài C spec. Ta thấy ví dụ trên thread 4 không thậm chí bắt đầu đến
+khi threads 0-1 đã xong. Thực tế, nếu chạy lại tôi có thể ra output
+khác. Ta không thể đảm bảo thứ tự thực thi thread.
 
-## Detaching Threads
+## Detach Threads
 
-If you want to fire-and-forget a thread (i.e. so you don't have to
-`thrd_join()` it later), you can do that with `thrd_detach()`.
+Nếu bạn muốn fire-and-forget một thread (tức là bạn không phải
+`thrd_join()` nó sau này), bạn làm được với `thrd_detach()`.
 
-This removes the parent thread's ability to get the return value from
-the child thread, but if you don't care about that and just want threads
-to clean up nicely on their own, this is the way to go.
+Cái này loại bỏ khả năng của thread cha lấy return value từ thread
+con, nhưng nếu bạn không quan tâm và chỉ muốn threads tự dọn dẹp
+đẹp đẽ, thì đây là cách đi.
 
-Basically we're going to do this:
+Về cơ bản ta sẽ làm vầy:
 
 [i[`thrd_detach()` function]<]
 
@@ -417,9 +409,9 @@ thrd_create(&t, run, NULL);
 thrd_detach(t);
 ```
 
-where the `thrd_detach()` call is the parent thread saying, "Hey, I'm
-not going to wait for this child thread to complete with `thrd_join()`.
-So go ahead and clean it up on your own when it completes."
+chỗ gọi `thrd_detach()` là thread cha nói, "Này, tôi sẽ không đợi
+thread con này hoàn thành với `thrd_join()`. Nên cứ tự dọn dẹp nó
+khi xong nhé."
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -453,47 +445,45 @@ int main(void)
 
 [i[`thrd_detach()` function]>]
 
-Note that in this code, we put the main thread to sleep for 1 second
-with `thrd_sleep()`---more on that later.
+Lưu ý trong code này ta cho thread chính sleep 1 giây bằng
+`thrd_sleep()`, nói thêm sau.
 
-Also in the `run()` function, I have a commented-out line in there that
-prints out the thread ID as an `unsigned long`. This is non-portable,
-because the spec doesn't say what type a `thrd_t` is under the hood---it
-could be a `struct` for all we know. But that line works on my system.
+Ngoài ra trong hàm `run()`, tôi có dòng comment-out in thread ID
+dưới dạng `unsigned long`. Cái này không portable, vì spec không nói
+kiểu bên dưới của `thrd_t` là gì, nó có thể là một `struct` ai biết.
+Nhưng dòng đó chạy được trên máy tôi.
 
-Something interesting I saw when I ran the code, above, and printed out
-the thread IDs was that some threads had duplicate IDs! This seems like
-it should be impossible, but C is allowed to _reuse_ thread IDs after
-the corresponding thread has exited. So what I was seeing was that some
-threads completed their run before other threads were launched.
+Một điều thú vị tôi thấy khi chạy code trên và in thread ID là vài
+threads có ID trùng nhau! Tưởng chừng là không thể, nhưng C cho
+phép _reuse_ thread ID sau khi thread tương ứng đã thoát. Nên cái
+tôi thấy là vài threads đã xong trước khi threads khác được launch.
 
-## Thread Local Data
+## Dữ liệu cục bộ theo Thread
 
 [i[Thread local data]<]
 
-Threads are interesting because they don't have their own memory beyond
-local variables. If you want a `static` variable or file scope variable,
-all threads will see that same variable.
+Threads thú vị vì chúng không có bộ nhớ riêng ngoài biến cục bộ. Nếu
+bạn muốn biến `static` hay biến phạm vi file, tất cả threads sẽ thấy
+cùng biến đó.
 
-This can lead to race conditions, where you get _Weird Things_™
-happening.
+Cái này có thể dẫn tới race conditions, nơi bạn gặp _Chuyện Lạ_™
+xảy ra.
 
-Check out this example. We have a `static` variable `foo` in block scope
-in `run()`. This variable will be visible to all threads that pass
-through the `run()` function. And the various threads can effectively
-step on each others toes.
+Xem ví dụ này. Ta có biến `static` `foo` trong block scope ở `run()`.
+Biến này sẽ thấy được bởi tất cả threads đi qua hàm `run()`. Và các
+threads thực sự có thể giẫm chân nhau.
 
-Each thread copies `foo` into a local variable `x` (which is not shared
-between threads---all the threads have their own call stacks). So they
-_should_ be the same, right?
+Mỗi thread copy `foo` vào biến cục bộ `x` (không chia sẻ giữa
+threads, tất cả threads có call stack riêng). Nên chúng _nên_ bằng
+nhau, đúng không?
 
-And the first time we print them, they are^[Though I don't think they
-have to be. It's just that the threads don't seem to get rescheduled
-until some system call like might happen with a `printf()`... which is
-why I have the `printf()` in there.]. But then right after that, we
-check to make sure they're still the same.
+Và lần đầu in ra, chúng bằng^[Dù tôi không nghĩ chúng phải vậy. Chỉ
+là threads có vẻ không được reschedule cho đến khi xảy ra system
+call nào đó như `printf()`... đó là lý do tôi để `printf()` trong
+đó.]. Nhưng rồi ngay sau đó, ta kiểm tra xem chúng có còn bằng
+không.
 
-And they _usually_ are. But not always!
+Và _thường thì_ bằng. Nhưng không phải luôn luôn!
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -548,7 +538,7 @@ int main(void)
 }
 ```
 
-Here's an example output (though this varies from run to run):
+Đây là một output mẫu (thay đổi giữa các lần chạy):
 
 ``` {.default}
 Thread 0: x = 10, foo = 10
@@ -559,37 +549,35 @@ Thread 4: x = 13, foo = 13
 Thread 3: x = 14, foo = 14
 ```
 
-In thread 1, between the two `printf()`s, the value of `foo` somehow
-changed from `10` to `11`, even though clearly there's no increment
-between the `printf()`s!
+Trong thread 1, giữa hai lần `printf()`, giá trị `foo` bằng cách nào
+đó đổi từ `10` thành `11`, dù rõ ràng không có increment nào giữa
+hai `printf()`!
 
-It was another thread that got in there (probably thread 0, from the
-look of it) and incremented the value of `foo` behind thread 1's back!
+Đó là một thread khác chen vào (có vẻ là thread 0 theo hình thù)
+và increment `foo` sau lưng thread 1!
 
-Let's solve this problem two different ways. (If you want all the
-threads to share the variable _and_ not step on each other's toes,
-you'll have to read on to the [mutex](#mutex) section.)
+Hãy giải quyết vấn đề này theo hai cách khác nhau. (Nếu bạn muốn tất
+cả threads cùng dùng chung biến _và_ không giẫm chân nhau, bạn phải
+đọc tiếp tới phần [mutex](#mutex).)
 
-### `_Thread_local` Storage-Class {#thread-local}
+### Storage-Class `_Thread_local` {#thread-local}
 
 [i[`_Thread_local` storage class]<]
 
-First things first, let's just look at the easy way around this: the
-`_Thread_local` storage-class.
+Trước hết, cứ nhìn cách dễ nhất để đi vòng: storage-class
+`_Thread_local`.
 
-Basically we're just going to slap this on the front of our block scope
-`static` variable and things will work! It tells C that every thread
-should have its own version of this variable, so none of them step on
-each other's toes.
+Về cơ bản ta chỉ dán nó vào trước biến `static` block scope và
+chuyện sẽ chạy! Nó bảo C rằng mỗi thread nên có phiên bản riêng của
+biến này, nên không có thread nào giẫm chân nhau.
 
 [i[`thread_local` storage class]<]
 
-The [i[`threads.h` header file]] `<threads.h>` header defines
-`thread_local` as an alias to `_Thread_local` so your code doesn't have
-to look so ugly.
+File header [i[`threads.h` header file]] `<threads.h>` định nghĩa
+`thread_local` là alias của `_Thread_local` nên code bạn khỏi xấu.
 
-Let's take the previous example and make `foo` into a `thread_local`
-variable so that we don't share that data.
+Lấy ví dụ trước và biến `foo` thành biến `thread_local` để ta không
+chia sẻ dữ liệu.
 
 ``` {.c .numberLines startFrom="5"}
 int run(void *arg)
@@ -601,7 +589,7 @@ int run(void *arg)
     thread_local static int foo = 10;  // <-- No longer shared!!
 ```
 
-And running we get:
+Và chạy ta được:
 
 ``` {.default}
 Thread 0: x = 10, foo = 10
@@ -611,61 +599,58 @@ Thread 4: x = 10, foo = 10
 Thread 3: x = 10, foo = 10
 ```
 
-No more weird problems!
+Không còn rắc rối lạ nữa!
 
-One thing: if a `thread_local` variable is block scope, it **must** be
-`static`. Them's the rules. (But this is OK because non-`static`
-variables are per-thread already since each thread has it's own
-non-`static` variables.)
+Một điều: nếu biến `thread_local` là block scope, nó **phải**
+`static`. Luật là vậy. (Nhưng vẫn OK vì biến không-`static` đã là
+per-thread rồi do mỗi thread có biến không-`static` riêng.)
 
-A bit of a lie there: block scope `thread_local` variables can also be
+Hơi nói dối chút: biến `thread_local` block scope còn có thể
 `extern`.
 
 [i[`thread_local` storage class]>]
 [i[`_Thread_local` storage class]>]
 [i[Thread local data]>]
 
-### Another Option: Thread-Specific Storage
+### Một lựa chọn khác: Thread-Specific Storage
 
 [i[Thread-specific storage]<]
 
-Thread-specific storage (TSS) is another way of getting per-thread data.
+Thread-specific storage (TSS) là một cách khác để có dữ liệu
+per-thread.
 
-One additional feature is that these functions allow you to specify a
-destructor that will be called on the data when the TSS variable is
-deleted. Commonly this destructor is `free()` to automatically clean up
-`malloc()`d per-thread data. Or `NULL` if you don't need to destroy
-anything.
+Một tính năng thêm là các hàm này cho phép bạn chỉ định destructor
+sẽ được gọi trên dữ liệu khi biến TSS bị xoá. Thông thường destructor
+là `free()` để tự động dọn dữ liệu `malloc()` per-thread. Hoặc
+`NULL` nếu không cần destroy gì.
 
-The destructor is type [i[`tss_dtor_t` type]] `tss_dtor_t` which is a
-pointer to a function that returns `void` and takes a `void*` as an
-argument (the `void*` points to the data stored in the variable). In
-other words, it's a `void (*)(void*)`, if that clears it up. Which I
-admit it probably doesn't. Check out the example, below.
+Destructor có kiểu [i[`tss_dtor_t` type]] `tss_dtor_t` là con trỏ
+đến hàm trả về `void` và nhận `void*` làm tham số (cái `void*` trỏ
+tới dữ liệu lưu trong biến). Nói cách khác, nó là `void (*)(void*)`,
+nếu có rõ thêm. Tôi thừa nhận chắc là không. Xem ví dụ bên dưới.
 
-Generally, `thread_local` is probably your go-to, but if you like the
-destructor idea, then you can make use of that.
+Nói chung `thread_local` chắc là lựa chọn mặc định, nhưng nếu bạn
+thích ý tưởng destructor thì tận dụng.
 
-The usage is a bit weird in that we need a variable of type [i[`tss_t`
-type]] `tss_t` to be alive to represent the value on a per thread basis.
-Then we initialize it with [i[`tss_create()` function]] `tss_create()`.
-Eventually we get rid of it with [i[`tss_delete()` function]<]
-`tss_delete()`. Note that calling `tss_delete()` doesn't run all the
-destructors---it's `thrd_exit()` (or returning from the run function)
-that does that. `tss_delete()` just releases any memory allocated by
-`tss_create()`. [i[`tss_delete()` function]>]
+Cách dùng hơi lạ ở chỗ ta cần biến kiểu [i[`tss_t` type]] `tss_t`
+sống để đại diện giá trị trên cơ sở per-thread. Rồi ta khởi tạo nó
+với [i[`tss_create()` function]] `tss_create()`. Cuối cùng xoá với
+[i[`tss_delete()` function]<] `tss_delete()`. Chú ý gọi
+`tss_delete()` không chạy tất cả destructors, chính `thrd_exit()`
+(hoặc return từ hàm run) mới làm. `tss_delete()` chỉ giải phóng bộ
+nhớ do `tss_create()` cấp phát. [i[`tss_delete()` function]>]
 
-In the middle, threads can call [i[`tss_set()` function]] `tss_set()`
-and [i[`tss_get()` function]] `tss_get()` to set and get the value.
+Ở giữa, threads có thể gọi [i[`tss_set()` function]] `tss_set()` và
+[i[`tss_get()` function]] `tss_get()` để đặt và lấy giá trị.
 
-In the following code, we set up the TSS variable before creating the
-threads, then clean up after the threads.
+Trong code sau, ta set up biến TSS trước khi tạo threads, rồi dọn
+dẹp sau khi threads xong.
 
-In the `run()` function, the threads `malloc()` some space for a string
-and store that pointer in the TSS variable.
+Trong hàm `run()`, threads `malloc()` chỗ cho một chuỗi và lưu con
+trỏ đó vào biến TSS.
 
-When the thread exits, the destructor function (`free()` in this case)
-is called for _all_ the threads.
+Khi thread thoát, hàm destructor (`free()` trong trường hợp này)
+được gọi cho _tất cả_ threads.
 
 [i[`tss_t` type]<]
 [i[`tss_get()` function]<]
@@ -737,9 +722,8 @@ int main(void)
 [i[`tss_create()` function]>]
 [i[`tss_delete()` function]>]
 
-Again, this is kind of a painful way of doing things compared to
-`thread_local`, so unless you really need that destructor functionality,
-I'd use that instead.
+Lại nữa, đây là cách làm khá đau so với `thread_local`, nên trừ khi
+bạn thực sự cần chức năng destructor, tôi sẽ dùng `thread_local`.
 
 [i[Thread-specific storage]>]
 
@@ -747,42 +731,41 @@ I'd use that instead.
 
 [i[Mutexes]<]
 
-If you want to only allow a single thread into a critical section of
-code at a time, you can protect that section with a mutex^[Short for
-"mutual exclusion", AKA a "lock" on a section of code that only one
-thread is permitted to execute.].
+Nếu bạn chỉ muốn cho một thread vào critical section của code tại
+một thời điểm, bạn có thể bảo vệ đoạn đó bằng mutex^[Viết tắt của
+"mutual exclusion", cũng gọi là "lock" trên một đoạn code mà chỉ một
+thread được phép thực thi.].
 
-For example, if we had a `static` variable and we wanted to be able to
-get and set it in two operations without another thread jumping in the
-middle and corrupting it, we could use a mutex for that.
-
-You can acquire a mutex or release it. If you attempt to acquire the
-mutex and succeed, you may continue execution. If you attempt and fail
-(because someone else holds it), you will _block_^[That is, your process
-will go to sleep.] until the mutex is released.
-
-If multiple threads are blocked waiting for a mutex to be released, one
-of them will be chosen to run (at random, from our perspective), and the
-others will continue to sleep.
-
-The gameplan is that first we'll initialize a mutex variable to make it
-ready to use with [i[`mtx_init()` function]] `mtx_init()`.
-
-Then subsequent threads can call [i[`mtx_lock()` function]] `mtx_lock()`
-and [i[`mtx_unlock` function]] `mtx_unlock()` to get and release the
+Ví dụ, nếu ta có biến `static` và muốn có thể lấy và set nó bằng hai
+thao tác mà không thread khác nhảy vào giữa làm hỏng, ta có thể dùng
 mutex.
 
-When we're completely done with the mutex, we can destroy it with
-[i[`mtx_destroy()` function]] `mtx_destroy()`, the logical opposite of
+Bạn có thể acquire mutex hay release nó. Nếu bạn cố acquire mutex
+và thành công, bạn có thể tiếp tục thực thi. Nếu cố mà thất bại (vì
+người khác đang giữ), bạn sẽ _block_^[Tức là process của bạn sẽ đi
+ngủ.] đến khi mutex được release.
+
+Nếu nhiều threads bị block đợi một mutex được release, một trong
+chúng sẽ được chọn để chạy (ngẫu nhiên từ góc nhìn của ta), còn các
+thread khác tiếp tục ngủ.
+
+Kế hoạch là đầu tiên ta sẽ khởi tạo biến mutex để sẵn sàng dùng bằng
+[i[`mtx_init()` function]] `mtx_init()`.
+
+Rồi các threads tiếp theo có thể gọi [i[`mtx_lock()` function]]
+`mtx_lock()` và [i[`mtx_unlock` function]] `mtx_unlock()` để lấy và
+release mutex.
+
+Khi ta đã hoàn toàn xong với mutex, có thể destroy với
+[i[`mtx_destroy()` function]] `mtx_destroy()`, đối lập logic của
 [i[`mtx_init()` function]] `mtx_init()`.
 
 [i[Multithreading-->race conditions]<]
 
-First, let's look at some code that does _not_ use a mutex, and
-endeavors to print out a shared (`static`) serial number and then
-increment it. Because we're not using a mutex over the getting of the
-value (to print it) and the setting (to increment it), threads might get
-in each other's way in that critical section.
+Đầu tiên xem code _không_ dùng mutex và cố in ra serial number chia
+sẻ (`static`) rồi tăng nó. Vì ta không dùng mutex trên việc lấy giá
+trị (để in) và set (để tăng), threads có thể giẫm chân nhau trong
+critical section đó.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -817,7 +800,7 @@ int main(void)
 }
 ```
 
-When I run this, I get something that looks like this:
+Khi tôi chạy, tôi được cái gì đó như:
 
 ``` {.default}
 Thread running! 0
@@ -832,17 +815,17 @@ Thread running! 8
 Thread running! 9
 ```
 
-Clearly multiple threads are getting in there and running the `printf()`
-before anyone gets a change to update the `serial` variable.
+Rõ ràng nhiều threads chen vào chạy `printf()` trước khi ai đó có cơ
+hội cập nhật biến `serial`.
 
 [i[Multithreading-->race conditions]>]
 
-What we want to do is wrap the getting of the variable and setting of it
-into a single mutex-protected stretch of code.
+Cái ta muốn làm là bọc việc lấy biến và set biến thành một đoạn code
+được mutex bảo vệ duy nhất.
 
-We'll add a new variable to represent the mutex of type [i[`mtx_t`
-type]] `mtx_t` in file scope, initialize it, and then the threads can
-lock and unlock it in the `run()` function.
+Ta sẽ thêm biến mới đại diện mutex kiểu [i[`mtx_t` type]] `mtx_t`
+trong phạm vi file, khởi tạo, rồi threads có thể lock và unlock nó
+trong hàm `run()`.
 
 [i[`mtx_lock()` function]<]
 [i[`mtx_unlock()` function]<]
@@ -903,23 +886,20 @@ int main(void)
 }
 ```
 
-See how on lines 38 and 50 of `main()` we initialize and destroy the
-mutex.
+Xem cách dòng 38 và 50 trong `main()` ta khởi tạo và destroy mutex.
 
 [i[`mtx_init()` function]>]
 [i[`mtx_destroy()` function]>]
 
-But each individual thread acquires the mutex on line 15 and releases it
-on line 24.
+Nhưng từng thread acquire mutex ở dòng 15 và release ở dòng 24.
 
-In between the `mtx_lock()` and `mtx_unlock()` is the _critical
-section_, the area of code where we don't want multiple threads mucking
-about at the same time.
+Giữa `mtx_lock()` và `mtx_unlock()` là _critical section_, vùng
+code mà ta không muốn nhiều threads lộn xộn cùng lúc.
 
 [i[`mtx_lock()` function]>]
 [i[`mtx_unlock()` function]>]
 
-And now we get proper output!
+Và giờ ta có output đúng!
 
 ``` {.default}
 Thread running! 0
@@ -934,19 +914,17 @@ Thread running! 8
 Thread running! 9
 ```
 
-If you need multiple mutexes, no problem: just have multiple mutex
-variables.
+Nếu bạn cần nhiều mutexes, không vấn đề: cứ có nhiều biến mutex.
 
-And always remember the Number One Rule of Multiple Mutexes: _Unlock
-mutexes in the opposite order in which you lock them!_
+Và nhớ Quy Tắc Số Một của Nhiều Mutex: _Unlock mutexes theo thứ tự
+ngược với thứ tự lock!_
 
-### Different Mutex Types
+### Các kiểu Mutex khác nhau
 
 [i[Mutexes-->types]<]
 
-As hinted earlier, we have a few mutex types that you can create with
-`mtx_init()`. (Some of these types are the result of a bitwise-OR
-operation, as noted in the table.)
+Như đã gợi ý, ta có vài kiểu mutex tạo được với `mtx_init()`. (Một
+số kiểu là kết quả của phép bitwise-OR, như ghi trong bảng.)
 
 [i[Mutexes-->timeouts]<]
 
@@ -956,25 +934,25 @@ operation, as noted in the table.)
 [i[`mtx_timed` macro]]
 [i[`mtx_recursive` macro]]
 
-|Type|Description|
+|Kiểu|Mô tả|
 |-|-|
-|`mtx_plain`|Regular ol' mutex|
-|`mtx_timed`|Mutex that supports timeouts|
-|`mtx_plain|mtx_recursive`|Recursive mutex|
-|`mtx_timed|mtx_recursive`|Recursive mutex that supports timeouts|
+|`mtx_plain`|Mutex bình thường|
+|`mtx_timed`|Mutex hỗ trợ timeouts|
+|`mtx_plain|mtx_recursive`|Mutex đệ quy|
+|`mtx_timed|mtx_recursive`|Mutex đệ quy hỗ trợ timeouts|
 
-"Recursive" means that the holder of a lock can call `mtx_lock()`
-multiple times on the same lock. (They have to unlock it an equal number
-of times before anyone else can take the mutex.) This might ease coding
-from time to time, especially if you call a function that needs to lock
-the mutex when you already hold the mutex.
+"Đệ quy" nghĩa là người giữ lock có thể gọi `mtx_lock()` nhiều lần
+trên cùng một lock. (Họ phải unlock một số lần bằng nhau trước khi
+ai khác có thể lấy mutex.) Cái này có thể làm code dễ hơn đôi khi,
+đặc biệt khi bạn gọi một hàm cần lock mutex trong khi bạn đã giữ
+mutex.
 
-And the timeout gives a thread a chance to _try_ to get the lock for a
-while, but then bail out if it can't get it in that timeframe.
+Và timeout cho thread cơ hội _cố_ lấy lock một lúc, nhưng rồi bỏ
+cuộc nếu không lấy được trong khung thời gian đó.
 
 [i[`mtx_timed` macro]<]
 
-For a timeout mutex, be sure to create it with `mtx_timed`:
+Với mutex timeout, nhớ tạo với `mtx_timed`:
 
 ``` {.c}
 mtx_init(&serial_mtx, mtx_timed);
@@ -982,27 +960,27 @@ mtx_init(&serial_mtx, mtx_timed);
 
 [i[`mtx_timed` macro]>]
 
-And then when you wait for it, you have to specify a time in UTC when it
-will unlock^[You might have expected it to be "time from now", but you'd
-just like to think that, wouldn't you!].
+Rồi khi bạn đợi nó, bạn phải chỉ định thời gian theo UTC khi nào
+unlock^[Bạn có thể đã nghĩ đó là "thời gian kể từ bây giờ", nhưng
+bạn chỉ muốn nghĩ vậy thôi phải không!].
 
 [i[`timespec_get()` function]<]
 
-The function `timespec_get()` from `<time.h>` can be of assistance here.
-It'll get you the current time in UTC in a `struct timespec` which is
-just what we need. In fact, it seems to exist merely for this purpose.
+Hàm `timespec_get()` từ `<time.h>` có thể trợ giúp. Nó cho bạn thời
+gian hiện tại theo UTC trong `struct timespec` đúng cái ta cần. Thực
+tế có vẻ nó tồn tại chỉ vì mục đích này.
 
-It has two fields: `tv_sec` has the current time in seconds since epoch,
-and `tv_nsec` has the nanoseconds (billionths of a second) as the
-"fractional" part.
+Nó có hai field: `tv_sec` giữ thời gian hiện tại tính bằng giây kể
+từ epoch, và `tv_nsec` giữ nanosecond (phần tỉ của giây) như phần
+"fractional".
 
-So you can load that up with the current time, and then add to it to get
-a specific timeout.
+Nên bạn có thể load nó với thời gian hiện tại, rồi cộng thêm để có
+timeout cụ thể.
 
 [i[`mtx_timedlock()` function]<]
 
-Then call `mtx_timedlock()` instead of `mtx_lock()`. If it returns the
-value `thrd_timedout`, it timed out.
+Rồi gọi `mtx_timedlock()` thay vì `mtx_lock()`. Nếu nó trả về giá
+trị `thrd_timedout`, là đã timeout.
 
 ``` {.c}
 struct timespec timeout;
@@ -1020,7 +998,7 @@ if (result == thrd_timedout) {
 [i[`mtx_timedlock()` function]>]
 [i[`timespec_get()` function]>]
 
-Other than that, timed locks are the same as regular locks.
+Ngoài cái đó ra, timed lock giống regular lock.
 
 [i[Mutexes-->timeouts]>]
 [i[Mutexes-->types]>]
@@ -1030,144 +1008,131 @@ Other than that, timed locks are the same as regular locks.
 
 [i[Condition variables]<]
 
-Condition Variables are the last piece of the puzzle we need to make
-performant multithreaded applications and to compose more complex
-multithreaded structures.
+Condition Variables là mảnh ghép cuối ta cần để làm các ứng dụng
+đa luồng có hiệu năng và compose các cấu trúc đa luồng phức tạp hơn.
 
-A condition variable provides a way for threads to go to sleep until
-some event on another thread occurs.
+Condition variable cung cấp cách để threads đi ngủ cho đến khi một
+event nào đó trên thread khác xảy ra.
 
-In other words, we might have a number of threads that are rearing to
-go, but they have to wait until some event is true before they continue.
-Basically they're being told "wait for it!" until they get notified.
+Nói cách khác, ta có thể có một số threads đã sẵn sàng chạy, nhưng
+phải đợi đến khi event nào đó là true trước khi tiếp tục. Về cơ bản
+chúng được bảo "đợi đấy!" đến khi được thông báo.
 
-And this works hand-in-hand with mutexes since what we're going to wait
-on generally depends on the value of some data, and that data generally
-needs to be protected by a mutex.
+Và cái này đi đôi với mutex vì cái ta đợi thường phụ thuộc vào giá
+trị của dữ liệu nào đó, và dữ liệu đó thường cần được mutex bảo vệ.
 
-It's important to note that the condition variable itself isn't the
-holder of any particular data from our perspective. It's merely the
-variable by which C keeps track of the waiting/not-waiting status of a
-particular thread or group of threads.
+Quan trọng là bản thân condition variable không phải người giữ dữ
+liệu cụ thể nào từ góc nhìn của ta. Nó chỉ là biến qua đó C theo dõi
+trạng thái waiting/not-waiting của một thread hay nhóm threads cụ
+thể.
 
-Let's write a contrived program that reads in groups of 5 numbers from
-the main thread one at a time. Then, when 5 numbers have been entered,
-the child thread wakes up, sums up those 5 numbers, and prints the
-result.
+Hãy viết một chương trình giả tạo đọc vào nhóm 5 số từ thread chính
+một lần một số. Rồi khi 5 số đã nhập, thread con thức dậy, cộng 5
+số đó, và in kết quả.
 
-The numbers will be stored in a global, shared array, as will the index
-into the array of the about-to-be-entered number.
+Các số sẽ được lưu trong mảng chia sẻ toàn cục, cũng như index của
+mảng cho số sắp được nhập.
 
-Since these are shared values, we at least have to hide them behind a
-mutex for both the main and child threads. (The main will be writing
-data to them and the child will be reading data from them.)
+Vì đây là giá trị chia sẻ, ta ít nhất phải giấu chúng sau mutex cho
+cả thread chính và thread con. (Chính sẽ ghi dữ liệu vào, còn con
+sẽ đọc dữ liệu ra.)
 
-But that's not enough. The child thread needs to block ("sleep") until 5
-numbers have been read into the array. And then the parent thread needs
-to wake up the child thread so it can do its work.
+Nhưng chừng đó chưa đủ. Thread con cần block ("ngủ") đến khi 5 số
+đã được đọc vào mảng. Rồi thread cha cần đánh thức thread con để nó
+làm việc.
 
-And when it wakes up, it needs to be holding that mutex. And it will!
-When a thread waits on a condition variable, it also acquires a mutex
-when it wakes up.
+Và khi thức dậy, nó cần đang giữ mutex đó. Và sẽ vậy! Khi một thread
+đợi trên condition variable, nó cũng acquire mutex khi thức dậy.
 
-All this takes place around an additional variable of type [i[`cnd_t`
-type]] `cnd_t` that is the _condition variable_. We create this variable
-with the [i[`cnd_init()` function]] `cnd_init()` function and destroy it
-when we're done with it with the [i[`cnd_destroy()` function]]
-`cnd_destroy()` function.
+Tất cả cái này xảy ra quanh một biến thêm kiểu [i[`cnd_t` type]]
+`cnd_t` chính là _condition variable_. Ta tạo biến này bằng hàm
+[i[`cnd_init()` function]] `cnd_init()` và destroy khi xong với hàm
+[i[`cnd_destroy()` function]] `cnd_destroy()`.
 
-But how's this all work? Let's look at the outline of what the child
-thread will do:
+Nhưng hoạt động thế nào? Xem phác thảo những gì thread con sẽ làm:
 
 [i[`mtx_lock()` function]<]
 [i[`mtx_unlock()` function]<]
 [i[`cnd_wait()` function]<]
 [i[`cnd_signal()` function]<]
 
-1. Lock the mutex with `mtx_lock()`
-2. If we haven't entered all the numbers, wait on the condition variable
-   with `cnd_wait()`
-3. Do the work that needs doing
-4. Unlock the mutex with `mtx_unlock()`
+1. Lock mutex với `mtx_lock()`
+2. Nếu chưa nhập hết số, đợi trên condition variable với
+   `cnd_wait()`
+3. Làm việc cần làm
+4. Unlock mutex với `mtx_unlock()`
 
-Meanwhile the main thread will be doing this:
+Cùng lúc thread chính sẽ làm:
 
-1. Lock the mutex with `mtx_lock()`
-2. Store the recently-read number into the array
-3. If the array is full, signal the child to wake up with `cnd_signal()`
-4. Unlock the mutex with `mtx_unlock()`
+1. Lock mutex với `mtx_lock()`
+2. Lưu số vừa đọc vào mảng
+3. Nếu mảng đầy, signal con thức dậy với `cnd_signal()`
+4. Unlock mutex với `mtx_unlock()`
 
 [i[`mtx_lock()` function]>]
 [i[`mtx_unlock()` function]>]
 
-If you didn't skim that too hard (it's OK---I'm not offended), you might
-notice something weird: how can the main thread hold the mutex lock and
-signal the child, if the child has to hold the mutex lock to wait for
-the signal? They can't both hold the lock!
+Nếu bạn không đọc lướt quá (OK, tôi không giận), bạn có thể nhận ra
+điều lạ: làm sao thread chính giữ lock mutex và signal con, nếu con
+phải giữ lock mutex để đợi signal? Cả hai không cùng giữ được!
 
-And indeed they don't! There's some behind-the-scenes magic with
-condition variables: when you `cnd_wait()`, it releases the mutex that
-you specify and the thread goes to sleep. And when someone signals that
-thread to wake up, it reacquires the lock as if nothing had happened.
+Và đúng vậy! Có tí ma thuật sau cánh gà với condition variable: khi
+bạn `cnd_wait()`, nó release mutex bạn chỉ định và thread đi ngủ. Và
+khi ai đó signal thread thức dậy, nó reacquire lock như không có gì
+xảy ra.
 
-It's a little different on the `cnd_signal()` side of things. This
-doesn't do anything with the mutex. The signaling thread still must
-manually release the mutex before the waiting threads can wake up.
+Bên `cnd_signal()` thì hơi khác. Cái này không làm gì với mutex.
+Thread signal vẫn phải tự release mutex trước khi threads đang đợi
+thức dậy được.
 
 [i[`cnd_signal()` function]>]
 
-One more thing on the `cnd_wait()`. You'll probably be calling
-`cnd_wait()` if some condition^[And that's why they're called _condition
-variables_!] is not yet met (e.g. in this case, if not all the numbers
-have yet been entered). Here's the deal: this condition should be in a
-`while` loop, not an `if` statement. Why?
+Một điều nữa về `cnd_wait()`. Bạn sẽ gọi `cnd_wait()` nếu điều kiện
+nào đó^[Và đó là lý do gọi là _condition variables_!] chưa đạt (ví
+dụ trong trường hợp này, nếu chưa nhập hết số). Thoả thuận là: điều
+kiện này nên trong `while` loop, không phải `if`. Tại sao?
 
-It's because of a mysterious phenomenon called a [i[Condition
-variables-->spurious wakeup]] _spurious wakeup_. Sometimes, in some
-implementations, a thread can be woken up out of a `cnd_wait()` sleep
-for seemingly _no reason_. _[X-Files music]_^[I'm not saying it's
-aliens... but it's aliens. OK, really more likely another thread might
-have been woken up and gotten to the work first.]. And so we have to
-check to see that the condition we need is still actually met when we
-wake up. And if it's not, back to sleep with us!
+Vì một hiện tượng bí ẩn gọi là [i[Condition variables-->spurious
+wakeup]] _spurious wakeup_. Đôi khi, trong vài implementation, một
+thread có thể bị đánh thức từ giấc ngủ `cnd_wait()` mà dường như
+_không có lý do_. _[nhạc X-Files]_^[Tôi không nói là người ngoài
+hành tinh... nhưng là người ngoài hành tinh. OK, thực tế nhiều khả
+năng hơn là một thread khác đã được đánh thức và làm được việc
+trước.]. Và ta phải kiểm tra xem điều kiện ta cần có còn thực sự
+đúng khi thức dậy không. Nếu không, đi ngủ lại!
 
 [i[`cnd_wait()` function]>]
 
-So let's do this thing! Starting with the main thread:
+Nào, làm thôi! Bắt đầu với thread chính:
 
-* The main thread will set up the mutex and condition variable, and will
-  launch the child thread.
+* Thread chính sẽ set up mutex và condition variable, và launch
+  thread con.
 
-* Then it will, in an infinite loop, get numbers as input from the
-  console.
+* Rồi trong vòng lặp vô hạn, lấy số làm input từ console.
 
-* It will also acquire the mutex to store the inputted number into a
-  global array.
+* Nó cũng acquire mutex để lưu số đã nhập vào mảng toàn cục.
 
-* When the array has 5 numbers in it, the main thread will signal the
-  child thread that it's time to wake up and do its work.
+* Khi mảng có 5 số, thread chính sẽ signal thread con rằng đến lúc
+  thức dậy làm việc.
 
-* Then the main thread will unlock the mutex and go back to reading the
-  next number from the console.
+* Rồi thread chính unlock mutex và quay lại đọc số tiếp từ console.
 
-Meanwhile, the child thread has been up to its own shenanigans:
+Trong khi đó, thread con làm trò riêng:
 
-* The child thread grabs the mutex
+* Thread con lấy mutex.
 
-* While the condition is not met (i.e. while the shared array doesn't
-  yet have 5 numbers in it), the child thread sleeps by waiting on the
-  condition variable. When it waits, it implicitly unlocks the mutex.
+* Trong khi điều kiện chưa đạt (tức mảng chia sẻ chưa có 5 số),
+  thread con ngủ bằng cách đợi trên condition variable. Khi đợi, nó
+  ngầm unlock mutex.
 
-* Once the main thread signals the child thread to wake up, it wakes up
-  to do the work and gets the mutex lock back.
+* Khi thread chính signal thread con thức dậy, nó thức dậy làm việc
+  và lấy lại mutex lock.
 
-* The child thread sums the numbers and resets the variable that is the
-  index into the array.
+* Thread con cộng các số và reset biến index vào mảng.
 
-* It then releases the mutex and runs again in an infinite loop.
+* Rồi release mutex và chạy lại trong vòng lặp vô hạn.
 
-And here's the code! Give it some study so you can see where all the
-above pieces are being handled:
+Và đây là code! Nhìn kỹ để thấy chỗ các mảnh trên được xử lý:
 
 [i[`mtx_lock()` function]<]
 [i[`mtx_unlock()` function]<]
@@ -1271,8 +1236,7 @@ int main(void)
 [i[`cnd_signal()` function]>]
 [i[`cnd_t` type]>]
 
-And here's some sample output (individual numbers on lines are my
-input):
+Và đây là output mẫu (các số trên từng dòng là input của tôi):
 
 ``` {.default}
 Thread: is waiting
@@ -1296,32 +1260,32 @@ Thread: total is 24
 Thread: is waiting
 ```
 
-It's a common use of condition variables in producer-consumer situations
-like this. If we didn't have a way to put the child thread to sleep
-while it waited for some condition to be met, it would be force to poll
-which is a big waste of CPU.
+Đây là cách dùng phổ biến của condition variable trong tình huống
+producer-consumer như vầy. Nếu ta không có cách cho thread con ngủ
+trong khi đợi điều kiện nào đó đạt, nó sẽ buộc phải poll, lãng phí
+CPU kinh khủng.
 
 ### Timed Condition Wait
 
 [i[Condition variables-->timeouts]<]
 
-There's a variant of `cnd_wait()` that allows you to specify a timeout
-so you can stop waiting.
+Có một biến thể của `cnd_wait()` cho phép bạn chỉ định timeout để
+ngừng đợi.
 
-Since the child thread must relock the mutex, this doesn't necessarily
-mean that you'll be popping back to life the instant the timeout occurs;
-you still must wait for any other threads to release the mutex.
+Vì thread con phải relock mutex, cái này không có nghĩa là bạn sẽ
+bật ngay trở lại khoảnh khắc timeout xảy ra; bạn vẫn phải đợi các
+threads khác release mutex.
 
-But it does mean that you won't be waiting until the `cnd_signal()`
-happens.
+Nhưng có nghĩa là bạn sẽ không đợi cho đến khi `cnd_signal()` xảy
+ra.
 
-To make this work, call [i[`cnd_timedwait()` function]]
-`cnd_timedwait()` instead of `cnd_wait()`. If it returns the value
-[i[`thrd_timedout` macro]] `thrd_timedout`, it timed out.
+Để dùng, gọi [i[`cnd_timedwait()` function]] `cnd_timedwait()` thay
+vì `cnd_wait()`. Nếu nó trả về giá trị [i[`thrd_timedout` macro]]
+`thrd_timedout`, là timeout.
 
-The timestamp is an absolute time in UTC, not a time-from-now.
-Thankfully the [i[`timespec_get()` function]] `timespec_get()` function
-in `<time.h>` seems custom-made for exactly this case.
+Timestamp là thời gian tuyệt đối theo UTC, không phải time-from-now.
+May thay hàm [i[`timespec_get()` function]] `timespec_get()` trong
+`<time.h>` có vẻ được làm ra đúng cho trường hợp này.
 
 [i[`timespec_get()` function]<]
 [i[`cnd_timedwait()` function]<]
@@ -1345,54 +1309,51 @@ if (result == thrd_timedout) {
 [i[`thrd_timedout()` macro]>]
 [i[Condition variables-->timeouts]>]
 
-### Broadcast: Wake Up All Waiting Threads
+### Broadcast: Đánh thức mọi Thread đang đợi
 
 [i[Condition variables-->broadcasting]<]
 
-[i[`cnd_signal()` function]>] `cnd_signal()` only wakes up one thread to
-continue working. Depending on how you have your logic done, it might
-make sense to wake up more than one thread to continue once the
-condition is met.
+[i[`cnd_signal()` function]>] `cnd_signal()` chỉ đánh thức một
+thread để tiếp tục làm việc. Tuỳ logic bạn làm, có thể hợp lý khi
+đánh thức nhiều hơn một thread tiếp tục khi điều kiện đạt.
 
-Of course only one of them can grab the mutex, but if you have a
-situation where:
+Tất nhiên chỉ một thread có thể lấy mutex, nhưng nếu bạn có tình
+huống:
 
-* The newly-awoken thread is responsible for waking up the next one,
-  and---
+* Thread mới thức dậy chịu trách nhiệm đánh thức thread kế, và,
 
-* There's a chance the spurious-wakeup loop condition will prevent it
-  from doing so, then---
+* Có khả năng điều kiện loop spurious-wakeup sẽ ngăn nó làm vậy,
 
-you'll want to broadcast the wake up so that you're sure to get at least
-one of the threads out of that loop to launch the next one.
+thì bạn sẽ muốn broadcast wake up để chắc chắn lấy được ít nhất một
+thread ra khỏi loop đó để launch thread tiếp.
 
-How, you ask?
+Cách làm?
 
 [i[`cnd_broadcast()` function]<]
 
-Simply use `cnd_broadcast()` instead of `cnd_signal()`. Exact same
-usage, except `cnd_broadcast()` wakes up **all** the sleeping threads
-that were waiting on that condition variable.
+Đơn giản dùng `cnd_broadcast()` thay vì `cnd_signal()`. Dùng giống
+hệt, chỉ khác `cnd_broadcast()` đánh thức **tất cả** sleeping threads
+đang đợi trên condition variable đó.
 
 [i[`cnd_broadcast()` function]>]
 [i[Condition variables-->broadcasting]>]
 [i[Condition variables]>]
 
-## Running a Function One Time
+## Chạy một hàm đúng một lần
 
 [i[Multithreading-->one-time functions]<]
 
-Let's say you have a function that _could_ be run by many threads, but
-you don't know when, and it's not work trying to write all that logic.
+Giả sử bạn có một hàm _có thể_ được chạy bởi nhiều threads, nhưng
+bạn không biết khi nào, và không đáng công viết tất cả logic đó.
 
-There's a way around it: use [i[`call_once()` function]] `call_once()`.
-Tons of threads could try to run the function, but only the first one
-counts^[Survival of the fittest! Right? I admit it's actually nothing
-like that.]
+Có cách đi vòng: dùng [i[`call_once()` function]] `call_once()`. Cả
+đống threads có thể cố chạy hàm, nhưng chỉ thread đầu tiên được
+tính^[Sự sống sót của kẻ khoẻ nhất! Đúng không? Tôi thừa nhận thực
+ra không giống vậy chút nào.]
 
-To work with this, you need a special flag variable you declare to keep
-track of whether or not the thing's been run. And you need a function to
-run, which takes no parameters and returns no value.
+Để làm, bạn cần một biến flag đặc biệt bạn khai báo để theo dõi xem
+cái đó đã được chạy chưa. Và bạn cần một hàm để chạy, không nhận
+tham số và không trả giá trị.
 
 [i[`once_flag` type]<]
 [i[`ONCE_FLAG_INIT` macro]<]
@@ -1419,8 +1380,8 @@ int run(void *arg)
 [i[`ONCE_FLAG_INIT` macro]>]
 [i[`call_once()` function]>]
 
-In this example, no matter how many threads get to the `run()`
-function, the `run_once_function()` will only be called a single time.
+Trong ví dụ này, không quan trọng bao nhiêu threads tới hàm `run()`,
+`run_once_function()` sẽ chỉ được gọi một lần duy nhất.
 
 [i[Multithreading-->one-time functions]>]
 [i[Multithreading]>]
