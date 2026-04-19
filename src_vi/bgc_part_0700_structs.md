@@ -3,28 +3,27 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Structs {#structs}
+# Struct {#structs}
 
 [i[`struct` keyword]<]
-In C, we have something called a `struct`, which is a user-definable
-type that holds multiple pieces of data, potentially of different types.
+Trong C, có một thứ gọi là `struct`, một kiểu do người dùng định nghĩa
+được, giữ nhiều mẩu dữ liệu, có thể thuộc các kiểu khác nhau.
 
-It's a convenient way to bundle multiple variables into a single one.
-This can be beneficial for passing variables to functions (so you just
-have to pass one instead of many), and useful for organizing data and
-making code more readable.
+Đây là cách tiện lợi để gói nhiều biến vào làm một. Việc này có ích
+khi truyền biến cho hàm (chỉ cần truyền một thay vì nhiều), và hữu
+dụng để tổ chức dữ liệu và làm code dễ đọc hơn.
 
-If you've come from another language, you might be familiar with the
-idea of _classes_ and _objects_. These don't exist in C,
-natively^[Although in C individual items in memory like `int`s are
-referred to as "objects", they're not objects in an object-oriented
-programming sense.]. You can think of a `struct` as a class with only
-data members, and no methods.
+Nếu bạn đến từ ngôn ngữ khác, có thể bạn đã quen với khái niệm _class_
+và _object_. Những thứ này không tồn tại sẵn trong C^[Mặc dù trong C
+các mẩu riêng lẻ trong bộ nhớ như `int` được gọi là "object", chúng
+không phải object theo nghĩa lập trình hướng đối tượng.]. Bạn có thể
+nghĩ về `struct` như class chỉ có các trường dữ liệu, không có
+method.
 
-## Declaring a Struct
+## Khai báo một struct
 
 [i[`struct` keyword-->declaring]<]
-You can declare a `struct` in your code like so:
+Bạn có thể khai báo một `struct` trong code của mình như này:
 
 ``` {.c}
 struct car {
@@ -34,28 +33,27 @@ struct car {
 };
 ```
 
-This is often done at the global scope outside any functions so that the
-`struct` is globally available.
+Chuyện này thường được làm ở scope toàn cục bên ngoài các hàm để
+`struct` khả dụng toàn cục.
 
-When you do this, you're making a new _type_. The full type name is
-`struct car`. (Not just `car`---that won't work.)
+Khi làm vậy, bạn đang tạo một _kiểu_ (type) mới. Tên kiểu đầy đủ là
+`struct car`. (Không phải chỉ `car`, viết thế không hoạt động.)
 
-There aren't any variables of that type yet, but we can declare some:
+Chưa có biến nào kiểu đó, nhưng ta có thể khai báo vài biến:
 
 ``` {.c}
 struct car saturn;  // Variable "saturn" of type "struct car"
 ```
 
-And now we have an uninitialized variable `saturn`^[The Saturn was a
-popular brand of economy car in the United States until it was put out
-of business by the 2008 crash, sadly so to us fans.] of type `struct
-car`.
+Giờ ta có biến chưa khởi tạo `saturn`^[Saturn là một hãng xe phổ thông
+khá được ưa chuộng ở Hoa Kỳ cho tới khi bị đóng cửa vì khủng hoảng
+2008, buồn thay với những fan như chúng ta.] kiểu `struct car`.
 
-We should initialize it! But how do we set the values of those
-individual fields?
+Ta nên khởi tạo nó! Nhưng làm sao đặt giá trị cho từng trường riêng
+lẻ?
 
-Like in many other languages that stole it from C, we're going to use
-the dot operator (`.`) to access the individual fields.
+Giống như nhiều ngôn ngữ khác lấy lại từ C, ta sẽ dùng toán tử chấm
+(`.`) để truy cập từng trường.
 
 ``` {.c}
 saturn.name = "Saturn SL/2";
@@ -67,20 +65,20 @@ printf("Price (USD):    %f\n", saturn.price);
 printf("Top Speed (km): %d\n", saturn.speed);
 ```
 
-There on the first lines, we set the values in the `struct car`, and
-then in the next bit, we print those values out.
+Ở các dòng đầu, ta đặt giá trị vào `struct car`, rồi ở đoạn sau, in
+các giá trị đó ra.
 [i[`struct` keyword-->declaring]>]
 
-## Struct Initializers {#struct-initializers}
+## Khởi tạo Struct {#struct-initializers}
 
 [i[`struct` keyword-->initializers]<]
-That example in the previous section was a little unwieldy. There must
-be a better way to initialize that `struct` variable!
+Ví dụ ở mục trước hơi cồng kềnh. Chắc phải có cách tốt hơn để khởi tạo
+biến `struct`!
 
-You can do it with an initializer by putting values in for the fields
-_in the order they appear in the `struct`_ when you define the
-variable. (This won't work after the variable has been defined---it has
-to happen in the definition).
+Bạn có thể làm với initializer bằng cách đặt giá trị cho các trường
+_theo thứ tự chúng xuất hiện trong `struct`_ khi bạn định nghĩa biến.
+(Cách này không chạy sau khi biến đã được định nghĩa, phải xảy ra
+ngay lúc định nghĩa).
 
 ``` {.c}
 struct car {
@@ -97,51 +95,48 @@ printf("Price:     %f\n", saturn.price);
 printf("Top Speed: %d km\n", saturn.speed);
 ```
 
-The fact that the fields in the initializer need to be in the same order
-is a little freaky. If someone changes the order in `struct car`, it
-could break all the other code!
+Việc các trường trong initializer phải cùng thứ tự nghe hơi rùng mình.
+Nếu ai đó đổi thứ tự trong `struct car`, có thể làm hỏng hết code
+khác!
 
-We can be more specific with our initializers:
+Ta có thể cụ thể hơn với initializer:
 
 ``` {.c}
 struct car saturn = {.speed=175, .name="Saturn SL/2"};
 ```
 
-Now it's independent of the order in the `struct` declaration. Which is
-safer code, for sure.
+Giờ nó độc lập với thứ tự trong khai báo `struct`. Code an toàn hơn
+hẳn.
 
-Similar to array initializers, any missing field designators are
-initialized to zero (in this case, that would be `.price`, which I've
-omitted).
+Tương tự như initializer của mảng, bất kỳ field designator nào bị bỏ
+sót đều được khởi tạo về không (trong trường hợp này, đó là `.price`,
+tôi đã bỏ qua).
 [i[`struct` keyword-->initializers]>]
 
-## Passing Structs to Functions
+## Truyền Struct cho hàm
 
 [i[`struct` keyword-->passing and returning]<]
-You can do a couple things to pass a `struct` to a function.
+Bạn có vài cách để truyền `struct` cho hàm.
 
-1. Pass the `struct`.
-2. Pass a pointer to the `struct`.
+1. Truyền bản thân `struct`.
+2. Truyền con trỏ tới `struct`.
 
-Recall that when you pass something to a function, a _copy_ of that
-thing gets made for the function to operate on, whether it's a copy of a
-pointer, an `int`, a `struct`, or anything.
+Nhớ rằng khi bạn truyền thứ gì đó cho hàm, một _bản sao_ của thứ đó
+được tạo ra cho hàm thao tác, bất kể đó là bản sao của con trỏ, của
+`int`, của `struct`, hay bất cứ thứ gì.
 
-There are basically two cases when you'd want to pass a pointer to the
-`struct`:
+Về cơ bản có hai trường hợp bạn muốn truyền con trỏ tới `struct`:
 
-1. You need the function to be able to make changes to the `struct` that
-   was passed in, and have those changes show in the caller.
-2. The `struct` is somewhat large and it's more expensive to copy that
-   onto the stack than it is to just copy a pointer^[A pointer is likely
-   8 bytes on a 64-bit system.].
+1. Bạn cần hàm có thể thay đổi `struct` được truyền vào, và để những
+   thay đổi đó hiện ra ở phía người gọi.
+2. `struct` hơi lớn và chép nó lên stack tốn hơn là chép một con
+   trỏ^[Một con trỏ có lẽ 8 byte trên hệ thống 64 bit.].
 
-For those two reasons, it's far more common to pass a pointer to a
-`struct` to a function, though its by no means illegal to pass the
-`struct` itself.
+Vì hai lý do đó, truyền con trỏ tới `struct` cho hàm phổ biến hơn
+nhiều, dù truyền cả `struct` thì không hề phạm luật.
 
-Let's try passing in a pointer, making a function that will allow you to
-set the `.price` field of the `struct car`:
+Thử truyền con trỏ, làm một hàm cho phép bạn đặt trường `.price` của
+`struct car`:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -164,22 +159,21 @@ int main(void)
 }
 ```
 
-You should be able to come up with the function signature for
-`set_price()` just by looking at the types of the arguments we have
-there.
+Bạn nên có thể nghĩ ra signature của hàm `set_price()` chỉ bằng cách
+nhìn kiểu của các đối số ta có ở đó.
 
-`saturn` is a `struct car`, so `&saturn` must be the address of the
-`struct car`, AKA a pointer to a `struct car`, namely a `struct car*`.
+`saturn` là `struct car`, nên `&saturn` phải là địa chỉ của `struct
+car`, tức là con trỏ tới `struct car`, cụ thể là `struct car*`.
 
-And `799.99` is a `float`.
+Và `799.99` là `float`.
 
-So the function declaration must look like this:
+Nên khai báo hàm phải như này:
 
 ``` {.c}
 void set_price(struct car *c, float new_price)
 ```
 
-We just need to write the body. One attempt might be:
+Ta chỉ cần viết phần thân. Lần thử đầu tiên có thể là:
 
 ``` {.c}
 void set_price(struct car *c, float new_price) {
@@ -187,13 +181,12 @@ void set_price(struct car *c, float new_price) {
 }
 ```
 
-That won't work because the dot operator only works on `struct`s... it
-doesn't work on _pointers_ to `struct`s.
+Cách đó không chạy vì toán tử chấm chỉ chạy trên `struct`... nó không
+chạy trên _con trỏ_ tới `struct`.
 
-Ok, so we can dereference the variable `c` to de-pointer it to get to the
-`struct` itself. Dereferencing a `struct car*` results in the `struct
-car` that the pointer points to, which we should be able to use the dot
-operator on:
+Được rồi, ta có thể dereference biến `c` để "de-pointer" nó để tới
+bản thân `struct`. Dereference một `struct car*` cho ra `struct car`
+mà con trỏ trỏ tới, ta nên có thể dùng toán tử chấm lên đó:
 
 ``` {.c}
 void set_price(struct car *c, float new_price) {
@@ -201,15 +194,16 @@ void set_price(struct car *c, float new_price) {
 }
 ```
 
-And that works! But it's a little clunky to type all those parens and
-the asterisk. C has some syntactic sugar called the _arrow operator_
-that helps with that.
+Và chạy! Nhưng hơi lôi thôi khi gõ hết đám dấu ngoặc với dấu sao. C có
+một thứ đường cú pháp gọi là _toán tử mũi tên_ (arrow operator) giúp
+chuyện đó.
 [i[`struct` keyword-->passing and returning]>]
 
-## The Arrow Operator
+## Toán tử mũi tên
 
 [i[`->` arrow operator]<]
-The arrow operator helps refer to fields in pointers to `struct`s.
+Toán tử mũi tên giúp tham chiếu tới các trường trong con trỏ tới
+`struct`.
 
 ``` {.c}
 void set_price(struct car *c, float new_price) {
@@ -221,18 +215,19 @@ void set_price(struct car *c, float new_price) {
 }
 ```
 
-So when accessing fields, when do we use dot and when do we use arrow?
+Vậy khi truy cập các trường, khi nào dùng chấm và khi nào dùng mũi
+tên?
 
-* If you have a `struct`, use dot (`.`).
-* If you have a pointer to a `struct`, use arrow (`->`).
+* Nếu bạn có `struct`, dùng chấm (`.`).
+* Nếu bạn có con trỏ tới `struct`, dùng mũi tên (`->`).
 [i[`->` arrow operator]>]
 
-## Copying and Returning `struct`s
+## Sao chép và trả về `struct`
 
 [i[`struct` keyword-->copying]<]
-Here's an easy one for you!
+Đây là phần dễ cho bạn!
 
-Just assign from one to the other!
+Chỉ cần gán từ cái này sang cái kia!
 
 ``` {.c}
 struct car a, b;
@@ -240,29 +235,29 @@ struct car a, b;
 b = a;  // Copy the struct
 ```
 
-And returning a `struct` (as opposed to a pointer to one) from a
-function also makes a similar copy to the receiving variable.
+Và trả về một `struct` (thay vì trả về một con trỏ tới nó) từ hàm
+cũng tạo một bản sao tương tự vào biến nhận.
 
-This is not a "deep copy"^[A _deep copy_ follows pointer in the `struct`
-and copies the data they point to, as well. A _shallow copy_ just copies
-the pointers, but not the things they point to. C doesn't come with any
-built-in deep copy functionality.]. All fields are copied as-is,
-including pointers to things.
+Đây không phải "deep copy"^[Một _deep copy_ đi theo các con trỏ trong
+`struct` và chép cả dữ liệu chúng trỏ tới. Một _shallow copy_ chỉ chép
+các con trỏ, chứ không chép thứ chúng trỏ tới. C không có sẵn chức
+năng deep copy tích hợp nào.]. Tất cả các trường được chép y nguyên,
+kể cả con trỏ tới các thứ.
 [i[`struct` keyword-->copying]>]
 
-## Comparing `struct`s
+## So sánh `struct`
 
 [i[`struct` keyword-->comparing]<]
-There's only one safe way to do it: compare each field one at a time.
+Chỉ có một cách an toàn duy nhất: so sánh từng trường một.
 
-You might think you could use
+Bạn có thể nghĩ có thể dùng
 [fl[`memcmp()`|https://beej.us/guide/bgclr/html/split/stringref.html#man-strcmp]],
-but that doesn't handle the case of the possible [padding
-bytes](#struct-padding-bytes) that might be in there.
+nhưng nó không xử lý được trường hợp có thể có [padding
+bytes](#struct-padding-bytes) nằm lẫn trong đó.
 
-If you clear the `struct` to zero first with
+Nếu bạn xoá `struct` về không trước bằng
 [fl[`memset()`|https://beej.us/guide/bgclr/html/split/stringref.html#man-memset]],
-then it _might_ work, though there could be weird elements that
-[fl[might not compare as you
-expect|https://stackoverflow.com/questions/141720/how-do-you-compare-structs-for-equality-in-c]].
+thì nó _có thể_ chạy, dù vẫn có thể có những phần tử lạ
+[fl[không so sánh như bạn
+mong|https://stackoverflow.com/questions/141720/how-do-you-compare-structs-for-equality-in-c]].
 [i[`struct` keyword-->comparing]>] [i[`struct` keyword]>]
