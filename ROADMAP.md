@@ -44,7 +44,7 @@ Programming (Vietnamese).
 | bgc_part_3000_inctype.md | Incomplete Types | done |
 | bgc_part_3100_complex.md | Complex Numbers | done |
 | bgc_part_3200_fixedint.md | Fixed Width Integer Types | done |
-| bgc_part_3300_time.md | Date and Time Functionality | not started |
+| bgc_part_3300_time.md | Date and Time Functionality | done |
 | bgc_part_3400_threads.md | Multithreading | not started |
 | bgc_part_3490_atomics.md | Atomics | not started |
 | bgc_part_3500_noreturn_align.md | Function Specifiers, Alignment Specifiers/Operators | not started |
