@@ -6,28 +6,26 @@
 # Scope {#scope}
 
 [i[Scope]<]
-Scope is all about what variables are visible in what contexts.
+Scope nói về chuyện biến nào nhìn thấy được trong ngữ cảnh nào.
 
-## Block Scope
+## Block scope
 
 [i[Scope-->block]<]
-This is the scope of almost all the variables devs define. It includes
-what other languages might call "function scope", i.e. variables that
-are declared inside functions.
+Đây là scope của gần như mọi biến dev định nghĩa. Nó bao gồm cả cái
+mà ngôn ngữ khác có thể gọi là "function scope", tức biến khai báo
+bên trong hàm.
 
-The basic rule is that if you've declared a variable in a block
-delimited by squirrelly braces, the scope of that variable is that
-block.
+Quy tắc cơ bản là nếu bạn khai báo biến trong một block được bao bởi
+cặp ngoặc xoăn xoắn xuýt, scope của biến đó là block đó.
 
-If there's a block inside a block, then variables declared in the
-_inner_ block are local to that block, and cannot be seen in the outer
-scope.
+Nếu có block trong block, thì biến khai báo trong block _bên trong_
+là local với block đó, không thấy được ở scope ngoài.
 
-Once a variable's scope ends, that variable can no longer be referenced,
-and you can consider its value to be gone into the great [flw[bit
-bucket|Bit_bucket]] in the sky.
+Khi scope của một biến kết thúc, biến đó không thể tham chiếu nữa, và
+bạn có thể coi giá trị của nó đã bay vào [flw[bit
+bucket|Bit_bucket]] khổng lồ trên trời.
 
-An example with nested scope:
+Ví dụ với scope lồng nhau:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -48,11 +46,11 @@ int main(void)
 }
 ```
 
-### Where To Define Variables
+### Chỗ nào định nghĩa biến
 
-Another fun fact is that you can define variables anywhere in the
-block, within reason---they have the scope of that block, but cannot be
-used before they are defined.
+Một sự thật vui là bạn có thể định nghĩa biến ở bất cứ đâu trong block,
+trong mức độ hợp lý, chúng có scope của block đó, nhưng không dùng
+được trước khi được định nghĩa.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -71,16 +69,15 @@ int main(void)
 }
 ```
 
-Historically, C required all the variables be defined before any code in
-the block, but this is no longer the case in the C99 standard.
+Trước đây, C yêu cầu mọi biến phải định nghĩa trước bất kỳ code nào
+trong block, nhưng chuẩn C99 không còn thế nữa.
 
-### Variable Hiding
+### Che biến
 
 [i[Variable hiding]<]
-If you have a variable named the same thing at an inner scope as one at
-an outer scope, the one at the inner scope takes precedence as long as
-you're running in the inner scope. That is, it _hides_ the one at outer
-scope for the duration of its lifetime.
+Nếu bạn có biến đặt tên giống nhau ở scope trong và scope ngoài, cái
+ở scope trong được ưu tiên trong khi bạn đang chạy ở scope trong. Tức
+là nó _che_ cái ở scope ngoài suốt thời gian tồn tại.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -99,26 +96,25 @@ int main(void)
 }
 ```
 
-You might have noticed in that example that I just threw a block in
-there at line 7, not so much as a `for` or `if` statement to kick it
-off! This is perfectly legal. Sometimes a dev will want to group a bunch
-of local variables together for a quick computation and will do this,
-but it's rare to see.
+Có thể bạn đã để ý trong ví dụ đó tôi quẳng luôn một block vào ở dòng
+7, chẳng có cả `for` hay `if` khởi sự! Chuyện này hoàn toàn hợp lệ.
+Thỉnh thoảng dev muốn gom một mớ biến local lại cho một tính toán
+nhanh và sẽ làm thế, nhưng hiếm khi thấy.
 [i[Variable hiding]>]
 [i[Scope-->block]>]
 
-## File Scope
+## File scope
 
 [i[Scope-->file]<]
-If you define a variable outside of a block, that variable has _file
-scope_. It's visible in all functions in the file that come after it,
-and shared between them. (An exception is if a block defines a variable
-of the same name, it would hide the one at file scope.)
+Nếu bạn định nghĩa biến ngoài block, biến đó có _file scope_. Nó nhìn
+thấy được trong mọi hàm trong file xuất hiện sau nó, và được chia sẻ
+giữa chúng. (Trường hợp ngoại lệ là nếu một block định nghĩa biến
+cùng tên, nó sẽ che cái ở file scope.)
 
-This is closest to what you would consider to be "global" scope in
-another language.
+Đây là cái gần nhất với khái niệm bạn có thể coi là scope "global"
+trong ngôn ngữ khác.
 
-For example:
+Ví dụ:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -142,21 +138,19 @@ int main(void)
 }
 ```
 
-Note that if `shared` were declared at the bottom of the file, it
-wouldn't compile. It has to be declared _before_ any functions use it.
+Chú ý rằng nếu `shared` được khai báo ở cuối file, nó sẽ không
+compile. Nó phải được khai báo _trước_ bất kỳ hàm nào dùng nó.
 
-There are ways to further modify items at file scope, namely with
-[static](#static) and [extern](#extern), but we'll talk more about those
-later.
+Có những cách chỉnh thêm các item ở file scope, cụ thể với
+[static](#static) và [extern](#extern), nhưng sẽ nói thêm sau.
 [i[Scope-->file]>]
 
-## `for`-loop Scope
+## Scope vòng lặp `for`
 
 [i[Scope-->`for` loop]<]
-I really don't know what to call this, as C11 §6.8.5.3¶1 doesn't give it
-a proper name. We've done it already a few times in this guide, as well.
-It's when you declare a variable inside the first clause of a
-`for`-loop:
+Thật sự tôi không biết gọi nó là gì, vì C11 §6.8.5.3¶1 không cho nó
+một tên riêng. Ta đã dùng vài lần trong sách này rồi. Nó là khi bạn
+khai báo biến bên trong mệnh đề đầu của vòng `for`:
 
 ``` {.c}
 for (int i = 0; i < 10; i++)
@@ -165,14 +159,14 @@ for (int i = 0; i < 10; i++)
 printf("%d\n", i);  // ILLEGAL--i is only in scope for the for-loop
 ```
 
-In that example, `i`'s lifetime begins the moment it is defined, and
-continues for the duration of the loop.
+Trong ví dụ đó, thời gian sống của `i` bắt đầu ngay lúc nó được định
+nghĩa, và tiếp tục trong suốt vòng lặp.
 
-If the loop body is enclosed in a block, the variables defined in the
-`for`-loop are visible from that inner scope. 
+Nếu thân vòng lặp nằm trong một block, các biến định nghĩa trong
+`for` nhìn thấy được từ scope bên trong đó.
 
-Unless, of course, that inner scope hides them. This crazy example
-prints `999` five times:
+Dĩ nhiên là trừ khi scope trong đó che chúng đi. Ví dụ điên rồ này in
+`999` năm lần:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -187,11 +181,10 @@ int main(void)
 ```
 [i[Scope-->`for` loop]>]
 
-## A Note on Function Scope
+## Ghi chú về function scope
 
 [i[Scope-->function]<]
-The C spec does refer to _function scope_, but it's used exclusively
-with _labels_, something we haven't discussed yet. More on that another
-day.
+Spec C có đề cập _function scope_, nhưng nó được dùng chỉ với
+_label_, thứ ta chưa bàn tới. Sẽ nói thêm hôm khác.
 [i[Scope-->function]>]
 [i[Scope]>]
