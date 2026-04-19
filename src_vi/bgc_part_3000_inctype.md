@@ -3,11 +3,11 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Incomplete Types
+# Kiểu không hoàn chỉnh (Incomplete Types)
 
 [i[Incomplete types]<]
 
-It might surprise you to learn that this builds without error:
+Bạn có thể ngạc nhiên khi biết đoạn này build không lỗi:
 
 ``` {.c}
 extern int a[];
@@ -20,35 +20,38 @@ int main(void)
 }
 ```
 
-We never gave a size for `a`. And we have pointers to `struct`s `foo`,
-`bar`, and `baz` that never seem to be declared anywhere.
+Ta chưa hề cho kích thước của `a`. Và ta có con trỏ tới `struct`
+`foo`, `bar`, và `baz` mà dường như không được khai báo ở đâu cả.
 
-And the only warnings I get are that `x`, `y`, and `z` are unused.
+Và cảnh báo duy nhất tôi nhận được là `x`, `y`, và `z` không được
+dùng.
 
-These are examples of _incomplete types_.
+Đây là các ví dụ về _kiểu không hoàn chỉnh_ (incomplete type).
 
-An incomplete type is a type the size (i.e. the size you'd get back from
-`sizeof`) for which is not known. Another way to think of it is a type
-that you haven't finished declaring.
+Kiểu không hoàn chỉnh là kiểu mà kích thước (tức là kích thước
+`sizeof` trả về) chưa biết. Cách nghĩ khác là kiểu bạn chưa khai báo
+xong.
 
-You can have a pointer to an incomplete type, but you can't dereference
-it or use pointer arithmetic on it. And you can't `sizeof` it.
+Bạn có thể có con trỏ tới kiểu không hoàn chỉnh, nhưng bạn không thể
+dereference nó hay dùng số học con trỏ trên nó. Và bạn không thể
+`sizeof` nó.
 
-So what can you do with it?
+Vậy làm gì được với nó?
 
-## Use Case: Self-Referential Structures
+## Use case: cấu trúc tự tham chiếu
 
 [i[Incomplete types-->self-referential `struct`s]<]
 
-I only know of one real use case: forward references to `struct`s or
-`union`s with self-referential or co-dependent structures. (I'm going to
-use `struct` for the rest of these examples, but they all apply equally
-to `union`s, as well.)
+Tôi chỉ biết một use case thực sự: forward reference tới `struct`
+hay `union` với các cấu trúc tự tham chiếu hay đồng phụ thuộc. (Tôi
+sẽ dùng `struct` cho phần còn lại của các ví dụ này, nhưng tất cả
+đều áp dụng ngang bằng cho `union`.)
 
-Let's do the classic example first.
+Làm ví dụ kinh điển trước.
 
-But before I do, know this! As you declare a `struct`, the `struct` is
-incomplete until the closing brace is reached!
+Nhưng trước đó, biết điều này! Khi bạn khai báo một `struct`,
+`struct` đó không hoàn chỉnh cho tới khi dấu ngoặc nhọn đóng được
+tới!
 
 ``` {.c}
 struct antelope {              // struct antelope is incomplete here
@@ -59,14 +62,15 @@ struct antelope {              // struct antelope is incomplete here
 };                             // NOW it's complete.
 ```
 
-So what? Seems sane enough.
+Thì sao? Trông đủ hợp lý.
 
-But what if we're doing a linked list? Each linked list node needs to
-have a reference to another node. But how can we create a reference to
-another node if we haven't finished even declaring the node yet?
+Nhưng nếu ta đang làm linked list thì sao? Mỗi node trong linked
+list cần có tham chiếu tới node khác. Nhưng làm sao tạo tham chiếu
+tới node khác nếu ta còn chưa khai báo xong cái node luôn?
 
-C's allowance for incomplete types makes it possible. We can't declare a
-node, but we _can_ declare a pointer to one, even if it's incomplete!
+Sự cho phép của C với kiểu không hoàn chỉnh làm điều đó thành khả
+thi. Ta không thể khai báo một node, nhưng ta _có thể_ khai báo một
+con trỏ tới nó, kể cả khi nó chưa hoàn chỉnh!
 
 ``` {.c}
 struct node {
@@ -75,14 +79,14 @@ struct node {
 };
 ```
 
-Even though the `struct node` is incomplete on line 3, we can still
-declare a pointer to one^[This works because in C, pointers are the same
-size regardless of the type of data they point to. So the compiler
-doesn't need to know the size of the `struct node` at this point; it
-just needs to know the size of a pointer.].
+Dù `struct node` chưa hoàn chỉnh ở dòng 3, ta vẫn có thể khai báo
+một con trỏ tới nó^[Cái này chạy vì trong C, con trỏ có cùng kích
+thước bất kể kiểu dữ liệu chúng trỏ tới. Nên compiler không cần biết
+kích thước `struct node` tại điểm này; nó chỉ cần biết kích thước
+con trỏ.].
 
-We can do the same thing if we have two different `struct`s that refer
-to each other:
+Ta có thể làm tương tự nếu ta có hai `struct` khác nhau tham chiếu
+lẫn nhau:
 
 ``` {.c}
 struct a {
@@ -94,14 +98,14 @@ struct b {
 };
 ```
 
-We'd never be able to make that pair of structures without the relaxed
-rules for incomplete types.
+Ta không thể nào tạo được cặp cấu trúc đó nếu không có quy tắc thả
+lỏng cho kiểu không hoàn chỉnh.
 
 [i[Incomplete types-->self-referential `struct`s]>]
 
-## Incomplete Type Error Messages
+## Thông báo lỗi về kiểu không hoàn chỉnh
 
-Are you getting errors like these?
+Bạn có đang nhận các lỗi kiểu này không?
 
 ``` {.default}
 invalid application of ‘sizeof’ to incomplete type
@@ -111,36 +115,38 @@ invalid use of undefined type
 dereferencing pointer to incomplete type
 ```
 
-Most likely culprit: you probably forgot to `#include` the header file
-that declares the type.
+Thủ phạm có khả năng nhất: bạn có lẽ quên `#include` file header
+khai báo kiểu đó.
 
-## Other Incomplete Types
+## Các kiểu không hoàn chỉnh khác
 
-Declaring a `struct` or `union` with no body makes an incomplete type,
-e.g. `struct foo;`.
+Khai báo `struct` hay `union` không có thân tạo ra kiểu không hoàn
+chỉnh, ví dụ `struct foo;`.
 
-`enums` are incomplete until the closing brace.
+`enum` không hoàn chỉnh cho tới dấu ngoặc nhọn đóng.
 
-`void` is an incomplete type.
+`void` là kiểu không hoàn chỉnh.
 
-Arrays declared `extern` with no size are incomplete, e.g.:
+Mảng khai báo `extern` không có kích thước là không hoàn chỉnh, ví
+dụ:
 
 ``` {.c}
 extern int a[];
 ```
 
-If it's a non-`extern` array with no size followed by an initializer,
-it's incomplete until the closing brace of the initializer.
+Nếu là mảng không-`extern` không có kích thước có initializer theo
+sau, nó không hoàn chỉnh cho tới dấu ngoặc nhọn đóng của
+initializer.
 
-## Use Case: Arrays in Header Files
+## Use case: mảng trong file header
 
-It can be useful to declare incomplete array types in header files. In
-those cases, the actual storage (where the complete array is declared)
-should be in a single `.c` file. If you put it in the `.h` file, it will
-be duplicated every time the header file is included.
+Có thể hữu ích khi khai báo kiểu mảng không hoàn chỉnh trong file
+header. Trong trường hợp đó, phần lưu trữ thực (nơi mảng hoàn chỉnh
+được khai báo) nên ở trong một file `.c` duy nhất. Nếu bạn đặt nó
+trong file `.h`, nó sẽ bị nhân đôi mỗi lần file header được include.
 
-So what you can do is make a header file with an incomplete type that
-refers to the array, like so:
+Nên cái bạn có thể làm là tạo một file header với kiểu không hoàn
+chỉnh tham chiếu tới mảng, như vầy:
 
 ``` {.c .numberLines}
 // File: bar.h
@@ -153,7 +159,7 @@ extern int my_array[];  // Incomplete type
 #endif
 ```
 
-And the in the `.c` file, actually define the array:
+Và trong file `.c`, thực sự định nghĩa mảng:
 
 ``` {.c .numberLines}
 // File: bar.c
@@ -161,8 +167,8 @@ And the in the `.c` file, actually define the array:
 int my_array[1024];     // Complete type!
 ```
 
-Then you can include the header from as many places as you'd like, and
-every one of those places will refer to the same underlying `my_array`.
+Rồi bạn có thể include header từ bao nhiêu chỗ tuỳ ý, và mỗi chỗ sẽ
+tham chiếu tới cùng `my_array` nằm dưới.
 
 ``` {.c .numberLines}
 // File: foo.c
@@ -178,17 +184,18 @@ int main(void)
 }
 ```
 
-When compiling multiple files, remember to specify all the `.c` files
-to the compiler, but not the `.h` files, e.g.:
+Khi compile nhiều file, nhớ chỉ định mọi file `.c` cho compiler,
+nhưng không cần file `.h`, ví dụ:
 
 ``` {.zsh}
 gcc -o foo foo.c bar.c
 ```
 
-## Completing Incomplete Types
+## Hoàn chỉnh kiểu không hoàn chỉnh
 
-If you have an incomplete type, you can complete it by defining the
-complete `struct`, `union`, `enum`, or array in the same scope.
+Nếu bạn có kiểu không hoàn chỉnh, bạn có thể hoàn chỉnh nó bằng cách
+định nghĩa `struct`, `union`, `enum`, hay mảng hoàn chỉnh trong cùng
+scope.
 
 ``` {.c}
 struct foo;        // incomplete type
@@ -204,15 +211,15 @@ struct foo {
 struct foo f;      // Success!
 ```
 
-Note that though `void` is an incomplete type, there's no way to
-complete it. Not that anyone ever thinks of doing that weird thing. But
-it does explain why you can do this:
+Lưu ý rằng dù `void` là kiểu không hoàn chỉnh, không có cách nào
+hoàn chỉnh nó. Không phải ai đó nghĩ tới chuyện làm cái quái đó.
+Nhưng nó cũng giải thích tại sao bạn có thể làm cái này:
 
 ``` {.c}
 void *p;             // OK: pointer to incomplete type
 ```
 
-and not either of these:
+và không thể làm cả hai cái này:
 
 ``` {.c}
 void v;              // Error: declare variable of incomplete type
@@ -220,6 +227,6 @@ void v;              // Error: declare variable of incomplete type
 printf("%d\n", *p);  // Error: dereference incomplete type
 ```
 
-The more you know...
+Biết thêm càng tốt...
 
 [i[Incomplete types]<]
