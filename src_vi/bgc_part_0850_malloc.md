@@ -3,88 +3,83 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Manual Memory Allocation
+# Cấp phát bộ nhớ thủ công
 
 [i[Manual memory management]<]
-This is one of the big areas where C likely diverges from languages you
-already know: _manual memory management_.
+Đây là một trong những mảng lớn C có khả năng khác với các ngôn ngữ
+bạn đã biết: _cấp phát bộ nhớ thủ công_.
 
-Other languages uses reference counting, garbage collection, or other
-means to determine when to allocate new memory for some data---and when
-to deallocate it when no variables refer to it.
+Các ngôn ngữ khác dùng reference counting, garbage collection, hay các
+cách khác để quyết định khi nào cấp phát bộ nhớ mới cho dữ liệu, và khi
+nào giải phóng khi không còn biến nào tham chiếu tới nó nữa.
 
-And that's nice. It's nice to be able to not worry about it, to just
-drop all the references to an item and trust that at some point the
-memory associated with it will be freed.
+Và chuyện đó nice. Nice khi không cần lo nghĩ, cứ thả hết tham chiếu
+tới một item và tin rằng ở lúc nào đó bộ nhớ gắn với nó sẽ được giải
+phóng.
 
-But C's not like that, entirely.
+Nhưng C không hoàn toàn như vậy.
 
 [i[Automatic variables]<]
-Of course, in C, some variables are automatically allocated and
-deallocated when they come into scope and leave scope. We call these
-automatic variables. They're your average run-of-the-mill block scope
-"local" variables. No problem.
+Dĩ nhiên trong C, một số biến được cấp phát và giải phóng tự động khi
+chúng vào scope và ra scope. Ta gọi chúng là biến automatic. Đó là các
+biến "local" block-scope bình thường. Không vấn đề gì.
 [i[Automatic variables]>]
 
-But what if you want something to persist longer than a particular
-block? This is where manual memory management comes into play.
+Nhưng nếu bạn muốn cái gì đó tồn tại lâu hơn một block cụ thể thì sao?
+Đây là lúc quản lý bộ nhớ thủ công vào cuộc.
 
-You can tell C explicitly to allocate for you a certain number of bytes
-that you can use as you please. And these bytes will remain allocated
-until you explicitly free that memory^[Or until the program exits, in
-which case all the memory allocated by it is freed. Asterisk: some
-systems allow you to allocate memory that persists after a program
-exits, but it's system dependent, out of scope for this guide, and
-you'll certainly never do it on accident.].
+Bạn có thể bảo C cấp phát tường minh cho bạn một số byte nhất định để
+dùng theo ý muốn. Các byte này sẽ vẫn được cấp phát cho đến khi bạn
+tường minh giải phóng bộ nhớ đó^[Hoặc cho đến khi chương trình thoát,
+lúc đó mọi bộ nhớ được cấp phát sẽ được giải phóng. Dấu sao: một số
+hệ thống cho phép cấp phát bộ nhớ tồn tại cả sau khi chương trình
+thoát, nhưng chuyện đó phụ thuộc hệ thống, ngoài phạm vi của sách
+này, và chắc chắn bạn sẽ không vô tình làm thế.].
 
-It's important to free the memory you're done with! If you don't, we
-call that a _memory leak_ and your process will continue to reserve that
-memory until it exits.
+Quan trọng là giải phóng bộ nhớ khi xong việc với nó! Nếu không, ta
+gọi đó là _memory leak_ (rò rỉ bộ nhớ) và process của bạn sẽ tiếp tục
+chiếm bộ nhớ đó cho đến khi thoát.
 
-_If you manually allocated it, you have to manually free it when you're
-done with it._
+_Bạn đã cấp phát thủ công, thì bạn phải giải phóng thủ công khi xong
+việc._
 
-So how do we do this? We're going to learn a couple new functions, and
-make use of the `sizeof` operator to help us learn how many bytes to
-allocate.
+Vậy làm sao? Ta sẽ học thêm vài hàm, và dùng toán tử `sizeof` để giúp
+biết cần cấp phát bao nhiêu byte.
 
 [i[The stack]<]
 [i[The heap]<]
-In common C parlance, devs say that automatic local variables are
-allocated "on the stack", and manually-allocated memory is "on the
-heap". The spec doesn't talk about either of those things, but all C
-devs will know what you're talking about if you bring them up.
+Nói kiểu phổ thông trong C, dev hay nói biến automatic local được cấp
+phát "trên stack", còn bộ nhớ cấp phát thủ công thì "trên heap". Spec
+không nói tới hai thứ đó, nhưng mọi dev C đều hiểu nếu bạn nhắc tới.
 [i[The heap]>]
 [i[The stack]>]
 
-All functions we're going to learn in this chapter can be found in
-`<stdlib.h>`.
+Mọi hàm ta sẽ học trong chương này đều nằm trong `<stdlib.h>`.
 
-## Allocating and Deallocating, `malloc()` and `free()`
+## Cấp phát và giải phóng, `malloc()` và `free()`
 
 [i[`malloc()` function]<]
-The `malloc()` function accepts a number of bytes to allocate, and
-returns a void pointer to that block of newly-allocated memory.
+Hàm `malloc()` nhận số byte cần cấp phát, và trả về con trỏ void tới
+khối bộ nhớ vừa cấp phát.
 
-Since it's a `void*`, you can assign it into whatever pointer type you
-want... normally this will correspond in some way to the number of bytes
-you're allocating.
+Vì nó là `void*`, bạn có thể gán vào bất kỳ kiểu con trỏ nào tuỳ ý,
+thường con trỏ đó sẽ ứng theo cách nào đó với số byte bạn đang cấp
+phát.
 
 [i[`sizeof` operator-->with `malloc()`]<]
-So... how many bytes should I allocate? We can use `sizeof` to help with
-that. If we want to allocate enough room for a single `int`, we can use
-`sizeof(int)` and pass that to `malloc()`.
+Vậy nên cấp phát bao nhiêu byte? Ta có thể dùng `sizeof` giúp cho
+chuyện đó. Nếu muốn cấp phát đủ chỗ cho một `int`, ta có thể dùng
+`sizeof(int)` và truyền vào `malloc()`.
 [i[`sizeof` operator-->with `malloc()`]>]
 
 [i[`free()` function]<]
-After we're done with some allocated memory, we can call `free()` to
-indicate we're done with that memory and it can be used for something
-else. As an argument, you pass the same pointer you got from `malloc()`
-(or a copy of it). It's undefined behavior to use a memory region after
-you `free()` it.
+Sau khi xong việc với đoạn bộ nhớ đã cấp phát, ta gọi `free()` để báo
+đã xong với bộ nhớ đó và có thể dùng cho việc khác. Đối số là cùng
+con trỏ bạn nhận từ `malloc()` (hoặc bản sao của nó). Dùng vùng bộ
+nhớ sau khi `free()` là undefined behavior.
 
-Let's try. We'll allocate enough memory for an `int`, and then store
-something there, and then print it.
+Thử xem. Ta sẽ cấp phát đủ chỗ cho một `int`, rồi lưu cái gì đó vào
+đó, rồi in ra.
 
 ``` {.c}
 // Allocate space for a single int (sizeof(int) bytes-worth):
@@ -101,16 +96,15 @@ free(p);  // All done with that memory
 ```
 [i[`free()` function]>]
 
-Now, in that contrived example, there's really no benefit to it. We
-could have just used an automatic `int` and it would have worked. But
-we'll see how the ability to allocate memory this way has its
-advantages, especially with more complex data structures.
+Trong ví dụ bịa đặt đó, thực sự cũng chẳng lợi gì. Ta có thể dùng một
+`int` automatic và nó vẫn chạy. Nhưng rồi sẽ thấy khả năng cấp phát
+bộ nhớ cách này có những lợi thế, đặc biệt với các cấu trúc dữ liệu
+phức tạp hơn.
 
 [i[`sizeof` operator-->with `malloc()`]<]
-One more thing you'll commonly see takes advantage of the fact that
-`sizeof` can give you the size of the result type of any constant
-expression. So you could put a variable name in there, too, and use
-that. Here's an example of that, just like the previous one:
+Một điều khác hay gặp tận dụng chuyện `sizeof` có thể cho biết kích
+cỡ của kiểu kết quả của bất kỳ biểu thức hằng nào. Nên bạn cũng có
+thể đặt tên biến vào đó dùng. Đây là ví dụ, y như cái trước:
 
 ``` {.c}
 int *p = malloc(sizeof *p);  // *p is an int, so same as sizeof(int)
@@ -118,16 +112,15 @@ int *p = malloc(sizeof *p);  // *p is an int, so same as sizeof(int)
 [i[`sizeof` operator-->with `malloc()`]>]
 [i[`malloc()` function]>]
 
-## Error Checking
+## Kiểm lỗi
 
 [i[`malloc()` function-->error checking]<]
-All the allocation functions return a pointer to the newly-allocated
-stretch of memory, or `NULL` if the memory cannot be allocated for some
-reason.
+Mọi hàm cấp phát đều trả về con trỏ tới vùng bộ nhớ vừa cấp phát, hoặc
+`NULL` nếu vì lý do nào đó bộ nhớ không cấp phát được.
 
-Some OSes like Linux can be configured in such a way that `malloc()`
-never returns `NULL`, even if you're out of memory. But despite this,
-you should always code it up with protections in mind.
+Một số OS như Linux có thể được cấu hình sao cho `malloc()` không bao
+giờ trả `NULL`, kể cả khi hết bộ nhớ. Nhưng dù vậy, bạn vẫn luôn nên
+viết code có phòng bị.
 
 ``` {.c}
 int *x;
@@ -140,8 +133,7 @@ if (x == NULL) {
 }
 ```
 
-Here's a common pattern that you'll see, where we do the assignment 
-and the condition on the same line:
+Đây là mẫu phổ biến bạn sẽ thấy, gán và kiểm tra trên cùng một dòng:
 
 ``` {.c}
 int *x;
@@ -153,32 +145,30 @@ if ((x = malloc(sizeof(int) * 10)) == NULL) {
 ```
 [i[`malloc()` function-->error checking]>]
 
-## Allocating Space for an Array
+## Cấp phát cho mảng
 
 [i[`malloc()` function-->and arrays]<]
-We've seen how to allocate space for a single thing; now what about for
-a bunch of them in an array?
+Ta đã xem cách cấp phát cho một thứ, giờ thế nào với một đống chúng
+trong mảng?
 
-In C, an array is a bunch of the same thing back-to-back in a contiguous
-stretch of memory.
+Trong C, mảng là một đống những thứ giống nhau xếp sát nhau trong một
+vùng bộ nhớ liên tục.
 
-We can allocate a contiguous stretch of memory---we've seen how to do
-that. If we wanted 3490 bytes of memory, we could just ask for it:
+Ta có thể cấp phát một vùng bộ nhớ liên tục, đã thấy cách rồi. Nếu
+muốn 3490 byte bộ nhớ, cứ đòi:
 
 ``` {.c}
 char *p = malloc(3490);  // Voila
 ```
 
-And---indeed!---that's an array of 3490 `char`s (AKA a string!) since
-each `char` is 1 byte. In other words, `sizeof(char)` is `1`.
+Và, đúng thế!, đó là mảng 3490 `char` (cũng là một chuỗi!) vì mỗi
+`char` là 1 byte. Nói cách khác, `sizeof(char)` là `1`.
 
-Note: there's no initialization done on the newly-allocated
-memory---it's full of garbage. Clear it with `memset()` if you want to,
-or see `calloc()`, below.
+Chú ý: bộ nhớ vừa cấp phát không được khởi tạo gì, đầy rác. Dọn sạch
+bằng `memset()` nếu cần, hoặc xem `calloc()` ở dưới.
 
-But we can just multiply the size of the thing we want by the number of
-elements we want, and then access them using either pointer or array
-notation. Example!
+Nhưng ta chỉ cần nhân kích cỡ thứ ta muốn với số phần tử muốn, rồi
+truy cập bằng ký hiệu con trỏ hay ký hiệu mảng. Ví dụ!
 
 [i[`sizeof` operator-->with `malloc()`]<]
 ``` {.c .numberLines}
@@ -203,33 +193,31 @@ int main(void)
 }
 ```
 
-The key's in that `malloc()` line. If we know each `int` takes
-`sizeof(int)` bytes to hold it, and we know we want 10 of them, we can
-just allocate exactly that many bytes with:
+Chìa khoá ở dòng `malloc()`. Nếu biết mỗi `int` chiếm `sizeof(int)`
+byte, và muốn 10 cái, ta cấp phát đúng chừng đó byte với:
 
 ``` {.c}
 sizeof(int) * 10
 ```
 
-And this trick works for every type. Just pass it to `sizeof` and
-multiply by the size of the array.
+Và mánh này chạy cho mọi kiểu. Cứ truyền vào `sizeof` rồi nhân với
+kích cỡ mảng.
 [i[`sizeof` operator-->with `malloc()`]>]
 [i[`malloc()` function-->and arrays]>]
 
-## An Alternative: `calloc()`
+## Phương án khác: `calloc()`
 
 [i[`calloc()` function]<]
-This is another allocation function that works similarly to `malloc()`,
-with two key differences:
+Đây là một hàm cấp phát nữa, hoạt động tương tự `malloc()`, với hai
+khác biệt then chốt:
 
-* Instead of a single argument, you pass the size of one element, and
-  the number of elements you wish to allocate. It's like it's made for
-  allocating arrays.
-* It clears the memory to zero.
+* Thay vì một đối số, bạn truyền kích cỡ của một phần tử, và số phần
+  tử muốn cấp phát. Cứ như sinh ra để cấp phát mảng.
+* Nó xoá bộ nhớ về không.
 
-You still use `free()` to deallocate memory obtained through `calloc()`.
+Bạn vẫn dùng `free()` để giải phóng bộ nhớ lấy qua `calloc()`.
 
-Here's a comparison of `calloc()` and `malloc()`.
+Đây là so sánh giữa `calloc()` và `malloc()`.
 
 ``` {.c}
 // Allocate space for 10 ints with calloc(), initialized to 0:
@@ -240,31 +228,29 @@ int *q = malloc(10 * sizeof(int));
 memset(q, 0, 10 * sizeof(int));   // set to 0
 ```
 
-Again, the result is the same for both except `malloc()` doesn't zero
-the memory by default.
+Lần nữa, kết quả giống nhau cả hai, chỉ khác `malloc()` không xoá bộ
+nhớ về 0 mặc định.
 [i[`calloc()` function]>]
 
-## Changing Allocated Size with `realloc()`
+## Đổi kích cỡ đã cấp phát với `realloc()`
 
 [i[`realloc()` function]<]
-If you've already allocated 10 `int`s, but later you decide you need 20,
-what can you do?
+Nếu bạn đã cấp phát 10 `int`, nhưng sau lại quyết định cần 20, làm
+sao?
 
-One option is to allocate some new space, and then `memcpy()` the memory
-over... but it turns out that sometimes you don't need to move anything.
-And there's one function that's just smart enough to do the right thing
-in all the right circumstances: `realloc()`.
+Một lựa chọn là cấp phát chỗ mới rồi `memcpy()` sang... nhưng hoá ra
+đôi khi không cần dịch chuyển gì. Và có một hàm vừa đủ thông minh để
+làm điều đúng trong mọi trường hợp đúng: `realloc()`.
 
-It takes a pointer to some previously-allocted memory (by `malloc()` or
-`calloc()`) and a new size for the memory region to be.
+Nó nhận con trỏ tới vùng bộ nhớ đã cấp phát trước (qua `malloc()`
+hoặc `calloc()`) và kích cỡ mới cho vùng bộ nhớ đó.
 
-It then grows or shrinks that memory, and returns a pointer to it.
-Sometimes it might return the same pointer (if the data didn't have to
-be copied elsewhere), or it might return a different one (if the data
-did have to be copied).
+Nó sẽ nới rộng hoặc thu nhỏ bộ nhớ đó, rồi trả về con trỏ tới nó. Đôi
+khi nó có thể trả về cùng con trỏ (nếu dữ liệu không cần chuyển đi
+đâu), hoặc con trỏ khác (nếu dữ liệu phải bị chép đi).
 
-Be sure when you call `realloc()`, you specify the number of _bytes_ to
-allocate, and not just the number of array elements! That is:
+Chắc chắn khi gọi `realloc()`, bạn phải chỉ định số _byte_ cần cấp
+phát, không phải số phần tử mảng! Tức là:
 
 ``` {.c}
 num_floats *= 2;
@@ -274,14 +260,12 @@ np = realloc(p, num_floats);  // WRONG: need bytes, not number of elements!
 np = realloc(p, num_floats * sizeof(float));  // Better!
 ```
 
-Let's allocate an array of 20 `float`s, and then change our mind and
-make it an array of 40.
+Cấp phát một mảng 20 `float`, rồi đổi ý thành 40 cái.
 
-We're going to assign the return value of realloc() into another 
-pointer so we can check if it's NULL. If it's not, then we can
-reassign it into our original pointer. (If we just assigned the return
-value directly into the original pointer, we'd lose that pointer if the
-function returned `NULL` and we'd have no way to get it back.)
+Ta sẽ gán giá trị trả về của realloc() vào một con trỏ khác để kiểm
+tra xem nó có phải NULL không. Nếu không phải, ta có thể gán lại vào
+con trỏ gốc. (Nếu gán thẳng giá trị trả về vào con trỏ gốc, ta sẽ mất
+con trỏ đó nếu hàm trả về `NULL` mà không có cách nào lấy lại.)
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -321,38 +305,34 @@ int main(void)
 }
 ```
 
-Notice in there how we took the return value from `realloc()` and
-reassigned it into the same pointer variable `p` that we passed in.
-That's pretty common to do.
+Chú ý chỗ ta lấy giá trị trả về từ `realloc()` rồi gán lại vào cùng
+biến con trỏ `p` đã truyền vào. Chuyện này khá phổ biến.
 
-Also if line 7 is looking weird, with that `sizeof *p` in there,
-remember that `sizeof` works on the size of the type of the expression.
-And the type of `*p` is `float`, so that line is equivalent to
-`sizeof(float)`.
+Cũng vậy, nếu dòng 7 trông lạ, với `sizeof *p` ở đó, nhớ rằng `sizeof`
+hoạt động trên kích cỡ của kiểu của biểu thức. Và kiểu của `*p` là
+`float`, nên dòng đó tương đương với `sizeof(float)`.
 
-Finally, it might be a little weird that I don't have a `free(new_p)` in
-there anywhere, even though that was the pointer returned by
-`realloc()`. The reason is that we copy `new_p` into `p` on line 23, so
-they both have the same value; that is, they both point to the same
-chunk of memory, and there's only the one chunk. So when I `free()`, I
-could actually free either of them for the same effect.
+Cuối cùng, có thể hơi lạ là tôi không có `free(new_p)` ở đâu cả, dù
+đó là con trỏ trả về từ `realloc()`. Lý do là ta chép `new_p` vào `p`
+ở dòng 23, nên cả hai cùng giá trị; cả hai trỏ tới cùng một khối bộ
+nhớ, và chỉ có một khối. Nên khi `free()`, thực ra tôi free cái nào
+cũng được kết quả như nhau.
 
 [i[`realloc()` function]>]
 
 
-### Reading in Lines of Arbitrary Length
+### Đọc dòng có độ dài bất kỳ
 
-I want to demonstrate two things with this full-blown example.
+Tôi muốn minh hoạ hai chuyện bằng ví dụ đầy đủ này.
 
-1. Use of `realloc()` to grow a buffer as we read in more data.
-2. Use of `realloc()` to shrink the buffer down to the perfect size
-   after we've completed the read.
+1. Dùng `realloc()` để nới buffer khi đọc thêm dữ liệu.
+2. Dùng `realloc()` để co buffer về kích cỡ hoàn hảo sau khi đã đọc
+   xong.
 
-What we see here is a loop that calls `fgetc()` over and over to append
-to a buffer until we see that the last character is a newline.
+Thứ ta thấy đây là một vòng lặp gọi `fgetc()` lặp đi lặp lại để nối
+vào buffer đến khi thấy ký tự cuối là newline.
 
-Once it finds the newline, it shrinks the buffer to just the right size
-and returns it.
+Khi tìm thấy newline, nó thu buffer về đúng kích cỡ rồi trả về.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -441,26 +421,25 @@ int main(void)
 }
 ```
 
-When growing memory like this, it's common (though hardly a law) to
-double the space needed each step just to minimize the number of
-`realloc()`s that occur.
+Khi nới bộ nhớ kiểu này, thường (dù chẳng phải luật) là nhân đôi
+không gian cần thiết ở mỗi bước để giảm số lần `realloc()`.
 
-Finally you might note that `readline()` returns a pointer to a
-`malloc()`d buffer. As such, it's up to the caller to explicitly
-`free()` that memory when it's done with it.
+Cuối cùng bạn có thể để ý rằng `readline()` trả về con trỏ tới buffer
+được `malloc()`. Vì vậy, caller có trách nhiệm `free()` tường minh bộ
+nhớ đó khi xong việc.
 
-### `realloc()` with `NULL`
+### `realloc()` với `NULL`
 
 [i[`realloc()` function-->with `NULL` argument]<]
-Trivia time! These two lines are equivalent:
+Giờ tới Trivia! Hai dòng này tương đương:
 
 ``` {.c}
 char *p = malloc(3490);
 char *p = realloc(NULL, 3490);
 ```
 
-That could be convenient if you have some kind of allocation loop and
-you don't want to special-case the first `malloc()`.
+Có thể tiện khi bạn có vòng lặp cấp phát và không muốn xử lý riêng
+cho `malloc()` lần đầu.
 
 ``` {.c}
 int *p = NULL;
@@ -476,49 +455,47 @@ while (!done) {
 }
 ```
 
-In that example, we didn't need an initial `malloc()` since `p` was
-`NULL` to start.
+Trong ví dụ đó, ta không cần `malloc()` khởi tạo vì `p` ban đầu là
+`NULL`.
 [i[`realloc()` function-->with `NULL` argument]>]
 
-## Aligned Allocations
+## Cấp phát có canh lề
 
 [i[Memory alignment]<]
-You probably aren't going to need to use this.
+Chắc bạn sẽ không phải dùng cái này.
 
-And I don't want to get too far off in the weeds talking about it right
-now, but there's this thing called _memory alignment_, which has to do
-with the memory address (pointer value) being a multiple of a certain
-number.
+Và tôi không muốn đi quá xa chỗ cỏ dại bàn về nó ngay bây giờ, nhưng
+có một thứ gọi là _memory alignment_ (canh lề bộ nhớ), liên quan tới
+chuyện địa chỉ bộ nhớ (giá trị con trỏ) là bội của một số cụ thể.
 
-For example, a system might require that 16-bit values begin on memory
-addresses that are multiples of 2. Or that 64-bit values begin on memory
-addresses that are multiples of 2, 4, or 8, for example. It depends on
-the CPU.
+Ví dụ, hệ thống có thể yêu cầu các giá trị 16-bit phải bắt đầu ở địa
+chỉ bộ nhớ là bội của 2. Hoặc giá trị 64-bit phải bắt đầu ở địa chỉ
+là bội của 2, 4, hay 8, chẳng hạn. Tuỳ CPU.
 
-Some systems require this kind of alignment for fast memory access, or
-some even for memory access at all.
+Vài hệ thống yêu cầu kiểu canh lề này để truy cập bộ nhớ nhanh, hoặc
+một số hệ thì để truy cập được bộ nhớ tí nào.
 
-Now, if you use `malloc()`, `calloc()`, or `realloc()`, C will give you
-a chunk of memory that's well-aligned for any value at all, even
-`struct`s. Works in all cases.
+Nếu bạn dùng `malloc()`, `calloc()`, hay `realloc()`, C sẽ đưa bạn
+một khối bộ nhớ được canh lề ổn cho bất kỳ giá trị nào, kể cả
+`struct`. Chạy trong mọi trường hợp.
 
-But there might be times that you know that some data can be aligned at
-a smaller boundary, or must be aligned at a larger one for some reason.
-I imagine this is more common with embedded systems programming.
+Nhưng có thể có lúc bạn biết một số dữ liệu canh được theo biên nhỏ
+hơn, hoặc vì lý do nào đó phải canh theo biên lớn hơn. Tôi đoán
+chuyện này phổ biến hơn với lập trình hệ nhúng.
 
 [i[`aligned_alloc()` function]<]
-In those cases, you can specify an alignment with `aligned_alloc()`.
+Trong những trường hợp đó, bạn có thể chỉ định một alignment với
+`aligned_alloc()`.
 
-The alignment is an integer power of two greater than zero, so `2`, `4`,
-`8`, `16`, etc. and you give that to `aligned_alloc()` before the number
-of bytes you're interested in.
+Alignment là số nguyên luỹ thừa của hai lớn hơn không, nên là `2`,
+`4`, `8`, `16`, v.v. và bạn đưa cái đó cho `aligned_alloc()` trước
+số byte bạn quan tâm.
 
-The other restriction is that the number of bytes you allocate needs to
-be a multiple of the alignment. But this might be changing. See [fl[C
-Defect Report
+Ràng buộc kia là số byte bạn cấp phát phải là bội của alignment.
+Nhưng chuyện này có thể đang thay đổi. Xem [fl[C Defect Report
 460|http://www.open-std.org/jtc1/sc22/wg14/www/docs/summary.htm#dr_460]]
 
-Let's do an example, allocating on a 64-byte boundary:
+Ví dụ, cấp phát trên biên 64-byte:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -539,13 +516,12 @@ int main(void)
 }
 ```
 
-I want to throw a note here about `realloc()` and `aligned_alloc()`.
-`realloc()` doesn't have any alignment guarantees, so if you need to get
-some aligned reallocated space, you'll have to do it the hard way with
-`memcpy()`.
+Tôi muốn ghi chú ở đây về `realloc()` và `aligned_alloc()`. `realloc()`
+không có bảo đảm gì về alignment, nên nếu bạn cần lấy được vùng cấp
+phát lại đã canh lề, bạn sẽ phải làm kiểu khó với `memcpy()`.
 [i[`aligned_alloc()` function]>]
 
-Here's a non-standard `aligned_realloc()` function, if you need it:
+Đây là một hàm `aligned_realloc()` không chuẩn, nếu bạn cần:
 
 ``` {.c}
 void *aligned_realloc(void *ptr, size_t old_size, size_t alignment, size_t size)
@@ -566,8 +542,8 @@ void *aligned_realloc(void *ptr, size_t old_size, size_t alignment, size_t size)
 }
 ```
 
-Note that it _always_ copies data, taking time, while real `realloc()`
-will avoid that if it can. So this is hardly efficient. Avoid needing to
-reallocate custom-aligned data.
+Chú ý rằng nó _luôn luôn_ chép dữ liệu, tốn thời gian, trong khi
+`realloc()` thật sẽ tránh chép nếu có thể. Nên nó kém hiệu quả. Tránh
+phải cấp phát lại dữ liệu canh lề tuỳ chỉnh.
 [i[Memory alignment]>]
 [i[Manual memory management]>]
