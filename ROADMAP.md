@@ -15,7 +15,7 @@ Programming (Vietnamese).
 | bgc_part_0500_arrays.md | Arrays | done |
 | bgc_part_0600_strings.md | Strings | done |
 | bgc_part_0700_structs.md | Structs | done |
-| bgc_part_0725_io.md | File Input/Output | not started |
+| bgc_part_0725_io.md | File Input/Output | done |
 | bgc_part_0750_typedef.md | `typedef`: Making New Types | not started |
 | bgc_part_0800_pointers_2.md | Pointers II: Arithmetic | not started |
 | bgc_part_0850_malloc.md | Manual Memory Allocation | not started |

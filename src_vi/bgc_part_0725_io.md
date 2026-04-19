@@ -6,102 +6,99 @@
 # File Input/Output
 
 [i[File I/O]<]
-We've already seen some examples of I/O with `printf()` for doing I/O at
-the console.
+Ta đã thấy vài ví dụ về I/O với `printf()` để làm I/O ở console.
 
-But we'll push those concepts a little farther this chapter.
+Nhưng ở chương này ta sẽ đẩy các khái niệm đó đi xa hơn một chút.
 
-## The `FILE*` Data Type
+## Kiểu dữ liệu `FILE*`
 
 [i[`FILE*` type]<]
-When we do any kind of I/O in C, we do so through a piece of data that
-you get in the form of a `FILE*` type. This `FILE*` holds all the
-information needed to communicate with the I/O subsystem about which
-file you have open, where you are in the file, and so on.
+Khi làm bất kỳ dạng I/O nào trong C, ta làm thông qua một mẩu dữ liệu
+dưới dạng kiểu `FILE*`. `FILE*` này giữ mọi thông tin cần để giao tiếp
+với hệ thống I/O về file bạn đang mở, vị trí hiện tại trong file, v.v.
 
-The spec refers to these as _streams_, i.e. a stream of data from a file
-or from any source. I'm going to use "files" and "streams"
-interchangeably, but really you should think of a "file" as a special
-case of a "stream". There are other ways to stream data into a program
-than just reading from a file.
+Đặc tả gọi những thứ này là _stream_, tức một dòng dữ liệu chảy ra từ
+file hoặc từ bất kỳ nguồn nào. Tôi sẽ dùng lẫn "file" với "stream",
+nhưng thực sự bạn nên coi "file" là một trường hợp đặc biệt của
+"stream". Có những cách khác để đẩy dữ liệu vào chương trình ngoài
+chuyện đọc từ file.
 
-We'll see in a moment how to go from having a filename to getting an
-open `FILE*` for it, but first I want to mention three streams that are
-already open for you and ready for use.
+Chút nữa ta sẽ xem cách đi từ một tên file tới một `FILE*` đã mở, nhưng
+trước hết tôi muốn nhắc đến ba stream đã được mở sẵn và có thể dùng
+ngay.
 
 [i[`stdin` standard input]<]
 [i[`stdout` standard output]<]
 [i[`stderr` standard error]<]
 
-|`FILE*` name|Description|
+|Tên `FILE*`|Mô tả|
 |-|-|
-|`stdin`|Standard Input, generally the keyboard by default|
-|`stdout`|Standard Output, generally the screen by default|
-|`stderr`|Standard Error, generally the screen by default, as well|
+|`stdin`|Standard Input (đầu vào chuẩn), mặc định thường là bàn phím|
+|`stdout`|Standard Output (đầu ra chuẩn), mặc định thường là màn hình|
+|`stderr`|Standard Error (lỗi chuẩn), mặc định cũng thường là màn hình|
 
-We've actually been using these implicitly already, it turns out. For
-example, these two calls are the same:
+Hoá ra ta đã dùng chúng ngầm suốt rồi. Chẳng hạn, hai lời gọi này là
+một:
 
 ``` {.c}
 printf("Hello, world!\n");
 fprintf(stdout, "Hello, world!\n");  // printf to a file
 ```
 
-But more on that later.
+Nhưng chuyện đó để sau.
 
-Also you'll notice that both `stdout` and `stderr` go to the screen.
-While this seems at first either like an oversight or redundancy, it
-actually isn't. Typical operating systems allow you to _redirect_ the
-output of either of those into different files, and it can be convenient
-to be able to separate error messages from regular non-error output.
+Bạn cũng sẽ nhận ra rằng cả `stdout` và `stderr` đều ra màn hình. Nhìn
+qua tưởng như sơ suất hay trùng lặp, nhưng thực ra không phải. Các hệ
+điều hành điển hình cho phép bạn _redirect_ (chuyển hướng) đầu ra của
+bất kỳ cái nào trong hai vào các file khác nhau, và việc tách thông
+báo lỗi khỏi đầu ra thường có thể rất tiện.
 
-For example, in a POSIX shell (like sh, ksh, bash, zsh, etc.) on a
-Unix-like system, we could run a program and send just the non-error
-(`stdout`) output to one file, and all the error (`stderr`) output to
-another file.
+Ví dụ, trong shell POSIX (như sh, ksh, bash, zsh, v.v.) trên hệ thống
+kiểu Unix, ta có thể chạy chương trình và đẩy đầu ra không-lỗi
+(`stdout`) vào một file, còn đầu ra lỗi (`stderr`) vào file khác.
 
 ``` {.zsh}
 ./foo > output.txt 2> errors.txt   # This command is Unix-specific
 ```
 
-For this reason, you should send serious error messages to `stderr`
-instead of `stdout`.
+Vì lý do đó, bạn nên gửi các thông báo lỗi nghiêm trọng ra `stderr`
+chứ đừng ra `stdout`.
 [i[`stdin` standard input]>]
 [i[`stdout` standard output]>]
 [i[`stderr` standard error]>]
 
-More on how to do that later.
+Cách làm sẽ nói sau.
 [i[`FILE*` type]<]
 
-## Reading Text Files
+## Đọc file văn bản
 
 [i[File I/O-->text files, reading]<]
-Streams are largely categorized two different ways: _text_ and _binary_.
+Stream được phân loại đại khái theo hai cách: _text_ (văn bản) và
+_binary_ (nhị phân).
 
-Text streams are allowed to do significant translation of the data, most
-notably translations of newlines to their different representations^[We
-used to have three different newlines in broad effect: Carriage Return
-(CR, used on old Macs), Linefeed (LF, used on Unix systems), and
-Carriage Return/Linefeed (CRLF, used on Windows systems). Thankfully the
-introduction of OS X, being Unix-based, reduced this number to two.].
-Text files are logically a sequence of _lines_ separated by newlines. To
-be portable, your input data should always end with a newline.
+Stream văn bản được phép dịch dữ liệu khá nhiều, đáng chú ý nhất là
+dịch các newline sang các biểu diễn khác nhau^[Trước kia ta có ba loại
+newline dùng rộng rãi: Carriage Return (CR, dùng trên Mac đời cũ),
+Linefeed (LF, dùng trên hệ Unix), và Carriage Return/Linefeed (CRLF,
+dùng trên hệ Windows). May mắn là sự xuất hiện của OS X, vốn dựa trên
+Unix, đã rút con số xuống còn hai.]. File văn bản về mặt logic là một
+chuỗi _dòng_ được ngăn bởi newline. Để portable, dữ liệu đầu vào nên
+luôn kết thúc bằng một newline.
 
-But the general rule is that if you're able to edit the file in a
-regular text editor, it's a text file. Otherwise, it's binary. More on
-binary later.
+Nhưng quy tắc chung là nếu bạn có thể chỉnh sửa file đó trong một
+trình soạn thảo văn bản thông thường thì đó là file văn bản. Ngược
+lại là nhị phân. Nhị phân thì để sau.
 
-So let's get to work---how do we open a file for reading, and pull data
-out of it?
+Vậy, vào việc, làm sao mở một file để đọc và kéo dữ liệu ra?
 
-Let's create a file called `hello.txt` that has just this in it:
+Tạo một file `hello.txt` chỉ chứa mỗi:
 
 ``` {.default}
 Hello, world!
 ```
 
-And let's write a program to open the file, read a character out of it,
-and then close the file when we're done. That's the game plan!
+Rồi viết một chương trình mở file, đọc một ký tự ra, rồi đóng file
+khi xong. Kế hoạch thế!
 
 [i[`fopen()` function]<]
 [i[`fgetc()` function]<]
@@ -122,52 +119,51 @@ int main(void)
 }
 ```
 
-See how when we opened the file with `fopen()`, it returned the `FILE*`
-to us so we could use it later.
+Thấy đấy, khi mở file với `fopen()`, nó trả `FILE*` về cho ta để dùng
+sau.
 
-(I'm leaving it out for brevity, but `fopen()` will return `NULL` if
-something goes wrong, like file-not-found, so you should really error
-check it!)
+(Tôi bỏ qua để gọn, nhưng `fopen()` sẽ trả về `NULL` nếu có gì trục
+trặc, như không tìm thấy file, nên bạn thật sự phải check lỗi cho nó!)
 
-Also notice the `"r"` that we passed in---this means "open a text stream
-for reading". (There are various strings we can pass to `fopen()` with
-additional meaning, like writing, or appending, and so on.)
+Cũng chú ý chuỗi `"r"` ta truyền vào, nghĩa là "mở một stream văn bản
+để đọc". (Có nhiều chuỗi khác nhau có thể truyền cho `fopen()` với ý
+nghĩa khác, như ghi, append, v.v.)
 [i[`fopen()` function]>]
 
-After that, we used the `fgetc()` function to get a character from the
-stream. You might be wondering why I've made `c` an `int` instead of a
-`char`---hold that thought!
+Sau đó ta dùng hàm `fgetc()` để lấy một ký tự từ stream. Có thể bạn
+thắc mắc sao tôi khai báo `c` là `int` chứ không phải `char`, giữ câu
+hỏi đó lại nhé!
 [i[`fgetc()` function]>]
 
-Finally, we close the stream when we're done with it. All streams are
-automatically closed when the program exits, but it's good form and good
-housekeeping to explicitly close any files yourself when done with them.
+Cuối cùng ta đóng stream khi xong. Mọi stream đều được đóng tự động
+khi chương trình thoát, nhưng đóng file thủ công khi không còn dùng
+nữa là phong cách tốt và cẩn thận.
 [i[`fclose()` function]>]
 
-The [i[`FILE*` type]]`FILE*` keeps track of our position in the
-file. So subsequent calls to `fgetc()` would get the next character in
-the file, and then the next, until the end.
+[i[`FILE*` type]]`FILE*` theo dõi vị trí của ta trong file. Nên các
+lời gọi `fgetc()` tiếp theo sẽ lấy ký tự kế, rồi ký tự kế nữa, cho tới
+hết.
 
-But that sounds like a pain. Let's see if we can make it easier.
+Nhưng nghe khổ sở quá. Xem có cách nào dễ hơn không.
 [i[File I/O-->text files, reading]>]
 
-## End of File: `EOF`
+## Hết file: `EOF`
 
 [i[`EOF` end of file]<]
-There is a special character defined as a macro: `EOF`. This is what
-`fgetc()` will return when the end of the file has been reached and
-you've attempted to read another character.
+Có một ký tự đặc biệt được định nghĩa dạng macro: `EOF`. Đây là thứ
+`fgetc()` sẽ trả về khi đã tới cuối file và bạn cố đọc thêm một ký tự
+nữa.
 
-How about I share that Fun Fact™, now. Turns out `EOF` is the reason why
-`fgetc()` and functions like it return an `int` instead of a `char`.
-`EOF` isn't a character proper, and its value likely falls outside the
-range of `char`. Since `fgetc()` needs to be able to return any byte
-**and** `EOF`, it needs to be a wider type that can hold more values. so
-`int` it is. But unless you're comparing the returned value against
-`EOF`, you can know, deep down, it's a `char`.
+Giờ kể một Fun Fact™. Hoá ra `EOF` là lý do `fgetc()` và các hàm kiểu
+nó trả về `int` thay vì `char`. `EOF` không phải ký tự đúng nghĩa, và
+giá trị của nó nhiều khả năng nằm ngoài miền của `char`. Vì `fgetc()`
+phải có khả năng trả về bất kỳ byte nào **và** `EOF`, nó cần một kiểu
+rộng hơn để chứa nhiều giá trị hơn. Nên là `int`. Nhưng trừ khi bạn
+đang so sánh giá trị trả về với `EOF`, trong thâm tâm bạn có thể yên
+tâm rằng đó là một `char`.
 
-All right! Back to reality! We can use this to read the whole file in a
-loop.
+Ổn! Quay lại thực tế! Ta có thể dùng cái này để đọc cả file trong một
+vòng lặp.
 
 [i[`fopen()` function]<]
 [i[`fgetc()` function]<]
@@ -191,39 +187,37 @@ int main(void)
 [i[`fopen()` function]>]
 [i[`fclose()` function]>]
 
-(If line 10 is too weird, just break it down starting with the
-innermost-nested parens. The first thing we do is assign the result of
-`fgetc()` into `c`, and _then_ we compare _that_ against `EOF`. We've
-just crammed it into a single line. This might look hard to read, but
-study it---it's idiomatic C.)
+(Nếu dòng 10 lạ quá, cứ mổ nó ra bắt đầu từ ngoặc lồng trong cùng. Việc
+đầu tiên là gán kết quả của `fgetc()` vào `c`, _rồi_ mới so sánh _cái
+đó_ với `EOF`. Ta vừa nhét tất cả vào một dòng. Đọc có vẻ khó, nhưng
+nghiền ngẫm đi, đây là C idiomatic đấy.)
 [i[`fgetc()` function]>]
 
-And running this, we see:
+Chạy thử, ta thấy:
 
 ``` {.default}
 Hello, world!
 ```
 
-But still, we're operating a character at a time, and lots of text files
-make more sense at the line level. Let's switch to that.
+Nhưng vẫn đang xử lý từng ký tự một, mà nhiều file văn bản hợp lý hơn
+khi nhìn theo dòng. Chuyển sang cái đó.
 [i[`EOF` end of file]>]
 
-### Reading a Line at a Time
+### Đọc từng dòng một
 
 [i[File I/O-->line by line]<]
-So how can we get an entire line at once? [i[`fgets()`
-function]<]`fgets()` to the rescue! For arguments, it takes a pointer to
-a `char` buffer to hold bytes, a maximum number of bytes to read, and a
-`FILE*` to read from. It returns `NULL` on end-of-file or error.
-`fgets()` is even nice enough to NUL-terminate the string when its
-done^[If the buffer's not big enough to read in an entire line, it'll
-just stop reading mid-line, and the next call to `fgets()` will continue
-reading the rest of the line.].[i[`fgets()` function]>]
+Vậy làm sao lấy nguyên một dòng cùng lúc? [i[`fgets()`
+function]<]`fgets()` giải cứu! Tham số gồm một con trỏ tới buffer
+`char` để chứa byte, số byte tối đa được đọc, và một `FILE*` để đọc
+từ đó. Nó trả về `NULL` khi hết file hoặc lỗi. `fgets()` còn tử tế
+đến mức NUL-terminate chuỗi khi xong^[Nếu buffer không đủ lớn để đọc
+hết một dòng, nó sẽ dừng giữa dòng, và lời gọi `fgets()` kế tiếp sẽ
+tiếp tục đọc phần còn lại của dòng đó.].[i[`fgets()` function]>]
 
-Let's do a similar loop as before, except let's have a multiline file
-and read it in a line at a time.
+Làm một vòng lặp tương tự trước, nhưng lần này với file nhiều dòng và
+đọc từng dòng một.
 
-Here's a file `quote.txt`:
+Đây là file `quote.txt`:
 
 ``` {.default}
 A wise man can learn more from
@@ -232,8 +226,8 @@ can learn from a wise answer.
                   --Bruce Lee
 ```
 
-And here's some code that reads that file a line at a time and prints
-out a line number before each one:
+Và đây là đoạn code đọc file đó từng dòng một và in số dòng trước mỗi
+dòng:
 
 [i[`fgets()` function]<]
 ``` {.c .numberLines}
@@ -255,7 +249,7 @@ int main(void)
 ```
 [i[`fgets()` function]>]
 
-Which gives the output:
+Cho ra:
 
 ``` {.default}
 1: A wise man can learn more from
@@ -265,25 +259,26 @@ Which gives the output:
 ```
 [i[File I/O-->line by line]>]
 
-## Formatted Input
+## Đầu vào có định dạng
 
 [i[File I/O-->formatted input]<]
-You know how you can get formatted output with `printf()` (and, thus,
-`fprintf()` like we'll see, below)?
+Bạn biết cách lấy đầu ra có định dạng bằng `printf()` chứ (và cũng vậy
+với `fprintf()` ta sẽ thấy ở dưới)?
 
 [i[`fscanf()` function]<]
-You can do the same thing with `fscanf()`.
+Bạn có thể làm y như thế với `fscanf()`.
 
-> Before we start, you should be advised that using `scanf()`-style
-> functions can be hazardous with untrusted input. If you don't specify
-> field widths with your `%s`, you could overflow the buffer. Worse,
-> invalid numeric conversion result in undefined behavior. The safe
-> thing to do with untrusted input is to use `%s` with a field width,
-> then use functions like [i[`strtol` function]] `strtol()` or
-> [i[`strtod` function]] `strtod()` to do the conversions.
+> Trước khi bắt đầu, xin lưu ý rằng dùng các hàm kiểu `scanf()` có thể
+> nguy hiểm với đầu vào không đáng tin. Nếu không chỉ định độ rộng
+> trường cho `%s`, bạn có thể tràn buffer. Tệ hơn, chuyển đổi số
+> không hợp lệ sẽ dẫn tới undefined behavior. Cách an toàn với đầu vào
+> không đáng tin là dùng `%s` kèm độ rộng trường, rồi dùng các hàm
+> như [i[`strtol` function]] `strtol()` hay [i[`strtod` function]]
+> `strtod()` để chuyển đổi.
 
-Let's have a file with a series of data records in it. In this case,
-whales, with name, length in meters, and weight in tonnes. `whales.txt`:
+Ta có một file với một dãy bản ghi dữ liệu. Trường hợp này là cá voi,
+với tên, chiều dài tính bằng mét, và cân nặng tính bằng tấn.
+`whales.txt`:
 
 ``` {.default}
 blue 29.9 173
@@ -292,13 +287,12 @@ gray 14.9 41
 humpback 16.0 30
 ```
 
-Yes, we could read these with [i[`fgets()` function]]`fgets()` and then
-parse the string with `sscanf()` (and in that's more resilient against
-corrupted files), but in this case, let's just use `fscanf()` and pull
-it in directly.
+Phải, ta có thể đọc bằng [i[`fgets()` function]]`fgets()` rồi parse
+chuỗi bằng `sscanf()` (và cách đó chống đỡ tốt hơn với file hỏng),
+nhưng lần này cứ dùng `fscanf()` kéo thẳng vào.
 
-The `fscanf()` function skips leading whitespace when reading, and
-returns `EOF` on end-of-file or error.
+Hàm `fscanf()` bỏ qua whitespace ở đầu khi đọc, và trả về `EOF` khi
+hết file hoặc lỗi.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -320,7 +314,7 @@ int main(void)
 ```
 [i[`fscanf()` function]>]
 
-Which gives the result:
+Cho ra:
 
 ``` {.default}
 blue whale, 173 tonnes, 29.9 meters
@@ -330,22 +324,22 @@ humpback whale, 30 tonnes, 16.0 meters
 ```
 [i[File I/O-->formatted input]>]
 
-## Writing Text Files
+## Ghi file văn bản
 
 [i[File I/O-->text files, writing]<]
 [i[`fputc()` function]<]
 [i[`fputs()` function]<]
 [i[`fprintf()` function]<]
-In much the same way we can use `fgetc()`, `fgets()`, and `fscanf()` to
-read text streams, we can use `fputc()`, `fputs()`, and `fprintf()` to
-write text streams.
+Giống hệt như cách ta dùng `fgetc()`, `fgets()`, và `fscanf()` để đọc
+stream văn bản, ta có thể dùng `fputc()`, `fputs()`, và `fprintf()`
+để ghi stream văn bản.
 
-To do so, we have to `fopen()` the file in write mode by passing `"w"`
-as the second argument. Opening an existing file in `"w"` mode will
-instantly truncate that file to 0 bytes for a full overwrite.
+Để làm vậy, ta phải `fopen()` file ở chế độ ghi bằng cách truyền `"w"`
+làm đối số thứ hai. Mở một file đang tồn tại ở chế độ `"w"` sẽ lập
+tức cắt file đó về 0 byte để ghi đè hoàn toàn.
 
-We'll put together a simple program that outputs a file `output.txt`
-using a variety of output functions.
+Ta sẽ ghép một chương trình đơn giản xuất ra file `output.txt` dùng
+vài hàm xuất khác nhau.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -369,7 +363,7 @@ int main(void)
 [i[`fputs()` function]>]
 [i[`fprintf()` function]>]
 
-And this produces a file, `output.txt`, with these contents:
+Chương trình này tạo ra file `output.txt` với nội dung:
 
 ``` {.default}
 B
@@ -377,45 +371,41 @@ x = 32
 Hello, world!
 ```
 
-Fun fact: since `stdout` is a file, you could replace line 8 with:
+Fun fact: vì `stdout` là một file, bạn có thể thay dòng 8 bằng:
 
 ``` {.c}
 fp = stdout;
 ```
 
-and the program would have outputted to the console instead of to a
-file. Try it!
+và chương trình sẽ xuất ra console thay vì ra file. Thử xem!
 [i[File I/O-->text files, writing]>]
 
-## Binary File I/O
+## I/O file nhị phân
 
 [i[File I/O-->binary files]<]
-So far we've just been talking text files. But there's that other beast
-we mentioned early on called _binary_ files, or binary streams.
+Tới giờ ta mới nói file văn bản. Nhưng còn con thú còn lại nhắc hồi
+đầu gọi là file _nhị phân_ (binary), hay binary stream.
 
-These work very similarly to text files, except the I/O subsystem
-doesn't perform any translations on the data like it might with a text
-file. With binary files, you get a raw stream of bytes, and that's all.
+Chúng hoạt động khá giống file văn bản, chỉ khác ở chỗ hệ thống I/O
+không dịch dữ liệu như có thể sẽ làm với file văn bản. Với file nhị
+phân, bạn có một dòng byte thô, thế thôi.
 
-The big difference in opening the file is that you have to add a `"b"`
-to the mode. That is, to read a binary file, open it in `"rb"` mode. To
-write a file, open it in `"wb"` mode.
+Khác biệt lớn khi mở file là phải thêm `"b"` vào mode. Tức là, để đọc
+file nhị phân, mở ở mode `"rb"`. Để ghi file, mở ở mode `"wb"`.
 
-Because it's streams of bytes, and streams of bytes can contain NUL
-characters, and the NUL character is the end-of-string marker in C, it's
-rare that people use the `fprintf()`-and-friends functions to operate on
-binary files.
+Vì là dòng byte, và dòng byte có thể chứa ký tự NUL, mà ký tự NUL là
+dấu kết chuỗi trong C, hiếm khi người ta dùng `fprintf()` và đồng bọn
+để thao tác file nhị phân.
 
 [i[`fwrite()` function]<]
-Instead the most common functions are [i[`fread()` function]]`fread()`
-and `fwrite()`. The functions read and write a specified number of bytes
-to the stream.
+Thay vào đó hai hàm phổ biến nhất là [i[`fread()` function]]`fread()`
+và `fwrite()`. Các hàm này đọc và ghi một số byte chỉ định vào stream.
 
-To demo, we'll write a couple programs. One will write a sequence of
-byte values to disk all at once. And the second program will read a byte
-at a time and print them out^[Normally the second program would read all
-the bytes at once, and _then_ print them out in a loop. That would be
-more efficient. But we're going for demo value, here.].
+Demo cho biết, ta sẽ viết mấy chương trình. Một chương trình sẽ ghi
+một dãy giá trị byte ra đĩa cùng lúc. Chương trình thứ hai sẽ đọc từng
+byte một và in ra^[Thông thường chương trình thứ hai sẽ đọc tất cả
+byte cùng lúc, _rồi_ mới in ra trong vòng lặp. Cách đó hiệu quả hơn.
+Nhưng ở đây cốt là để demo.].
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -441,30 +431,28 @@ int main(void)
 ```
 [i[`fwrite()` function]>]
 
-Those two middle arguments to `fwrite()` are pretty odd. But basically
-what we want to tell the function is, "We have items that are _this_
-big, and we want to write _that_ many of them." This makes it convenient
-if you have a record of a fixed length, and you have a bunch of them in
-an array. You can just tell it the size of one record and how many to
-write. 
+Hai đối số giữa của `fwrite()` trông hơi kỳ. Nhưng đại khái ý ta muốn
+nói với hàm là: "Ta có các mục lớn _ngần này_, và muốn ghi _bấy nhiêu_
+mục." Tiện lợi nếu bạn có bản ghi có độ dài cố định, và có một mảng
+chúng. Bạn chỉ cần bảo kích cỡ một bản ghi và bao nhiêu bản ghi cần
+ghi.
 
-In the example above, we tell it each record is the size of a `char`,
-and we have 6 of them.
+Trong ví dụ trên, ta bảo kích cỡ mỗi bản ghi là `char`, và có 6 mục.
 
-Running the program gives us a file `output.bin`, but opening it in a
-text editor doesn't show anything friendly! It's binary data---not text.
-And random binary data I just made up, at that!
+Chạy chương trình xong ta có file `output.bin`, nhưng mở nó trong
+trình soạn thảo văn bản thì chẳng thấy gì thân thiện! Đó là dữ liệu
+nhị phân, không phải văn bản. Và là dữ liệu nhị phân ngẫu nhiên tôi
+vừa chế ra ấy chứ!
 
-If I run it through a [flw[hex dump|Hex_dump]] program, we can see the
-output as bytes:
+Nếu đẩy qua chương trình [flw[hex dump|Hex_dump]], ta có thể thấy đầu
+ra dưới dạng các byte:
 
 ``` {.default}
 05 25 00 58 ff 0c
 ```
 
-> Many Unix systems ship with a program called `hexdump` to do this. You
-> can use it like this with the `-C` ("canonical") switch to get nice
-> output:
+> Nhiều hệ Unix có sẵn chương trình tên `hexdump` để làm việc này. Bạn
+> có thể dùng như này với cờ `-C` ("canonical") để có đầu ra đẹp:
 >
 > ``` {.default}
 > $ hexdump -C output.bin
@@ -473,27 +461,24 @@ output as bytes:
 >
 > <!-- ` -->
 >
-> The `00000000` is the offset within the file that this line of output
-> starts on. The `05 25 00 58 ff 0c` are the byte values (and this would
-> be longer (up to 16 bytes per line) if there were more bytes in the
-> file). And on the right between the pipe (`|`) symbols is `hexdump`'s
-> best attempt to print out the characters that correspond to those
-> bytes. It prints a period if the character is unprintable. In this
-> case, since we're just printing random binary data, this part of the
-> output is just garbage. But if we'd printed an ASCII string to the
-> file, we'd see that in there.
+> `00000000` là offset trong file mà dòng đầu ra này bắt đầu. `05 25
+> 00 58 ff 0c` là các giá trị byte (và sẽ dài hơn, tới 16 byte mỗi
+> dòng, nếu có nhiều byte hơn trong file). Và bên phải giữa hai ký
+> hiệu pipe (`|`) là nỗ lực hết mình của `hexdump` để in ra các ký tự
+> ứng với những byte đó. Nó in dấu chấm nếu ký tự không in được.
+> Trường hợp này, vì ta chỉ in dữ liệu nhị phân ngẫu nhiên, phần đầu
+> ra đó chỉ là rác. Nhưng nếu ta in một chuỗi ASCII ra file, sẽ thấy
+> nó ở trong đó.
 
-And those values in hex do match up to the values (in decimal) that we
-wrote out.
+Và các giá trị hex đó khớp với các giá trị (thập phân) ta đã ghi ra.
 
-But now let's try to read them back in with a different program. This
-one will open the file for binary reading (`"rb"` mode) and will read
-the bytes one at a time in a loop.
+Giờ thử đọc lại bằng một chương trình khác. Chương trình này sẽ mở
+file để đọc nhị phân (mode `"rb"`) và đọc từng byte một trong vòng
+lặp.
 
 [i[`fread()` function]<]
-`fread()` has the neat feature where it returns the number of bytes
-read, or `0` on EOF. So we can loop until we see that, printing numbers
-as we go.
+`fread()` có đặc điểm hay ở chỗ trả về số byte đã đọc, hoặc `0` khi
+EOF. Nên ta có thể lặp đến khi thấy thế, in số ra trong lúc chạy.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -513,7 +498,7 @@ int main(void)
 ```
 [i[`fread()` function]>]
 
-And, running it, we see our original numbers!
+Và, chạy nó, ta thấy lại các con số gốc!
 
 ``` {.default}
 5
@@ -527,32 +512,30 @@ And, running it, we see our original numbers!
 Woo hoo!
 [i[File I/O-->binary files]>]
 
-### `struct` and Number Caveats
+### Lưu ý về `struct` và số
 
 [i[File I/O-->with `struct`s]<]
-As we saw in the `struct`s section, the compiler is free to add padding
-to a `struct` as it sees fit. And different compilers might do this
-differently. And the same compiler on different architectures could do
-it differently. And the same compiler on the same architectures could do
-it differently.
+Như đã thấy ở phần `struct`, compiler được tự do thêm padding vào
+`struct` theo cách nó thấy hợp. Và các compiler khác nhau có thể làm
+khác nhau. Cùng một compiler trên kiến trúc khác nhau có thể làm
+khác. Cùng một compiler trên cùng kiến trúc cũng có thể làm khác.
 
-What I'm getting at is this: it's not portable to just `fwrite()` an
-entire `struct` out to a file when you don't know where the padding will
-end up.
+Ý tôi là: không portable nếu bạn chỉ `fwrite()` nguyên một `struct` ra
+file khi không biết padding sẽ nằm đâu.
 [i[File I/O-->with `struct`s]>]
 
-How do we fix this? Hold that thought---we'll look at some ways to do
-this after looking at another related problem.
+Fix sao đây? Giữ ý đó lại, ta sẽ xem vài cách làm chuyện này sau khi
+ngó qua một vấn đề liên quan khác.
 
 [i[File I/O-->with numeric values]<]
-Numbers!
+Số!
 
-Turns out all architectures don't represent numbers in memory the same
-way.
+Hoá ra không phải mọi kiến trúc đều biểu diễn số trong bộ nhớ theo
+cùng một cách.
 
-Let's look at a simple `fwrite()` of a 2-byte number. We'll write it in
-hex so each byte is clear. The most significant byte will have the value
-`0x12` and the least significant will have the value `0x34`.
+Xem một `fwrite()` đơn giản của một số 2 byte. Ta sẽ viết nó dạng hex
+để mỗi byte hiện rõ. Byte có giá trị cao nhất sẽ có giá trị `0x12`,
+byte thấp nhất sẽ có giá trị `0x34`.
 
 ``` {.c}
 unsigned short v = 0x1234;  // Two bytes, 0x12 and 0x34
@@ -560,50 +543,49 @@ unsigned short v = 0x1234;  // Two bytes, 0x12 and 0x34
 fwrite(&v, sizeof v, 1, fp);
 ```
 
-What ends up in the stream?
+Stream sẽ chứa gì?
 
-Well, it seems like it should be `0x12` followed by `0x34`, right?
+Tưởng như phải là `0x12` rồi tới `0x34`, đúng không?
 
-But if I run this on my machine and hex dump the result, I get:
+Nhưng nếu tôi chạy cái này trên máy mình và hex dump kết quả, tôi
+thấy:
 
 ``` {.default}
 34 12
 ```
 
-They're reversed! What gives?
+Đảo ngược rồi! Chuyện gì thế?
 
-This has something to do with what's called the
-[i[Endianess]][flw[_endianess_|Endianess]] of the architecture. Some
-write the most significant bytes first, and some the least significant
-bytes first.
+Chuyện này liên quan tới cái gọi là
+[i[Endianess]][flw[_endianess_|Endianess]] của kiến trúc. Có nơi ghi
+byte có giá trị cao trước, có nơi ghi byte có giá trị thấp trước.
 
-This means that if you write a multibyte number out straight from
-memory, you can't do it in a portable way^[And this is why I used
-individual bytes in my `fwrite()` and `fread()` examples, above,
-shrewdly.].
+Điều này nghĩa là nếu bạn ghi thẳng một số nhiều byte ra từ bộ nhớ,
+bạn không thể làm portable được^[Và đây là lý do tôi dùng từng byte
+riêng trong các ví dụ `fwrite()` và `fread()` ở trên, khôn đấy chứ.].
 
-A similar problem exists with floating point. Most systems use the same
-format for their floating point numbers, but some do not. No guarantees!
+Một vấn đề tương tự tồn tại với số dấu phẩy động. Hầu hết hệ thống
+dùng cùng format cho số floating point, nhưng vài hệ thì không. Không
+đảm bảo gì hết!
 
 [i[File I/O-->with `struct`s]<]
-So... how can we fix all these problems with numbers and `struct`s to
-get our data written in a portable way?
+Vậy... làm sao fix hết đống vấn đề này với số và `struct` để ghi dữ
+liệu ra một cách portable?
 
-The summary is to [i[Data serialization]]_serialize_ the data, which is
-a general term that means to take all the data and write it out in a
-format that you control, that is well-known, and programmable to work
-the same way on all platforms.
+Tóm gọn là [i[Data serialization]]_serialize_ (tuần tự hoá) dữ liệu,
+thuật ngữ chung mang nghĩa lấy hết dữ liệu và ghi ra theo một định
+dạng bạn kiểm soát, rõ ràng, và lập trình được để hoạt động giống
+nhau trên mọi nền tảng.
 
-As you might imagine, this is a solved problem. There are a bunch of
-serialization libraries you can take advantage of, such as Google's
-[flw[_protocol buffers_|Protocol_buffers]], out there and ready to use.
-They will take care of all the gritty details for you, and even will
-allow data from your C programs to interoperate with other languages
-that support the same serialization methods.
+Như bạn đoán, đây là bài toán đã giải. Có một loạt thư viện
+serialization sẵn sàng để dùng, chẳng hạn [flw[_protocol
+buffers_|Protocol_buffers]] của Google. Chúng lo mọi chi tiết vặt cho
+bạn, và thậm chí cho phép dữ liệu từ chương trình C của bạn tương tác
+với các ngôn ngữ khác hỗ trợ cùng phương thức serialization.
 
-Do yourself and everyone a favor! Serialize your binary data when you
-write it to a stream! This will keep things nice and portable, even if
-you transfer data files from one architecture to another.
+Làm ơn một điều cho bản thân và mọi người! Serialize dữ liệu nhị phân
+khi ghi ra stream! Sẽ giữ mọi thứ gọn và portable, kể cả khi bạn
+chuyển file dữ liệu từ kiến trúc này sang kiến trúc khác.
 [i[File I/O-->with `struct`s]>]
 [i[File I/O-->with numeric values]>]
 [i[File I/O]>]
