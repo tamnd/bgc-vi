@@ -12,30 +12,30 @@
 
 [i[Atomic variables]<]
 
-This is one of the more challenging aspects of multithreading with C.
-But we'll try to take it easy.
+Đây là một trong những khía cạnh thử thách hơn của đa luồng với C.
+Nhưng ta sẽ cố gắng thong thả.
 
-Basically, I'll talk about the more straightforward uses of atomic
-variables, what they are, and how they work, etc.  And I'll mention some
-of the more insanely-complex paths that are available to you.
+Về cơ bản tôi sẽ nói về các cách dùng đơn giản hơn của biến atomic,
+chúng là gì, và hoạt động thế nào, vân vân. Và tôi sẽ nhắc tới vài
+con đường điên-rồ-phức-tạp có sẵn cho bạn.
 
-But I won't go down those paths. Not only am I barely qualified to even
-write about them, but I figure if you know you need them, you already
-know more than I do.
+Nhưng tôi sẽ không đi theo những con đường đó. Không chỉ vì tôi
+hiếm đủ khả năng để viết về chúng, mà tôi nghĩ nếu bạn biết mình
+cần chúng, bạn đã biết nhiều hơn tôi rồi.
 
-But there are some weird things out here even in the basics. So buckle
-your seatbelts, everyone, 'cause Kansas is goin' bye-bye.
+Nhưng ngay cả phần cơ bản cũng có những thứ lạ. Nên cài dây an toàn
+nào mọi người, vì Kansas sắp tạm biệt rồi đây.
 
-## Testing for Atomic Support
+## Kiểm tra hỗ trợ Atomic
 
 [i[`__STDC_NO_ATOMICS__` macro]<]
 
-Atomics are an optional feature. There's a macro `__STDC_NO_ATOMICS__`
-that's `1` if you _don't_ have atomics.
+Atomics là tính năng tuỳ chọn. Có một macro `__STDC_NO_ATOMICS__`
+bằng `1` nếu bạn _không_ có atomics.
 
-That macro might not exist pre-C11, so we should test the language
-version with `__STDC_VERSION__`^[The `__STDC_VERSION__` macro didn't
-exist in early C89, so if you're worried about that, check it with
+Macro đó có thể không tồn tại trước C11, nên ta nên kiểm tra phiên
+bản ngôn ngữ với `__STDC_VERSION__`^[Macro `__STDC_VERSION__` không
+tồn tại trong C89 đời đầu, nên nếu bạn lo về điều đó, kiểm tra với
 `#ifdef`.].
 
 ``` {.c}
@@ -50,52 +50,51 @@ exist in early C89, so if you're worried about that, check it with
 
 [i[Atomic variables-->compiling with]<]
 
-If those tests pass, then you can safely include `<stdatomic.h>`, the
-header on which the rest of this chapter is based. But if there is no
-atomic support, that header might not even exist.
+Nếu những test đó qua, bạn có thể an toàn include `<stdatomic.h>`,
+header làm cơ sở cho phần còn lại của chương này. Nhưng nếu không có
+hỗ trợ atomic, header đó có thể thậm chí không tồn tại.
 
-On some systems, you might need to add `-latomic` to the end of your
-compilation command line to use any functions in the header file.
+Trên vài hệ thống, bạn có thể cần thêm `-latomic` vào cuối dòng
+lệnh compile để dùng các hàm trong header đó.
 
 [i[Atomic variables-->compiling with]>]
 
-## Atomic Variables
+## Biến Atomic
 
-Here's _part_ of how atomic variables work:
+Đây là _một phần_ của cách biến atomic hoạt động:
 
-If you have a shared atomic variable and you write to it from one
-thread, that write will be _all-or-nothing_ in a different thread.
+Nếu bạn có biến atomic chia sẻ và ghi vào nó từ một thread, lần ghi
+đó sẽ là _all-or-nothing_ trong thread khác.
 
-That is, the other thread will see the entire write of, say, a 32-bit
-value. Not half of it. There's no way for one thread to interrupt
-another that is in the _middle_ of an atomic multi-byte write.
+Tức là thread khác sẽ thấy toàn bộ lần ghi, ví dụ giá trị 32 bit.
+Không phải một nửa. Không có cách nào để một thread ngắt thread
+khác đang ở _giữa_ một lần ghi atomic nhiều byte.
 
-It's almost like there's a little lock around the getting and setting of
-that one variable. (And there _might_ be! See [Lock-Free Atomic
-Variables](#lock-free-atomic), below.)
+Gần như có một cái lock nhỏ quanh việc lấy và set biến đó. (Và có
+_thể_ có thật! Xem [Biến Atomic Lock-Free](#lock-free-atomic) bên
+dưới.)
 
-And on that note, you can get away with never using atomics if you use
-mutexes to lock your critical sections. It's just that there are a
-class of _lock-free data structures_ that always allow other threads to
-make progress instead of being blocked by a mutex... but these are tough
-to create correctly from scratch, and are one of the things that are
-beyond the scope of the guide, sadly.
+Nhân đây, bạn có thể thoát khỏi việc dùng atomic nếu bạn dùng mutex
+để lock critical section. Chỉ là có một lớp _cấu trúc dữ liệu
+lock-free_ luôn cho phép các thread khác tiến tới thay vì bị block
+bởi mutex... nhưng cái này tạo ra đúng từ đầu khá khó, và là một
+trong những thứ nằm ngoài phạm vi guide này, buồn thay.
 
-That's only part of the story. But it's the part we'll start with.
+Đó mới chỉ là một phần. Nhưng là phần ta bắt đầu.
 
-Before we go further, how do you declare a variable to be atomic?
+Trước khi đi tiếp, làm sao khai báo biến là atomic?
 
-First, include [i[`stdatomic.h` header]] `<stdatomic.h>`.
+Đầu tiên, include [i[`stdatomic.h` header]] `<stdatomic.h>`.
 
 [i[`atomic_int` type]<]
 
-This gives us types such as `atomic_int`.
+Cái này cho ta các kiểu như `atomic_int`.
 
-And then we can simply declare variables to be of that type.
+Rồi ta có thể đơn giản khai báo biến có kiểu đó.
 
-But let's do a demo where we have two threads. The first runs for a
-while and then sets a variable to a specific value, then exits. The
-other runs until it sees that value get set, and then it exits.
+Nhưng hãy làm demo có hai thread. Thread thứ nhất chạy một hồi rồi
+set một biến thành giá trị cụ thể, rồi thoát. Thread kia chạy cho
+đến khi thấy giá trị đó được set, rồi thoát.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -148,10 +147,10 @@ int main(void)
 
 [i[`atomic_int` type]>]
 
-The second thread spins in place, looking at the flag and waiting for it
-to get set to the value `3490`. And the first one does that.
+Thread thứ hai spin tại chỗ, nhìn vào cờ và đợi nó được set thành
+giá trị `3490`. Và thread thứ nhất làm điều đó.
 
-And I get this output:
+Và tôi nhận được output này:
 
 ``` {.default}
 Thread 1: Sleeping for 1.5 seconds
@@ -163,47 +162,46 @@ Main    : Threads are done, so x better be 3490
 Main    : And indeed, x == 3490
 ```
 
-Look, ma! We're accessing a variable from different threads and not
-using a mutex! And that'll work every time thanks to the atomic nature
-of atomic variables.
+Nhìn nè, mẹ ơi! Ta đang truy cập biến từ các thread khác nhau mà
+không dùng mutex! Và cái đó chạy mọi lần nhờ bản chất atomic của
+biến atomic.
 
-You might be wondering what happens if that's a regular non-atomic
-`int`, instead. Well, on my system it still works... unless I do an
-optimized build in which case it hangs on thread 2 waiting to see the
-3490 to get set^[The reason for this is when optimized, my compiler has
-put the value of `x` in a register to make the `while` loop fast. But
-the register has no way of knowing that the variable was updated in
-another thread, so it never sees the `3490`. This isn't really related
-to the _all-or-nothing_ part of atomicity, but is more related to the
-synchronization aspects in the next section.].
+Bạn có thể đang thắc mắc chuyện gì xảy ra nếu đó là `int` thường
+không-atomic. Trên máy tôi vẫn chạy... trừ khi tôi build có
+optimization thì nó hang trên thread 2 đợi thấy 3490 được
+set^[Lý do là khi optimize, compiler của tôi đã đặt giá trị `x` vào
+register để làm `while` loop nhanh. Nhưng register không có cách
+nào biết biến đã được cập nhật trong thread khác, nên nó không bao
+giờ thấy `3490`. Cái này không thực sự liên quan phần
+_all-or-nothing_ của atomicity, mà liên quan hơn đến các khía cạnh
+đồng bộ trong phần tiếp.].
 
-But that's just the beginning of the story. The next part is going to
-require more brain power and has to do with something called
-_synchronization_.
+Nhưng đó mới chỉ là đầu câu chuyện. Phần tiếp sẽ cần nhiều năng lực
+não hơn và có liên quan một thứ gọi là _synchronization_.
 
 ## Synchronization
 
 [i[Atomic variables-->synchronization]<]
 
-The next part of our story is all about when certain memory writes in
-one thread become visible to those in another thread.
+Phần tiếp của câu chuyện là về khi nào các lần ghi bộ nhớ trong một
+thread trở nên có thể thấy với các thread khác.
 
-You might think, it's right away, right? But it's not. A number of
-things can go wrong. Weirdly wrong.
+Bạn có thể nghĩ là ngay lập tức, đúng không? Nhưng không phải.
+Nhiều thứ có thể sai. Sai một cách kỳ lạ.
 
-The compiler might have rearranged memory accesses so that when you
-think you set a value relative to another might not be true. And even if
-the compiler didn't, your CPU might have done it on the fly. Or maybe
-there's something else about this architecture that causes writes on one
-CPU to be delayed before they're visible on another.
+Compiler có thể đã sắp xếp lại các truy cập bộ nhớ nên khi bạn nghĩ
+đã set giá trị tương đối so với cái khác có thể không đúng. Và dù
+compiler không làm, CPU của bạn có thể đã làm on the fly. Hoặc có
+thể có gì đó khác về kiến trúc đó gây ra việc ghi trên một CPU bị
+delay trước khi có thể thấy trên CPU khác.
 
-The good news is that we can condense all these potential troubles into
-one: unsynchronized memory accesses can appear out of order depending on
-which thread is doing the observing, as if the lines of code themselves
-had been rearranged.
+Tin tốt là ta có thể gom tất cả rắc rối tiềm ẩn này vào một: các
+truy cập bộ nhớ không đồng bộ có thể xuất hiện không theo thứ tự
+tuỳ thread nào đang quan sát, như thể các dòng code đã bị sắp xếp
+lại.
 
-By way of example, which happens first in the following code, the write
-to `x` or the write to `y`?
+Lấy ví dụ, cái nào xảy ra trước trong code sau, ghi `x` hay ghi
+`y`?
 
 ``` {.c .numberLines}
 int x, y;  // global
@@ -216,11 +214,11 @@ y = 3;
 printf("%d %d\n", x, y);
 ```
 
-Answer: we don't know. The compiler or CPU could silently reverse lines
-5 and 6 and we'd be none-the-wiser. The code would run single-threaded
-_as-if_ it were executed in code order.
+Đáp án: ta không biết. Compiler hay CPU có thể âm thầm đảo dòng 5
+và 6 mà ta không hay. Code sẽ chạy single-thread _như thể_ nó được
+thực thi theo thứ tự code.
 
-In a multithreaded scenario, we might have something like this pseudocode:
+Trong kịch bản đa luồng, ta có thể có pseudocode như vầy:
 
 ``` {.c .numberLines}
 int x = 0, y = 0;
@@ -236,40 +234,40 @@ thread2() {
 }
 ```
 
-What is the output from thread 2?
+Output của thread 2 là gì?
 
-Well, if `x` gets assigned `2` _before_ `y` is assigned `3`, then I'd
-expect the output to be the very sensible:
+Nếu `x` được gán `2` _trước_ khi `y` được gán `3`, tôi kỳ vọng
+output rất hợp lý là:
 
 ``` {.default}
 x is now 2 
 ```
 
-But something sneaky could rearrange lines 4 and 5 causing us to see the
-value of `0` for `x` when we print it.
+Nhưng cái gì đó lén lút có thể sắp xếp lại dòng 4 và 5 làm ta thấy
+giá trị `0` của `x` khi in.
 
-In other words, all bets are off unless we can somehow say, "As of this
-point, I expect all previous writes in another thread to be visible in
-this thread."
+Nói cách khác, mọi thứ không chắc chắn trừ khi ta có thể bằng cách
+nào đó nói, "Tại điểm này, tôi kỳ vọng tất cả các lần ghi trước đó
+trong thread khác đều thấy được trong thread này."
 
-Two threads _synchronize_ when they agree on the state of shared memory.
-As we've seen, they're not always in agreement with the code. So how do
-they agree?
+Hai thread _đồng bộ_ khi chúng thống nhất về trạng thái bộ nhớ chia
+sẻ. Như đã thấy, chúng không phải luôn đồng ý với code. Vậy chúng
+đồng ý cách nào?
 
-Using atomic variables can force the agreement^[Until I say otherwise,
-I'm speaking generally about _sequentially consistent_ operations. More
-on what that means soon.]. If a thread writes to an atomic variable,
-it's saying "anyone who reads this atomic variable in the future will
-also see all the changes I made to memory (atomic or not) up to and
-including the atomic variable".
+Dùng biến atomic có thể ép sự đồng ý đó^[Cho đến khi tôi nói khác,
+tôi đang nói chung về các thao tác _sequentially consistent_. Nói
+thêm ý nghĩa của nó sớm thôi.]. Nếu một thread ghi vào biến atomic,
+nó đang nói "ai đọc biến atomic này trong tương lai cũng sẽ thấy
+tất cả thay đổi tôi đã làm với bộ nhớ (atomic hay không) cho đến và
+bao gồm biến atomic này".
 
-Or, in more human terms, let's sit around the conference table and make
-sure we're on the same page as to which pieces of shared memory hold
-what values. You agree that the memory changes that you'd made
-up-to-and-including the atomic store will be visible to me after I do a
-load of the same atomic variable.
+Hay theo kiểu người hơn, cùng ngồi quanh bàn họp và bảo đảm rằng ta
+cùng chung một trang về các mảnh bộ nhớ chia sẻ nào giữ giá trị
+nào. Bạn đồng ý rằng các thay đổi bộ nhớ bạn đã làm cho đến và bao
+gồm lần store atomic sẽ thấy được với tôi sau khi tôi load cùng
+biến atomic đó.
 
-So we can easily fix our example:
+Nên ta có thể dễ dàng sửa ví dụ:
 
 ``` {.c .numberLines}
 int x = 0;
@@ -286,113 +284,110 @@ thread2() {
 }
 ```
 
-Because the threads synchronize across `y`, all writes in thread 1 that
-happened _before_ the write to `y` are visible in thread 2 _after_ the
-read from `y` (in the `while` loop).
+Vì các thread đồng bộ qua `y`, tất cả các lần ghi trong thread 1
+xảy ra _trước_ lần ghi vào `y` đều thấy được trong thread 2 _sau_
+lần đọc từ `y` (trong `while` loop).
 
-It's important to note a couple things here:
+Quan trọng chú ý vài điều ở đây:
 
-1. Nothing sleeps. The synchronization is not a blocking operation. Both
-   threads are running full bore until they exit. Even the one stuck in
-   the spin loop isn't blocking anyone else from running.
+1. Không có gì ngủ. Synchronization không phải thao tác blocking.
+   Cả hai thread chạy hết ga đến khi thoát. Thậm chí cái bị kẹt
+   trong spin loop cũng không block ai khác khỏi chạy.
 
-2. The synchronization happens when one thread reads an atomic variable
-   another thread wrote. So when thread 2 reads `y`, all previous memory
-   writes in thread 1 (namely setting `x`) will be visible in thread 2.
+2. Synchronization xảy ra khi một thread đọc biến atomic mà thread
+   khác đã ghi. Nên khi thread 2 đọc `y`, tất cả lần ghi bộ nhớ
+   trước trong thread 1 (cụ thể là set `x`) sẽ thấy được trong
+   thread 2.
 
-3. Notice that `x` isn't atomic. That's OK because we're not
-   synchronizing over `x`, and the synchronization over `y` when we
-   write it in thread 1 means that all previous writes---including
-   `x`---in thread 1 will become visible to other threads... if those
-   other threads read `y` to synchronize.
+3. Chú ý `x` không atomic. Vẫn OK vì ta không đang đồng bộ qua `x`,
+   và việc đồng bộ qua `y` khi ta ghi nó trong thread 1 nghĩa là
+   tất cả lần ghi trước, bao gồm `x`, trong thread 1 sẽ thấy được
+   với các thread khác... nếu các thread đó đọc `y` để đồng bộ.
 
-Forcing this synchronization is inefficient and can be a lot slower than
-just using a regular variable. This is why we don't use atomics unless
-we have to for a particular application.
+Ép synchronization này kém hiệu quả và có thể chậm hơn nhiều so
+với dùng biến thường. Đây là lý do ta không dùng atomic trừ khi
+phải dùng cho ứng dụng cụ thể.
 
-So that's the basics. Let's look deeper.
+Đó là cơ bản. Xem sâu hơn nào.
 
 [i[Atomic variables-->synchronization]<]
 
-## Acquire and Release
+## Acquire và Release
 
 [i[Atomic variables-->acquire]<]
 [i[Atomic variables-->release]<]
 
-More terminology! It'll pay off to learn this now.
+Thêm thuật ngữ! Học giờ thì có lợi sau.
 
-When a thread reads an atomic variable, it is said to be an _acquire_
-operation.
+Khi một thread đọc biến atomic, đó được gọi là thao tác _acquire_.
 
-When a thread writes an atomic variable, it is said to be a _release_
-operation.
+Khi một thread ghi biến atomic, đó được gọi là thao tác _release_.
 
-What are these? Let's line them up with terms you already know when it
-comes to atomic variables:
+Những cái này là gì? Xếp chúng vào các thuật ngữ bạn đã biết về
+biến atomic:
 
-**Read = Load = Acquire**. Like when you compare an atomic variable or
-read it to copy it to another value.
+**Read = Load = Acquire**. Như khi bạn so sánh biến atomic hay đọc
+nó để copy sang giá trị khác.
 
-**Write = Store = Release**. Like when you assign a value into an atomic
-variable.
+**Write = Store = Release**. Như khi bạn gán giá trị vào biến
+atomic.
 
-When using atomic variables with these acquire/release semantics, C
-spells out what can happen when.
+Khi dùng biến atomic với ngữ nghĩa acquire/release, C nêu rõ chuyện
+gì có thể xảy ra khi nào.
 
-Acquire/release form the basis for the synchronization we just talked
-about.
+Acquire/release tạo cơ sở cho synchronization ta vừa nói.
 
-When a thread acquires an atomic variable, it can see values set in
-another thread that released that same variable.
+Khi một thread acquire biến atomic, nó có thể thấy giá trị đã set
+trong thread khác đã release cùng biến đó.
 
-In other words:
+Nói cách khác:
 
-When a thread reads an atomic variable, it can see values set in another
-thread that wrote to that same variable.
+Khi một thread đọc biến atomic, nó có thể thấy giá trị đã set trong
+thread khác đã ghi cùng biến đó.
 
-The synchronization happens across the acquire/release pair.
+Synchronization xảy ra qua cặp acquire/release.
 
-More details:
+Chi tiết thêm:
 
-With read/load/acquire of a particular atomic variable:
+Với read/load/acquire một biến atomic cụ thể:
 
-* All writes (atomic or non-atomic) in another thread that happened
-  before that other thread wrote/stored/released this atomic variable
-  are now visible in this thread.
+* Tất cả lần ghi (atomic hay không) trong thread khác xảy ra trước
+  khi thread đó write/store/release biến atomic này giờ thấy được
+  trong thread này.
 
-* The new value of the atomic variable set by the other thread is also
-  visible in this thread.
+* Giá trị mới của biến atomic do thread khác set cũng thấy được
+  trong thread này.
 
-* No reads or writes of any variables/memory in the current thread can
-  be reordered to happen before this acquire.
+* Không có lần đọc hay ghi biến/bộ nhớ nào trong thread hiện tại có
+  thể bị sắp xếp lại xảy ra trước acquire này.
 
-* The acquire acts as a one-way barrier when it comes to code
-  reordering; reads and writes in the current thread can be moved down
-  from _before_ the acquire to _after_ it. But, more importantly for
-  synchronization, nothing can move up from _after_ the acquire to
-  _before_ it.
+* Acquire đóng vai rào chắn một chiều khi sắp xếp lại code; các
+  lần đọc và ghi trong thread hiện tại có thể bị di chuyển xuống từ
+  _trước_ acquire thành _sau_ nó. Nhưng quan trọng hơn với
+  synchronization, không gì có thể di chuyển lên từ _sau_ acquire
+  thành _trước_ nó.
 
-With write/store/release of a particular atomic variable:
+Với write/store/release một biến atomic cụ thể:
 
-* All writes (atomic or non-atomic) in the current thread that happened
-  before this release become visible to other threads that have
-  read/loaded/acquired the same atomic variable.
+* Tất cả lần ghi (atomic hay không) trong thread hiện tại xảy ra
+  trước release này trở nên thấy được với các thread khác đã
+  read/load/acquire cùng biến atomic.
 
-* The value written to this atomic variable by this thread is also
-  visible to other threads.
+* Giá trị thread này ghi vào biến atomic này cũng thấy được với
+  các thread khác.
 
-* No reads or writes of any variables/memory in the current thread can
-  be reordered to happen after this release.
+* Không có lần đọc hay ghi biến/bộ nhớ nào trong thread hiện tại có
+  thể bị sắp xếp lại xảy ra sau release này.
 
-* The release acts as a one-way barrier when it comes to code
-  reordering: reads and writes in the current thread can be moved up
-  from _after_ the release to _before_ it. But, more importantly for
-  synchronization, nothing can move down from _before_ the release to
-  _after_ it.
+* Release đóng vai rào chắn một chiều khi sắp xếp lại code: các
+  lần đọc và ghi trong thread hiện tại có thể bị di chuyển lên từ
+  _sau_ release thành _trước_ nó. Nhưng quan trọng hơn với
+  synchronization, không gì có thể di chuyển xuống từ _trước_
+  release thành _sau_ nó.
 
-Again, the upshot is synchronization of memory from one thread to
-another. The second thread can be sure that variables and memory are
-written in the order the programmer intended.
+Lại nữa, kết quả là synchronization bộ nhớ từ thread này sang
+thread khác. Thread thứ hai có thể chắc chắn rằng biến và bộ nhớ
+được ghi theo thứ tự lập trình viên mong muốn.
 
 ```
 int x, y, z = 0;
@@ -416,17 +411,16 @@ thread2()
 }
 ```
 
-In the above example, `thread2` can be sure of the values in `x` and `y`
-after it acquires `a` because they were set before `thread1` released
-the atomic `a`.
+Trong ví dụ trên, `thread2` có thể chắc chắn về giá trị của `x` và
+`y` sau khi nó acquire `a` vì chúng được set trước khi `thread1`
+release atomic `a`.
 
-But `thread2` can't be sure of `z`'s value because it happened after the
-release. Maybe the assignment to `z` got moved before the assignment to
-`a`.
+Nhưng `thread2` không thể chắc chắn về giá trị `z` vì nó xảy ra
+sau release. Có thể việc gán cho `z` bị di chuyển lên trước việc
+gán cho `a`.
 
-An important note: releasing one atomic variable has no effect on
-acquires of different atomic variables. Each variable is isolated from
-the others.
+Chú ý quan trọng: release một biến atomic không có tác dụng lên
+acquire các biến atomic khác. Mỗi biến cô lập với các biến khác.
 
 [i[Atomic variables-->acquire]>]
 [i[Atomic variables-->release]>]
@@ -435,58 +429,59 @@ the others.
 
 [i[Atomic variables-->sequential consistency]<]
 
-You hanging in there? We're through the meat of the simpler usage of
-atomics. And since we're not even going to talk about the more complex
-uses here, you can relax a bit.
+Bạn vẫn còn trụ được chứ? Ta đã qua phần nội dung chính của cách
+dùng atomic đơn giản hơn. Và vì ta không định nói về các cách dùng
+phức tạp hơn ở đây, bạn có thể thư giãn chút.
 
-_Sequential consistency_ is what's called a _memory ordering_. There are
-many memory orderings, but sequential consistency is the sanest^[Sanest
-from a programmer perspective.] C has to offer. It is also the default.
-You have to go out of your way to use other memory orderings.
+_Sequential consistency_ là cái gọi là _memory ordering_. Có nhiều
+memory ordering, nhưng sequential consistency là tỉnh táo nhất^[Tỉnh
+táo nhất từ góc nhìn của lập trình viên.] mà C có. Nó cũng là mặc
+định. Bạn phải cố tình để dùng các memory ordering khác.
 
-All the stuff we've been talking about so far has happened within the
-realm of sequential consistency.
+Tất cả thứ ta đã nói từ đầu đến giờ đều xảy ra trong lãnh địa của
+sequential consistency.
 
-We've talked about how the compiler or CPU can rearrange memory reads
-and writes in a single thread as long as it follows the _as-if_ rule.
+Ta đã nói về cách compiler hay CPU có thể sắp xếp lại lần đọc và
+ghi bộ nhớ trong một thread miễn là tuân theo quy tắc _as-if_.
 
-And we've seen how we can put the brakes on this behavior by
-synchronizing over atomic variables.
+Và ta đã thấy cách phanh hành vi này bằng cách đồng bộ qua biến
+atomic.
 
-Let's formalize just a little more.
+Hãy chính thức hoá thêm chút.
 
-If operations are _sequentially consistent_, it means at the end of the
-day, when all is said and done, all the threads can kick up their feet,
-open their beverage of choice, and all agree on the order in which
-memory changes occurred during the run. And that order is the one
-specified by the code.
+Nếu các thao tác là _sequentially consistent_, nghĩa là cuối ngày,
+khi mọi thứ đã nói xong, tất cả các thread có thể gác chân, mở đồ
+uống yêu thích, và đồng ý về thứ tự các thay đổi bộ nhớ xảy ra
+trong lần chạy. Và thứ tự đó là cái được quy định bởi code.
 
-One won't say, "But didn't _B_ happen before _A_?" if the rest of them
-say, "_A_ definitely happened before _B_". They're all friends, here.
+Một cái sẽ không nói, "Nhưng chẳng phải _B_ xảy ra trước _A_ sao?"
+nếu các cái khác nói, "_A_ chắc chắn xảy ra trước _B_". Tất cả đều
+bạn bè nhau ở đây.
 
-In particular, within a thread, none of the acquires and releases can be
-reordered with respect to one another. This is in addition to the rules
-about what other memory accesses can be reordered around them.
+Đặc biệt, trong một thread, không có acquire và release nào có thể
+bị sắp xếp lại so với nhau. Cái này thêm vào các quy tắc về những
+truy cập bộ nhớ khác có thể bị sắp xếp lại quanh chúng.
 
-This rule gives an additional level of sanity to the progression of
-atomic loads/acquires and stores/releases.
+Quy tắc này cho thêm một cấp độ tỉnh táo cho tiến trình các load/
+acquire và store/release atomic.
 
-Every other memory order in C involves a relaxation of the reordering
-rules, either for acquires/releases or other memory accesses, atomic or
-otherwise. You'd do that if you _really_ knew what you were doing and
-needed the speed boost. _Here be armies of dragons..._
+Mọi memory order khác trong C đều liên quan việc nới lỏng các quy
+tắc sắp xếp lại, cho acquires/releases hoặc cho các truy cập bộ
+nhớ khác, atomic hay không. Bạn sẽ làm vậy nếu _thực sự_ biết mình
+đang làm gì và cần tăng tốc. _Đây là đất của đội quân rồng..._
 
-More on that later, but for now, let's stick to the safe and practical.
+Nói thêm sau, nhưng giờ cứ dùng cái an toàn thực dụng.
 
 [i[Atomic variables-->sequential consistency]>]
 
-## Atomic Assignments and Operators
+## Gán Atomic và các Toán tử
 
 [i[Atomic variables-->assignments and operators]<]
 
-Certain operators on atomic variables are atomic. And others aren't.
+Một số toán tử trên biến atomic là atomic. Và những cái khác thì
+không.
 
-Let's start with a counter-example:
+Hãy bắt đầu với một phản ví dụ:
 
 ``` {.c}
 atomic_int x = 0;
@@ -496,11 +491,11 @@ thread1() {
 }
 ```
 
-Since there's a read of `x` on the right hand side of the assignment and
-a write effectively on the left, these are two operations. Another
-thread could sneak in the middle and make you unhappy.
+Vì có lần đọc `x` ở bên phải phép gán và lần ghi hiệu quả ở bên
+trái, đây là hai thao tác. Một thread khác có thể chen vào giữa và
+làm bạn phật lòng.
 
-But you _can_ use the shorthand `+=` to get an atomic operation:
+Nhưng bạn _có thể_ dùng shorthand `+=` để được thao tác atomic:
 
 ``` {.c}
 atomic_int x = 0;
@@ -510,12 +505,12 @@ thread1() {
 }
 ```
 
-In that case, `x` will be atomically incremented by `3`---no other
-thread can jump in the middle.
+Trong trường hợp đó, `x` sẽ được tăng atomic thêm `3`, không thread
+nào khác có thể nhảy vào giữa.
 
-In particular, the following operators are atomic read-modify-write
-operations with sequential consistency, so use them with gleeful
-abandon. (In the example, `a` is atomic.)
+Đặc biệt, các toán tử sau là thao tác atomic read-modify-write với
+sequential consistency, nên cứ dùng thoải mái trong niềm vui. (Trong
+ví dụ, `a` là atomic.)
 
 ``` {.c}
 a++       a--       --a       ++a
@@ -525,13 +520,12 @@ a &= b    a |= b    a ^= b    a >>= b   a <<= b
 
 [i[Atomic variables-->assignments and operators]>]
 
-## Library Functions that Automatically Synchronize
+## Các hàm thư viện tự đồng bộ
 
 [i[Atomic variables-->synchronized library functions]<]
 
-So far we've talked about how you can synchronize with atomic variables,
-but it turns out there are a few library functions that do some limited
-behind-the-scenes synchronization, themselves.
+Đến giờ ta đã nói cách đồng bộ với biến atomic, nhưng hoá ra có
+vài hàm thư viện tự làm đồng bộ hạn chế sau cánh gà.
 
 ``` {.c}
 call_once()      thrd_create()       thrd_join()
@@ -540,48 +534,48 @@ malloc()         calloc()            realloc()
 aligned_alloc()
 ```
 
-**`call_once()`**---Synchronizes with all subsequent calls to
-`call_once()` for a particular flag. This way subsequent calls can rest
-assured that if another thread sets the flag, they will see it.
+**`call_once()`**: Đồng bộ với tất cả các lần gọi tiếp theo tới
+`call_once()` cho một flag cụ thể. Cách này các lần gọi tiếp theo
+có thể yên tâm rằng nếu thread khác set flag, chúng sẽ thấy.
 
-**`thrd_create()`**---Synchronizes with the beginning of the new thread.
-The new thread can be sure it will see all shared memory writes from the
-parent thread from before the `thrd_create()` call.
+**`thrd_create()`**: Đồng bộ với phần đầu của thread mới. Thread
+mới có thể chắc chắn nó sẽ thấy tất cả các lần ghi bộ nhớ chia sẻ
+từ thread cha trước khi gọi `thrd_create()`.
 
-**`thrd_join()`**---When a thread dies, it synchronizes with this
-function. The thread that has called `thrd_join()` can be assured that
-it can see all the late thread's shared writes.
+**`thrd_join()`**: Khi một thread chết, nó đồng bộ với hàm này.
+Thread đã gọi `thrd_join()` có thể yên tâm rằng nó có thể thấy tất
+cả các lần ghi chia sẻ của thread đã chết.
 
-**`mtx_lock()`**---Earlier calls to `mtx_unlock()` on the same mutex
-synchronize on this call. This is the case that most mirrors the
-acquire/release process we've already talked about. `mtx_unlock()`
-performs a release on the mutex variable, assuring any subsequent thread
-that makes an acquire with `mtx_lock()` can see all the shared memory
-changes in the critical section.
+**`mtx_lock()`**: Các lần gọi trước tới `mtx_unlock()` trên cùng
+mutex đồng bộ với lần gọi này. Đây là trường hợp phản chiếu nhiều
+nhất tiến trình acquire/release ta đã nói. `mtx_unlock()` thực
+hiện release trên biến mutex, bảo đảm bất kỳ thread sau nào
+acquire với `mtx_lock()` có thể thấy tất cả thay đổi bộ nhớ chia
+sẻ trong critical section.
 
-**`mtx_timedlock()`** and **`mtx_trylock()`**---Similar to the situation
-with `mtx_lock()`, if this call succeeds, earlier calls to
-`mtx_unlock()` synchronize with this one.
+**`mtx_timedlock()`** và **`mtx_trylock()`**: Tương tự tình huống
+với `mtx_lock()`, nếu lần gọi này thành công, các lần gọi trước
+tới `mtx_unlock()` đồng bộ với cái này.
 
-**Dynamic Memory Functions**: if you allocate memory, it synchronizes
-with the previous deallocation of that same memory. And allocations and
-deallocations of that particular memory region happen in a single total
-order that all threads can agree upon. I _think_ the idea here is that
-the deallocation can wipe the region if it chooses, and we want to be
-sure that a subsequent allocation doesn't see the non-wiped data.
-Someone let me know if there's more to it.
+**Các hàm bộ nhớ động**: nếu bạn cấp phát bộ nhớ, nó đồng bộ với
+lần giải phóng trước đó của cùng bộ nhớ. Và các lần cấp phát và
+giải phóng vùng bộ nhớ đó xảy ra theo một thứ tự tổng thể duy nhất
+mà tất cả thread có thể đồng ý. Tôi _nghĩ_ ý tưởng ở đây là lần
+giải phóng có thể xoá sạch vùng nếu nó chọn, và ta muốn chắc rằng
+lần cấp phát sau không thấy dữ liệu không bị xoá. Ai đó báo tôi
+biết nếu còn gì khác.
 
 [i[Atomic variables-->synchronized library functions]>]
 
-## Atomic Type Specifier, Qualifier
+## Bộ chỉ định kiểu Atomic, Qualifier
 
-Let's take it down a notch and see what types we have available, and how
-we can even make new atomic types.
+Hạ một chút xem ta có các kiểu nào sẵn, và làm sao tạo kiểu atomic
+mới.
 
 [i[`_Atomic` type qualifier]<]
 
-First things first, let's look at the built-in atomic types and what
-they are `typedef`'d to. (Spoiler: `_Atomic` is a type qualifier!)
+Đầu tiên, xem các kiểu atomic có sẵn và chúng được `typedef` tới
+cái gì. (Spoiler: `_Atomic` là một type qualifier!)
 
 [i[`atomic_bool` type]]
 [i[`atomic_char` type]]
@@ -621,7 +615,7 @@ they are `typedef`'d to. (Spoiler: `_Atomic` is a type qualifier!)
 [i[`atomic_intmax_t` type]]
 [i[`atomic_uintmax_t` type]]
 
-|Atomic type|Longhand equivalent|
+|Kiểu Atomic|Dạng dài tương đương|
 |-|-|
 |`atomic_bool`|`_Atomic _Bool`|
 |`atomic_char`|`_Atomic char`|
@@ -663,18 +657,18 @@ they are `typedef`'d to. (Spoiler: `_Atomic` is a type qualifier!)
 
 [i[`_Atomic` type qualifier]>]
 
-Use those at will! They're consistent with the atomic aliases found in
-C++, if that helps.
+Dùng chúng thoải mái! Chúng nhất quán với các alias atomic trong
+C++, nếu điều đó có ích.
 
-But what if you want more?
+Nhưng nếu bạn muốn nhiều hơn?
 
-You can do it either with a type qualifier or type specifier.
+Bạn có thể làm với type qualifier hoặc type specifier.
 
 [i[`_Atomic` type specifier]<]
 
-First, specifier! It's the keyword `_Atomic` with a type in parens
-after^[Apparently C++23 is adding this as a macro.]---suitable for use
-with `typedef`:
+Đầu tiên, specifier! Đó là từ khoá `_Atomic` với kiểu trong ngoặc
+sau^[Có vẻ C++23 thêm cái này như một macro.], phù hợp dùng với
+`typedef`:
 
 ``` {.c}
 typedef _Atomic(double) atomic_double;
@@ -682,57 +676,58 @@ typedef _Atomic(double) atomic_double;
 atomic_double f;
 ```
 
-Restrictions on the specifier: the type you're making atomic can't be of
-type array or function, nor can it be atomic or otherwise qualified.
+Hạn chế với specifier: kiểu bạn đang làm atomic không thể là kiểu
+mảng hay hàm, cũng không thể là atomic hay đã qualified kiểu khác.
 
 [i[`_Atomic` type specifier]>]
 [i[`_Atomic` type qualifier]<]
 
-Next, qualifier! It's the keyword `_Atomic` _without_ a type in parens.
+Tiếp, qualifier! Đó là từ khoá `_Atomic` _không_ có kiểu trong
+ngoặc sau.
 
-So these do similar things^[The spec notes that they might differ in
-size, representation, and alignment.]:
+Nên hai cái này làm việc tương tự^[Spec lưu ý chúng có thể khác về
+kích thước, biểu diễn, và căn chỉnh.]:
 
 ``` {.c}
 _Atomic(int) i;   // type specifier
 _Atomic int  j;   // type qualifier
 ```
 
-The thing is, you can include other type qualifiers with the latter:
+Điểm khác là bạn có thể include type qualifier khác với cái sau:
 
 ``` {.c}
 _Atomic volatile int k;   // qualified atomic variable
 ```
 
-Restrictions on the qualifier: the type you're making atomic can't be of
-type array or function.
+Hạn chế với qualifier: kiểu bạn đang làm atomic không thể là kiểu
+mảng hay hàm.
 
 [i[`_Atomic` type qualifier]>]
 
-## Lock-Free Atomic Variables {#lock-free-atomic}
+## Biến Atomic Lock-Free {#lock-free-atomic}
 
 [i[Atomic variables-->lock-free]<]
 
-Hardware architectures are limited in the amount of data they can
-atomically read and write. It depends on how it's wired together. And it
-varies.
+Kiến trúc phần cứng bị hạn chế về lượng dữ liệu có thể atomic đọc
+và ghi. Tuỳ vào cách nó được kết nối. Và khác nhau.
 
-If you use an atomic type, you can be assured that accesses to that type
-will be atomic... but there's a catch: if the hardware can't do it, it's
-done with a lock, instead.
+Nếu bạn dùng kiểu atomic, bạn có thể yên tâm rằng truy cập kiểu đó
+sẽ atomic... nhưng có một điều: nếu phần cứng không làm được, nó
+được làm bằng lock thay.
 
-So the atomic access becomes lock-access-unlock, which is rather slower
-and has some implications for signal handlers.
+Nên truy cập atomic trở thành lock-access-unlock, chậm hơn khá và
+có một số ngụ ý với signal handler.
 
-[Atomic flags](#atomic-flags), below, is the only atomic type that is
-guaranteed to be lock-free in all conforming implementations. In typical
-desktop/laptop computer world, other larger types are likely lock-free.
+[Atomic flags](#atomic-flags) bên dưới là kiểu atomic duy nhất được
+đảm bảo lock-free trong tất cả implementation tuân chuẩn. Trong
+thế giới desktop/laptop máy tính thông thường, các kiểu lớn khác
+có thể cũng lock-free.
 
-Luckily, we have a couple ways to determine if a particular type is
-a lock-free atomic or not.
+May thay, ta có vài cách để xác định liệu kiểu cụ thể có phải
+atomic lock-free hay không.
 
-First of all, some macros---you can use these at compile time with
-`#if`. They apply to both signed and unsigned types.
+Trước hết, vài macro, bạn có thể dùng ở compile time với `#if`.
+Chúng áp dụng cho cả kiểu signed lẫn unsigned.
 
 [i[`ATOMIC_BOOL_LOCK_FREE` macro]]
 [i[`ATOMIC_CHAR_LOCK_FREE` macro]]
@@ -745,7 +740,7 @@ First of all, some macros---you can use these at compile time with
 [i[`ATOMIC_LLONG_LOCK_FREE` macro]]
 [i[`ATOMIC_POINTER_LOCK_FREE` macro]]
 
-|Atomic Type|Lock Free Macro|
+|Kiểu Atomic|Macro Lock Free|
 |-|-|
 |`atomic_bool`|`ATOMIC_BOOL_LOCK_FREE`|
 |`atomic_char`|`ATOMIC_CHAR_LOCK_FREE`|
@@ -758,56 +753,55 @@ First of all, some macros---you can use these at compile time with
 |`atomic_llong`|`ATOMIC_LLONG_LOCK_FREE`|
 |`atomic_intptr_t`|`ATOMIC_POINTER_LOCK_FREE`|
 
-These macros can interestingly have _three_ different values:
+Các macro này thú vị có thể có _ba_ giá trị khác nhau:
 
-|Value|Meaning|
+|Giá trị|Ý nghĩa|
 |-|-|
-|`0`|Never lock-free.|
-|`1`|_Sometimes_ lock-free.|
-|`2`|Always lock-free.|
+|`0`|Không bao giờ lock-free.|
+|`1`|_Đôi khi_ lock-free.|
+|`2`|Luôn lock-free.|
 
-Wait---how can something be _sometimes_ lock-free? This just means the
-answer isn't known at compile-time, but could later be known at runtime.
-Maybe the answer varies depending on whether or not you're running this
-code on Genuine Intel or AMD, or something like that^[I just pulled that
-example out of nowhere. Maybe it doesn't matter on Intel/AMD, but it
-could matter somewhere, dangit!].
+Khoan, cái gì đó _đôi khi_ lock-free được là sao? Nghĩa là đáp án
+không biết tại compile-time, nhưng có thể biết sau tại runtime. Có
+thể đáp án khác tuỳ bạn đang chạy code trên Genuine Intel hay AMD
+hay gì đó^[Tôi chỉ lấy ví dụ đó từ không khí. Có thể không quan
+trọng trên Intel/AMD, nhưng có thể quan trọng ở đâu đó đấy!].
 
-But you can always test at runtime with the [i[`atomic_is_lock_free()`
-function]] `atomic_is_lock_free()` function. This function returns true
-or false if the particular type is atomic right now.
+Nhưng bạn luôn có thể test tại runtime với hàm
+[i[`atomic_is_lock_free()` function]] `atomic_is_lock_free()`. Hàm
+này trả về true hay false nếu kiểu cụ thể là atomic ngay bây giờ.
 
-So why do we care?
+Tại sao ta quan tâm?
 
-Lock-free is faster, so maybe there's a speed concern that you'd code
-around another way. Or maybe you need to use an atomic variable in a
+Lock-free nhanh hơn, nên có thể có vấn đề tốc độ bạn muốn code
+tránh theo cách khác. Hoặc có thể bạn cần dùng biến atomic trong
 signal handler.
 
 [i[Atomic variables-->lock-free]>]
 
-### Signal Handlers and Lock-Free Atomics
+### Signal Handlers và Atomic Lock-Free
 
 [i[Signal handlers-->with lock-free atomics]<]
 [i[Atomic variables-->with signal handlers]<]
 
-If you read or write a shared variable (static storage duration or
-`_Thread_Local`) in a signal handler, it's undefined behavior [gasp!]...
-Unless you do one of the following:
+Nếu bạn đọc hay ghi biến chia sẻ (thời lượng lưu trữ static hay
+`_Thread_Local`) trong signal handler, đó là hành vi không xác định
+[gasp!]... Trừ khi bạn làm một trong các điều sau:
 
-1. Write to a variable of type `volatile sig_atomic_t`.
+1. Ghi vào biến kiểu `volatile sig_atomic_t`.
 
-2. Read or write a lock-free atomic variable.
+2. Đọc hay ghi biến atomic lock-free.
 
-As far as I can tell, lock-free atomic variables are one of the few ways
-you get portably get information out of a signal handler.
+Theo tôi thấy, biến atomic lock-free là một trong số ít cách
+portable lấy thông tin ra khỏi signal handler.
 
-The spec is a bit vague, in my read, about the memory order when it
-comes to acquiring or releasing atomic variables in the signal handler.
-C++ says, and it makes sense, that such accesses are unsequenced with
-respect to the rest of the program^[C++ elaborates that if the signal is
-the result of a call to [i[`raise()` function]] `raise()`, it is
-sequenced _after_ the `raise()`.]. The signal can be raised, after all,
-at any time. So I'm assuming C's behavior is similar.
+Spec hơi mơ hồ, theo cách tôi đọc, về memory order khi acquire hay
+release biến atomic trong signal handler. C++ nói, và hợp lý, rằng
+các truy cập đó là không tuần tự so với phần còn lại của chương
+trình^[C++ nói thêm nếu signal là kết quả của lần gọi
+[i[`raise()` function]] `raise()`, nó tuần tự _sau_ `raise()`.].
+Signal có thể được raise bất cứ lúc nào. Nên tôi giả định hành vi
+của C tương tự.
 
 [i[Signal handlers-->with lock-free atomics]>]
 [i[Atomic variables-->with signal handlers]>]
@@ -817,11 +811,12 @@ at any time. So I'm assuming C's behavior is similar.
 [i[Atomic variables-->atomic flags]<]
 [i[`atomic_flag` type]<]
 
-There's only one type the standard guarantees will be a lock-free
-atomic: `atomic_flag`. This is an opaque type for
-[flw[test-and-set|Test-and-set]] operations.
+Chỉ có một kiểu mà chuẩn đảm bảo sẽ là lock-free atomic:
+`atomic_flag`. Đây là kiểu mờ (opaque) cho các thao tác
+[flw[test-and-set|Test-and-set]].
 
-It can be either _set_ or _clear_. You can initialize it to clear with:
+Nó có thể là _set_ hoặc _clear_. Bạn có thể khởi tạo nó thành clear
+với:
 
 [i[`ATOMIC_FLAG_INIT` macro]<]
 
@@ -833,16 +828,15 @@ atomic_flag f = ATOMIC_FLAG_INIT;
 
 [i[`atomic_flag_test_and_set()` function]<]
 
-You can set the flag atomically with `atomic_flag_test_and_set()`, which
-will set the flag and return its previous status as a `_Bool` (true for
+Bạn có thể set flag atomic với `atomic_flag_test_and_set()`, sẽ set
+flag và trả về trạng thái trước của nó dưới dạng `_Bool` (true cho
 set).
 
 [i[`atomic_flag_clear()` function]<]
 
-You can clear the flag atomically with `atomic_flag_clear()`.
+Bạn có thể clear flag atomic với `atomic_flag_clear()`.
 
-Here's an example where we init the flag to clear, set it twice, then
-clear it again.
+Đây là ví dụ ta init flag thành clear, set hai lần, rồi clear lại.
 
 ``` {.c}
 #include <stdio.h>
@@ -870,16 +864,15 @@ int main(void)
 [i[Atomic variables-->atomic flags]>]
 [i[`atomic_flag` type]>]
 
-## Atomic `struct`s and `union`s
+## `struct` và `union` Atomic
 
 [i[Atomic variables-->`struct` and `union`]<]
 
-Using the `_Atomic` qualifier or specifier, you can make atomic
-`struct`s or `union`s! Pretty astounding.
+Dùng qualifier hay specifier `_Atomic`, bạn có thể tạo `struct`
+hay `union` atomic! Khá đáng kinh ngạc.
 
-If there's not a lot of data in there (i.e. a handful of bytes), the
-resulting atomic type might be lock-free. Test it with
-`atomic_is_lock_free()`.
+Nếu không có nhiều dữ liệu bên trong (tức là vài byte), kiểu atomic
+tạo ra có thể lock-free. Test bằng `atomic_is_lock_free()`.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -897,10 +890,10 @@ int main(void)
 }
 ```
 
-Here's the catch: you can't access fields of an atomic `struct` or
-`union`... so what's the point? Well, you can atomically _copy_ the entire `struct`
-into a non-atomic variable and then use it. You can atomically copy the
-other way, too.
+Đây là cái bắt: bạn không thể truy cập field của `struct` hay
+`union` atomic... nên có ý nghĩa gì? À, bạn có thể atomic _copy_
+toàn bộ `struct` vào biến không-atomic rồi dùng. Bạn cũng có thể
+atomic copy ngược lại.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -925,19 +918,20 @@ int main(void)
 }
 ```
 
-You can also declare a `struct` where individual fields are atomic. It
-is implementation defined if atomic types are allowed on bitfields.
+Bạn cũng có thể khai báo `struct` mà các field riêng lẻ là atomic.
+Là implementation-defined xem kiểu atomic có được phép trên bitfield
+hay không.
 
 [i[Atomic variables-->`struct` and `union`]>]
 
-## Atomic Pointers
+## Con trỏ Atomic
 
 [i[Atomic variables-->pointers]<]
 
-Just a note here about placement of `_Atomic` when it comes to pointers.
+Chỉ ghi chú ở đây về vị trí `_Atomic` khi nói tới con trỏ.
 
-First, pointers to atomics (i.e. the pointer value is not atomic, but
-the thing it points to is):
+Đầu tiên, con trỏ tới atomic (tức là giá trị con trỏ không atomic,
+nhưng thứ nó trỏ tới thì atomic):
 
 ``` {.c}
 _Atomic int x;
@@ -946,8 +940,8 @@ _Atomic int *p;  // p is a pointer to an atomic int
 p = &x;  // OK!
 ```
 
-Second, atomic pointers to non-atomic values (i.e. the pointer value
-itself is atomic, but the thing it points to is not):
+Thứ hai, con trỏ atomic tới giá trị không-atomic (tức là giá trị
+con trỏ tự thân atomic, nhưng thứ nó trỏ tới thì không):
 
 ``` {.c}
 int x;
@@ -956,8 +950,8 @@ int * _Atomic p;  // p is an atomic pointer to an int
 p = &x;  // OK!
 ```
 
-Lastly, atomic pointers to atomic values (i.e. the pointer and the thing
-it points to are both atomic):
+Cuối cùng, con trỏ atomic tới giá trị atomic (tức là con trỏ và
+thứ nó trỏ tới đều atomic):
 
 ``` {.c}
 _Atomic int x;
@@ -973,8 +967,8 @@ p = &x;  // OK!
 [i[Atomic variables-->memory order]<]
 [i[Memory order]<]
 
-We've already talked about sequential consistency, which is the sensible
-one of the bunch. But there are a number of other ones:
+Ta đã nói về sequential consistency, cái hợp lý trong nhóm. Nhưng
+còn một số cái khác:
 
 [i[`memory_order_seq_cst` enumerated type]]
 [i[`memory_order_acq_rel` enumerated type]]
@@ -983,7 +977,7 @@ one of the bunch. But there are a number of other ones:
 [i[`memory_order_consume` enumerated type]]
 [i[`memory_order_relaxed` enumerated type]]
 
-|`memory_order`|Description|
+|`memory_order`|Mô tả|
 |-|-|
 |`memory_order_seq_cst`|Sequential Consistency|
 |`memory_order_acq_rel`|Acquire/Release|
@@ -992,8 +986,8 @@ one of the bunch. But there are a number of other ones:
 |`memory_order_consume`|Consume|
 |`memory_order_relaxed`|Relaxed|
 
-You can specify other ones with certain library functions. For example,
-you can add a value to an atomic variable like this:
+Bạn có thể chỉ định các cái khác với một số hàm thư viện. Ví dụ,
+bạn có thể cộng giá trị vào biến atomic như vầy:
 
 ``` {.c}
 atomic_int x = 0;
@@ -1001,7 +995,7 @@ atomic_int x = 0;
 x += 5;  // Sequential consistency, the default
 ```
 
-Or you can do the same with this library function:
+Hay bạn có thể làm tương tự với hàm thư viện này:
 
 [i[`atomic_fetch_add()` function]<]
 
@@ -1012,7 +1006,7 @@ atomic_fetch_add(&x, 5);  // Sequential consistency, the default
 ```
 [i[`atomic_fetch_add()` function]>]
 
-Or you can do the same thing with an explicit memory ordering:
+Hay bạn có thể làm tương tự với memory ordering tường minh:
 
 [i[`atomic_fetch_add_explicit()` function]<]
 
@@ -1022,8 +1016,8 @@ atomic_int x = 0;
 atomic_fetch_add_explicit(&x, 5, memory_order_seq_cst);
 ```
 
-But what if we didn't want sequential consistency? And you wanted
-acquire/release instead for whatever reason? Just name it:
+Nhưng nếu ta không muốn sequential consistency? Và muốn
+acquire/release thay vào đó vì lý do gì đó? Cứ gọi tên nó:
 
 ``` {.c}
 atomic_int x = 0;
@@ -1033,24 +1027,23 @@ atomic_fetch_add_explicit(&x, 5, memory_order_acq_rel);
 
 [i[`atomic_fetch_add_explicit()` function]>]
 
-We'll do a breakdown of the different memory orders, below. Don't mess
-with anything other than sequential consistency unless you know what
-you're doing. It's really easy to make mistakes that will cause rare,
-hard-to-repro failures.
+Ta sẽ chia nhỏ các memory order khác bên dưới. Đừng nghịch bất kỳ
+cái gì khác ngoài sequential consistency trừ khi bạn biết đang làm
+gì. Rất dễ mắc lỗi gây ra các failure hiếm, khó tái hiện.
 
 ### Sequential Consistency
 
 [i[Atomic variables-->sequential consistency]<]
 [i[Memory order-->sequential consistency]<]
 
-* Load operations acquire (see below).
-* Store operations release (see below).
-* Read-modify-write operations acquire then release.
+* Thao tác Load acquire (xem bên dưới).
+* Thao tác Store release (xem bên dưới).
+* Thao tác Read-modify-write acquire rồi release.
 
-Also, in order to maintain the total order of acquires and releases, no
-acquires or releases will be reordered with respect to each other. (The
-acquire/release rules do not forbid reordering a release followed by an
-acquire. But the sequentially consistent rules do.)
+Cũng vậy, để duy trì tổng thứ tự của acquire và release, không có
+acquire hay release nào bị sắp xếp lại so với nhau. (Quy tắc
+acquire/release không cấm sắp xếp lại một release theo sau là
+acquire. Nhưng quy tắc sequentially consistent thì cấm.)
 
 [i[Memory order-->sequential consistency]>]
 [i[Atomic variables-->sequential consistency]>]
@@ -1060,13 +1053,13 @@ acquire. But the sequentially consistent rules do.)
 [i[Atomic variables-->acquire]<]
 [i[Memory order-->acquire]<]
 
-This is what happens on a load/read operation on an atomic variable.
+Đây là chuyện xảy ra trên thao tác load/read một biến atomic.
 
-* If another thread released this atomic variable, all the writes that
-  thread did are now visible in this thread.
+* Nếu thread khác đã release biến atomic này, tất cả các lần ghi
+  thread đó làm giờ thấy được trong thread này.
 
-* Memory accesses in this thread that happen after this load can't be
-  reordered before it.
+* Các truy cập bộ nhớ trong thread này xảy ra sau lần load này
+  không thể bị sắp xếp lại trước nó.
 
 [i[Memory order-->acquire]>]
 [i[Atomic variables-->acquire]>]
@@ -1076,14 +1069,14 @@ This is what happens on a load/read operation on an atomic variable.
 [i[Atomic variables-->release]<]
 [i[Memory order-->acquire]<]
 
-This is what happens on a store/write of an atomic variable.
+Đây là chuyện xảy ra trên store/write một biến atomic.
 
-* If another thread later acquires this atomic variable, all memory
-  writes in this thread before its atomic write become visible to that
-  other thread.
+* Nếu thread khác sau này acquire biến atomic này, tất cả các lần
+  ghi bộ nhớ trong thread này trước lần ghi atomic của nó trở nên
+  thấy được với thread khác đó.
 
-* Memory accesses in this thread that happen before the release can't
-  be reordered after it.
+* Các truy cập bộ nhớ trong thread này xảy ra trước release không
+  thể bị sắp xếp lại sau nó.
 
 [i[Atomic variables-->release]>]
 [i[Memory order-->release]>]
@@ -1093,25 +1086,25 @@ This is what happens on a store/write of an atomic variable.
 [i[Atomic variables-->consume]<]
 [i[Memory order-->consume]<]
 
-This is an odd one, similar to a less-strict version of acquire. It
-affects memory accesses that are _data dependent_ on the atomic
-variable.
+Cái này hơi lạ, tương tự phiên bản ít nghiêm khắc hơn của acquire.
+Nó ảnh hưởng các truy cập bộ nhớ _phụ thuộc dữ liệu_ vào biến
+atomic.
 
-Being "data dependent" vaguely means that the atomic variable is used in
-a calculation.
+"Phụ thuộc dữ liệu" mơ hồ nghĩa là biến atomic được dùng trong một
+phép tính.
 
-That is, if a thread consumes an atomic variable then all the operations
-in that thread that go on to use that atomic variable will be able to
-see the memory writes in the releasing thread.
+Tức là nếu một thread consume biến atomic thì tất cả các thao tác
+trong thread đó tiếp tục dùng biến atomic đó sẽ có thể thấy các
+lần ghi bộ nhớ trong thread đang release.
 
-Compare to acquire where memory writes in the releasing thread will be
-visible to _all_ operations in the current thread, not just the
-data-dependent ones.
+So với acquire nơi các lần ghi bộ nhớ trong thread đang release sẽ
+thấy được với _tất cả_ các thao tác trong thread hiện tại, không
+chỉ những cái phụ thuộc dữ liệu.
 
-Also like acquire, there is a restriction on which operations can be
-reordered _before_ the consume. With acquire, you couldn't reorder
-anything before it. With consume, you can't reorder anything that
-depends on the loaded atomic value before it.
+Cũng giống acquire, có hạn chế về thao tác nào có thể bị sắp xếp
+lại _trước_ consume. Với acquire, bạn không thể sắp xếp lại bất cứ
+gì trước nó. Với consume, bạn không thể sắp xếp lại bất cứ gì phụ
+thuộc giá trị atomic đã load trước nó.
 
 [i[Atomic variables-->consume]>]
 [i[Memory order-->consume]>]
@@ -1121,11 +1114,11 @@ depends on the loaded atomic value before it.
 [i[Atomic variables-->acquire/release]<]
 [i[Memory order-->acquire/release]<]
 
-This only applies to read-modify-write operations. It's an acquire and
-release bundled into one.
+Cái này chỉ áp dụng cho thao tác read-modify-write. Là một acquire
+và release gom vào một.
 
-* An acquire happens for the read.
-* A release happens for the write.
+* Acquire xảy ra cho lần read.
+* Release xảy ra cho lần write.
 
 [i[Atomic variables-->acquire/release]>]
 [i[Memory order-->acquire/release]>]
@@ -1135,18 +1128,18 @@ release bundled into one.
 [i[Atomic variables-->relaxed]<]
 [i[Memory order-->relaxed]<]
 
-No rules; it's anarchy! Everyone can reorder everything everywhere!
-Dogs and cats living together---mass hysteria!
+Không có quy tắc; là hỗn loạn! Ai cũng có thể sắp xếp lại mọi thứ
+mọi nơi! Chó với mèo sống chung, loạn lớn!
 
-Actually, there is a rule. Atomic reads and writes are still
-all-or-nothing. But the operations can be reordered whimsically and
-there is zero synchronization between threads.
+Thực ra có một quy tắc. Lần đọc và ghi atomic vẫn là all-or-nothing.
+Nhưng các thao tác có thể bị sắp xếp lại tuỳ hứng và không có
+synchronization giữa các thread.
 
-There are a few use cases for this memory order, which you can find with
-a tiny bit of searching, e.g. simple counters.
+Có vài use case cho memory order này, bạn có thể tìm với một ít
+tìm kiếm, ví dụ các counter đơn giản.
 
-And you can use a fence to force synchronization after a bunch of
-relaxed writes.
+Và bạn có thể dùng fence để ép synchronization sau một loạt lần ghi
+relaxed.
 
 [i[Atomic variables-->relaxed]>]
 [i[Memory order-->relaxed]>]
@@ -1157,22 +1150,23 @@ relaxed writes.
 
 [i[Atomic variables-->fences]<]
 
-You know how the releases and acquires of atomic variables occur as you
-read and write them?
+Bạn biết cách release và acquire biến atomic xảy ra khi bạn đọc và
+ghi chúng đúng không?
 
-Well, it's possible to do a release or acquire _without_ an atomic
-variable, as well.
+Thì ra cũng có thể làm release hay acquire mà _không_ có biến
+atomic.
 
-This is called a _fence_. So if you want all the writes in a thread to
-be visible elsewhere, you can put up a release fence in one thread and
-an acquire fence in another, just like with how atomic variables work.
+Cái này gọi là _fence_. Nên nếu bạn muốn tất cả các lần ghi trong
+một thread thấy được ở nơi khác, bạn có thể đặt release fence trong
+một thread và acquire fence trong thread khác, giống cách biến
+atomic hoạt động.
 
-Since a consume operation doesn't really make sense on a fence^[Because
-consume is all about the operations that are dependent on the value of
-the acquired atomic variable, and there is no atomic variable with a
-fence.], `memory_order_consume` is treated as an acquire.
+Vì thao tác consume không thực sự có nghĩa trên fence^[Vì consume
+là về các thao tác phụ thuộc giá trị biến atomic đã acquire, và
+không có biến atomic với fence.], `memory_order_consume` được xử
+lý như acquire.
 
-You can put up a fence with any specified order:
+Bạn có thể đặt fence với bất kỳ order nào được chỉ định:
 
 [i[`atomic_thread_fence()` function]<]
 
@@ -1183,38 +1177,38 @@ atomic_thread_fence(memory_order_release);
 [i[`atomic_thread_fence()` function]>]
 [i[`atomic_signal_fence()` function]<]
 
-There's also a light version of a fence for use with signal handlers,
-called `atomic_signal_fence()`.
+Còn có phiên bản fence nhẹ để dùng với signal handler, gọi là
+`atomic_signal_fence()`.
 
-It works just the same way as `atomic_thread_fence()`, except:
+Nó hoạt động y như `atomic_thread_fence()`, trừ:
 
-* It only deals with visibility of values within the same thread; there
-  is no synchronization with other threads.
+* Nó chỉ liên quan khả năng thấy giá trị trong cùng thread; không
+  có synchronization với thread khác.
 
-* No hardware fence instructions are emitted.
+* Không phát ra lệnh fence phần cứng.
 
-If you want to be sure the side effects of non-atomic operations (and
-relaxed atomic operations) are visible in the signal handler, you can
-use this fence.
+Nếu bạn muốn chắc rằng side effect của thao tác không-atomic (và
+thao tác atomic relaxed) thấy được trong signal handler, bạn có
+thể dùng fence này.
 
-The idea is that the signal handler is executing in _this_ thread, not
-another, so this is a lighter-weight way of making sure changes outside
-the signal handler are visible within it (i.e. they haven't been
-reordered).
+Ý tưởng là signal handler đang thực thi trong _thread này_, không
+phải thread khác, nên đây là cách nhẹ hơn để đảm bảo thay đổi bên
+ngoài signal handler thấy được bên trong nó (tức là chúng không bị
+sắp xếp lại).
 
 [i[`atomic_signal_fence()` function]>]
 [i[Atomic variables-->fences]>]
 
-## References
+## Tham khảo
 
-If you want to learn more about this stuff, here are some of the things
-that helped me plow through it:
+Nếu bạn muốn học thêm về mấy thứ này, đây là một số thứ đã giúp tôi
+cày qua nó:
 
 * Herb Sutter's _`atomic<>` Weapons_ talk:
   * [fl[Part 1|https://www.youtube.com/watch?v=A8eCGOqgvH4]]
   * [fl[part 2|https://www.youtube.com/watch?v=KeLBd2EJLOU]]
 
-* [fl[Jeff Preshing's materials|https://preshing.com/archives/]], in particular:
+* [fl[Jeff Preshing's materials|https://preshing.com/archives/]], đặc biệt:
   * [fl[An Introduction to Lock-Free Programming|https://preshing.com/20120612/an-introduction-to-lock-free-programming/]]
   * [fl[Acquire and Release Semantics|https://preshing.com/20120913/acquire-and-release-semantics/]]
   * [fl[The _Happens-Before_ Relation|https://preshing.com/20130702/the-happens-before-relation/]]
@@ -1228,6 +1222,6 @@ that helped me plow through it:
 
 * Bruce Dawson's [fl[Lockless Programming Considerations|https://docs.microsoft.com/en-us/windows/win32/dxtecharts/lockless-programming]]
 
-* The helpful and knowledgeable folks on [fl[r/C_Programming|https://www.reddit.com/r/C_Programming/]]
+* Những người nhiệt tình và am hiểu trên [fl[r/C_Programming|https://www.reddit.com/r/C_Programming/]]
 
 [i[Atomic variables]>]
