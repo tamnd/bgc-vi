@@ -47,7 +47,7 @@ Programming (Vietnamese).
 | bgc_part_3300_time.md | Date and Time Functionality | done |
 | bgc_part_3400_threads.md | Multithreading | done |
 | bgc_part_3490_atomics.md | Atomics | done |
-| bgc_part_3500_noreturn_align.md | Function Specifiers, Alignment Specifiers/Operators | not started |
+| bgc_part_3500_noreturn_align.md | Function Specifiers, Alignment Specifiers/Operators | done |
 
 ## Guidelines
 
