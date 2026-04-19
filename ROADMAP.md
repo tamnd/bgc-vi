@@ -14,7 +14,7 @@ Programming (Vietnamese).
 | bgc_part_0400_pointers.md | Pointers, Cower In Fear! | done |
 | bgc_part_0500_arrays.md | Arrays | done |
 | bgc_part_0600_strings.md | Strings | done |
-| bgc_part_0700_structs.md | Structs | not started |
+| bgc_part_0700_structs.md | Structs | done |
 | bgc_part_0725_io.md | File Input/Output | not started |
 | bgc_part_0750_typedef.md | `typedef`: Making New Types | not started |
 | bgc_part_0800_pointers_2.md | Pointers II: Arithmetic | not started |
