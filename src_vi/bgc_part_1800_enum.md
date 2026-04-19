@@ -3,13 +3,14 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Enumerated Types: `enum`
+# Kiểu liệt kê: `enum`
 
 [i[`enum` enumerated types]<]
 
-C offers us another way to have constant integer values by name: `enum`.
+C cho ta thêm một cách nữa để có giá trị số nguyên hằng đặt tên:
+`enum`.
 
-For example:
+Ví dụ:
 
 ``` {.c}
 enum {
@@ -20,29 +21,29 @@ enum {
 printf("%d %d", ONE, TWO);  // 1 2
 ```
 
-In some ways, it can be better---or different---than using a `#define`.
-Key differences:
+Ở vài chỗ, nó có thể tốt hơn, hoặc khác, so với dùng `#define`. Mấy
+khác biệt chính:
 
-* `enum`s can only be integer types.
-* `#define` can define anything at all.
-* `enum`s are often shown by their symbolic identifier name in a debugger.
-* `#define`d numbers just show as raw numbers which are harder to know
-  the meaning of while debugging.
+* `enum` chỉ có thể là kiểu số nguyên.
+* `#define` thì định nghĩa được bất cứ thứ gì.
+* `enum` thường hiện ra bằng tên ký hiệu trong debugger.
+* Số `#define` chỉ hiện ra dưới dạng số thô, khó biết ý nghĩa lúc
+  debug.
 
-Since they're integer types, they can be used any place integers can be
-used, including in array dimensions and `case` statements.
+Vì chúng là kiểu số nguyên, chúng dùng được ở bất cứ đâu mà số
+nguyên dùng được, kể cả kích thước mảng và câu `case`.
 
-Let's tear into this more.
+Mổ xẻ thêm nhé.
 
-## Behavior of `enum`
+## Hành vi của `enum`
 
-### Numbering
+### Đánh số
 
 [i[`enum` enumerated types-->numbering order]<]
 
-`enum`s are automatically numbered unless you override them.
+`enum` được đánh số tự động trừ khi bạn ghi đè.
 
-They start at `0`, and autoincrement up from there, by default:
+Chúng bắt đầu từ `0`, rồi tự tăng dần lên, theo mặc định:
 
 ``` {.c}
 enum {
@@ -56,7 +57,7 @@ enum {
 printf("%d %d\n", SHEEP, BRICK);  // 0 3
 ```
 
-You can force particular integer values, as we saw earlier:
+Bạn có thể ép giá trị số nguyên cụ thể, như ta đã thấy ở trên:
 
 ``` {.c}
 enum {
@@ -66,7 +67,7 @@ enum {
 };
 ```
 
-Duplicates are not a problem:
+Trùng giá trị cũng không sao:
 
 ``` {.c}
 enum {
@@ -76,8 +77,8 @@ enum {
 };
 ```
 
-if values are omitted, numbering continues counting in the positive
-direction from whichever value was last specified. For example:
+Nếu giá trị bị bỏ đi, việc đánh số tiếp tục đếm theo hướng dương từ
+giá trị nào được chỉ định gần nhất. Ví dụ:
 
 ``` {.c}
 enum {
@@ -94,9 +95,9 @@ enum {
 
 [i[`enum` enumerated types-->numbering order]>]
 
-### Trailing Commas
+### Dấu phẩy đuôi
 
-This is perfectly fine, if that's your style:
+Cái này hoàn toàn ổn, nếu bạn thích kiểu đó:
 
 ``` {.c}
 enum {
@@ -106,44 +107,44 @@ enum {
 };
 ```
 
-It's gotten more popular in languages of the recent decades so you might
-be pleased to see it.
+Mấy thập kỷ gần đây nó phổ biến hơn trong các ngôn ngữ khác, nên bạn
+có thể thấy vui khi gặp lại.
 
-### Scope
+### Phạm vi
 
 [i[`enum` enumerated types-->scope]<]
 
-`enum`s scope as you'd expect. If at file scope, the whole file can see
-it. If in a block, it's local to that block.
+`enum` có scope đúng như bạn kỳ vọng. Nếu ở file scope, cả file thấy
+nó. Nếu trong một block, nó cục bộ trong block đó.
 
-It's really common for `enum`s to be defined in header files so they can
-be `#include`d at file scope.
+Rất thường gặp chuyện `enum` được định nghĩa trong file header để có
+thể `#include` vào ở file scope.
 
 [i[`enum` enumerated types-->scope]>]
 
 ### Style
 
-As you've noticed, it's common to declare the `enum` symbols in
-uppercase (with underscores).
+Như bạn đã để ý, rất phổ biến việc khai báo ký hiệu `enum` bằng chữ
+hoa (với gạch dưới).
 
-This isn't a requirement, but is a very, very common idiom.
+Đây không phải yêu cầu, nhưng là một idiom rất, rất phổ biến.
 
-## Your `enum` is a Type
+## `enum` của bạn là một kiểu
 
-This is an important thing to know about `enum`: they're a type,
-analogous to how a `struct` is a type.
+Đây là chuyện quan trọng cần biết về `enum`: chúng là một kiểu,
+tương tự cách `struct` là một kiểu.
 
-You can give them a tag name so you can refer to the type later and
-declare variables of that type.
+Bạn có thể gán cho chúng một tên tag để về sau tham chiếu kiểu và
+khai báo biến của kiểu đó.
 
-Now, since `enum`s are integer types, why not just use `int`?
+Mà này, vì `enum` là kiểu số nguyên, sao không xài luôn `int`?
 
-In C, the best reason for this is code clarity--it's a nice, typed way
-to describe your thinking in code. C (unlike C++) doesn't actually
-enforce any values being in range for a particular `enum`.
+Trong C, lý do tốt nhất là để code rõ ràng, đây là cách đẹp, có
+kiểu, để diễn tả suy nghĩ của bạn trong code. C (khác với C++) thật
+ra không ép giá trị phải nằm trong phạm vi của một `enum` cụ thể.
 
-Let's do an example where we declare a variable `r` of type `enum
-resource` that can hold those values:
+Làm ví dụ khai báo biến `r` kiểu `enum resource` có thể giữ các giá
+trị đó:
 
 ``` {.c}
 // Named enum, type is "enum resource"
@@ -165,8 +166,8 @@ if (r == BRICK) {
 }
 ```
 
-You can also `typedef` these, of course, though I personally don't like
-to.
+Bạn cũng có thể `typedef` cái này, dĩ nhiên, dù cá nhân tôi không
+thích.
 
 
 ``` {.c}
@@ -181,8 +182,8 @@ typedef enum {
 RESOURCE r = BRICK;
 ```
 
-Another shortcut that's legal but rare is to declare variables when you
-declare the `enum`:
+Một lối tắt khác hợp lệ nhưng hiếm là khai báo biến ngay khi khai
+báo `enum`:
 
 ``` {.c}
 // Declare an enum and some initialized variables of that type:
@@ -196,8 +197,8 @@ enum {
 } r = BRICK, s = WOOD;
 ```
 
-You can also give the `enum` a name so you can use it later, which is
-probably what you want to do in most cases:
+Bạn cũng có thể đặt tên cho `enum` để về sau dùng lại, đây có lẽ là
+điều bạn muốn làm trong phần lớn trường hợp:
 
 
 ``` {.c}
@@ -212,7 +213,7 @@ enum resource {   // <-- type is now "enum resource"
 } r = BRICK, s = WOOD;
 ```
 
-In short, `enum`s are a great way to write nice, scoped, typed, clean
-code.
+Ngắn gọn, `enum` là cách hay để viết code đẹp, có scope, có kiểu,
+sạch sẽ.
 
 [i[`enum` enumerated types]>]
