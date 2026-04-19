@@ -3,40 +3,39 @@
 # vim: ts=4:sw=4:nosi:et:tw=72
 -->
 
-# Types Part V: Compound Literals and Generic Selections
+# Types Phần V: Compound Literals và Generic Selections
 
-This is the final chapter for types! We're going to talk about two
-things:
+Đây là chương cuối về types! Ta sẽ nói hai chuyện:
 
-* How to have "anonymous" unnamed objects and how that's useful.
-* How to generate type-dependent code.
+* Làm sao có object "ẩn danh" không tên và lợi ích của nó.
+* Làm sao tạo code phụ thuộc kiểu.
 
-They're not particularly related, but don't really each warrant their
-own chapters. So I crammed them in here like a rebel!
+Chúng không liên quan lắm, nhưng cũng không đáng mỗi cái một chương.
+Nên tôi nhét chúng vào đây như một kẻ nổi loạn!
 
 ## Compound Literals
 
 [i[Compound literals]<]
 
-This is a neat feature of the language that allows you to create an
-object of some type on the fly without ever assigning it to a variable.
-You can make simple types, arrays, `struct`s, you name it.
+Đây là một tính năng hay của ngôn ngữ cho phép bạn tạo một object
+thuộc kiểu nào đó trên đường đi mà không cần gán nó vào biến. Bạn có
+thể làm kiểu đơn giản, mảng, `struct`, gì cũng được.
 
-One of the main uses for this is passing complex arguments to functions
-when you don't want to make a temporary variable to hold the value.
+Một trong những cách dùng chính của nó là truyền đối số phức tạp cho
+hàm khi bạn không muốn tạo biến tạm để giữ giá trị.
 
-The way you create a compound literal is to put the type name in
-parentheses, and then put an initializer list after. For example, an
-unnamed array of `int`s, might look like this:
+Cách bạn tạo compound literal là đặt tên kiểu trong ngoặc đơn, rồi
+đặt một initializer list phía sau. Ví dụ, một mảng `int` không tên
+có thể trông như vầy:
 
 ``` {.c}
 (int []){1,2,3,4}
 ```
 
-Now, that line of code doesn't do anything on its own. It creates an
-unnamed array of 4 `int`s, and then throws them away without using them.
+Giờ, dòng code đó tự nó không làm gì cả. Nó tạo một mảng không tên
+gồm 4 `int`, rồi vứt đi mà không dùng.
 
-We could use a pointer to store a reference to the array...
+Ta có thể dùng một con trỏ để lưu tham chiếu tới mảng...
 
 ``` {.c}
 int *p = (int []){1 ,2 ,3 ,4};
@@ -44,9 +43,9 @@ int *p = (int []){1 ,2 ,3 ,4};
 printf("%d\n", p[1]);  // 2
 ```
 
-But that seems a little like a long-winded way to have an array. I mean,
-we could have just done this^[Which isn't quite the same, since it's an
-array, not a pointer to an `int`.]:
+Nhưng cái đó có vẻ như kiểu vòng vo để có mảng. Ý là, ta cũng có thể
+đã làm vầy^[Cũng không hoàn toàn giống, vì nó là mảng chứ không phải
+con trỏ tới `int`.]:
 
 ``` {.c}
 int p[] = {1, 2, 3, 4};
@@ -54,13 +53,13 @@ int p[] = {1, 2, 3, 4};
 printf("%d\n", p[1]);  // 2
 ```
 
-So let's take a look at a more useful example.
+Vậy hãy xem ví dụ hữu ích hơn.
 
-### Passing Unnamed Objects to Functions
+### Truyền object không tên cho hàm
 
 [i[Compound literals-->passing to functions]<]
 
-Let's say we have a function to sum an array of `int`s:
+Giả sử ta có một hàm tính tổng một mảng `int`:
 
 ``` {.c}
 int sum(int p[], int count)
@@ -74,8 +73,8 @@ int sum(int p[], int count)
 }
 ```
 
-If we wanted to call it, we'd normally have to do something like this,
-declaring an array and storing values in it to pass to the function:
+Nếu ta muốn gọi nó, thường ta phải làm kiểu này, khai báo mảng và
+lưu giá trị vào nó để truyền cho hàm:
 
 ``` {.c}
 int a[] = {1, 2, 3, 4};
@@ -83,10 +82,9 @@ int a[] = {1, 2, 3, 4};
 int s = sum(a, 4);
 ```
 
-But unnamed objects give us a way to skip the variable by passing it
-directly in (parameter names listed above). Check it out---we're going
-to replace the variable `a` with an unnamed array that we pass in as the
-first argument:
+Nhưng object không tên cho ta cách bỏ qua biến bằng cách truyền
+thẳng nó vào (tên tham số liệt kê phía trên). Xem này, ta sẽ thay
+biến `a` bằng một mảng không tên truyền làm đối số đầu:
 
 ``` {.c}
 //                   p[]         count
@@ -94,21 +92,21 @@ first argument:
 int s = sum((int []){1, 2, 3, 4}, 4);
 ```
 
-Pretty slick!
+Khá gọn!
 
 [i[Compound literals-->passing to functions]>]
 
-### Unnamed `struct`s
+### `struct` không tên
 
 [i[Compound literals-->with `struct`]<]
 [i[`struct` keyword-->compound literals]<]
 
-We can do something similar with `struct`s.
+Ta có thể làm điều tương tự với `struct`.
 
-First, let's do things without unnamed objects. We'll define a `struct`
-to hold some `x`/`y` coordinates. Then we'll define one, passing in
-values into its initializer. Finally, we'll pass it to a function to
-print the values:
+Trước, hãy làm không dùng object không tên. Ta sẽ định nghĩa một
+`struct` để giữ toạ độ `x`/`y`. Rồi ta định nghĩa một cái, truyền
+giá trị vào initializer của nó. Cuối cùng, truyền nó cho một hàm để
+in giá trị ra:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -130,13 +128,12 @@ int main(void)
 }
 ```
 
-Straightforward enough?
+Đủ thẳng thắn?
 
-Let's modify it to use an unnamed object instead of the variable `t`
-we're passing to `print_coord()`.
+Chỉnh nó để dùng object không tên thay cho biến `t` mà ta đang
+truyền cho `print_coord()`.
 
-We'll just take `t` out of there and replace it with an unnamed
-`struct`:
+Ta chỉ cần rút `t` ra và thay bằng một `struct` không tên:
 
 ``` {.c .numberLines startFrom="7"}
     //struct coord t = {.x=10, .y=20};
@@ -144,28 +141,27 @@ We'll just take `t` out of there and replace it with an unnamed
     print_coord((struct coord){.x=10, .y=20});   // prints "10, 20"
 ```
 
-Still works!
+Vẫn chạy!
 
 [i[`struct` keyword-->compound literals]>]
 [i[Compound literals-->with `struct`]>]
 
-### Pointers to Unnamed Objects
+### Con trỏ tới object không tên
 
 [i[Compound literals-->pointers to]<]
 
-You might have noticed in the last example that even through we were
-using a `struct`, we were passing a copy of the `struct` to
-`print_coord()` as opposed to passing a pointer to the `struct`.
+Bạn có thể để ý trong ví dụ cuối rằng dù ta đang dùng `struct`, ta
+truyền một bản sao của `struct` cho `print_coord()` chứ không phải
+truyền con trỏ tới `struct`.
 
-Turns out, we can just take the address of an unnamed object with `&`
-like always.
+Hoá ra, ta có thể lấy địa chỉ của một object không tên bằng `&` như
+thường.
 
-This is because, in general, if an operator would have worked on a
-variable of that type, you can use that operator on an unnamed object of
-that type.
+Đó là vì, nhìn chung, nếu một toán tử chạy được với biến thuộc kiểu
+đó, bạn có thể dùng toán tử đó trên object không tên thuộc cùng
+kiểu.
 
-Let's modify the above code so that we pass a pointer to an unnamed
-object 
+Chỉnh code trên để ta truyền con trỏ tới object không tên
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -187,28 +183,28 @@ int main(void)
 }
 ```
 
-Additionally, this can be a nice way to pass even pointers to simple
-objects:
+Thêm nữa, đây có thể là cách hay ngay cả để truyền con trỏ tới
+object đơn giản:
 
 ``` {.c}
 // Pass a pointer to an int with value 3490
 foo(&(int){3490});
 ```
 
-Easy as that.
+Dễ vậy thôi.
 
 [i[Compound literals-->pointers to]>]
 
-### Unnamed Objects and Scope
+### Object không tên và scope
 
 [i[Compound literals-->scope]<]
 
-The lifetime of an unnamed object ends at the end of its scope. The
-biggest way this could bite you is if you make a new unnamed object, get
-a pointer to it, and then leave the object's scope. In that case, the
-pointer will refer to a dead object.
+Vòng đời của object không tên kết thúc ở cuối scope của nó. Cách
+lớn nhất mà chuyện này có thể cắn bạn là nếu bạn tạo một object
+không tên mới, lấy con trỏ tới nó, rồi rời khỏi scope của object.
+Trong trường hợp đó, con trỏ sẽ tham chiếu tới một object đã chết.
 
-So this is undefined behavior:
+Nên cái này là hành vi không xác định:
 
 ``` {.c}
 int *p;
@@ -220,8 +216,8 @@ int *p;
 printf("%d\n", *p);  // INVALID: The (int){10} fell out of scope
 ```
 
-Likewise, you can't return a pointer to an unnamed object from a
-function. The object is deallocated when it falls out of scope:
+Tương tự, bạn không thể trả về một con trỏ tới object không tên từ
+một hàm. Object được giải phóng khi nó rơi khỏi scope:
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -238,16 +234,16 @@ int main(void)
 }
 ```
 
-Just think of their scope like that of an ordinary local variable. You
-can't return a pointer to a local variable, either.
+Cứ nghĩ scope của chúng giống như biến cục bộ thông thường. Bạn cũng
+không thể trả về con trỏ tới biến cục bộ.
 
 [i[Compound literals-->scope]>]
 
-### Silly Unnamed Object Example
+### Ví dụ object không tên hơi ngớ
 
-You can put any type in there and make an unnamed object.
+Bạn có thể đặt kiểu nào vào đó và tạo object không tên cũng được.
 
-For example, these are effectively equivalent:
+Ví dụ, những cái này thực tế tương đương:
 
 ``` {.c}
 int x = 3490;
@@ -257,10 +253,10 @@ printf("%d\n", 3490);            // 3490 (constant)
 printf("%d\n", (int){3490});     // 3490 (unnamed object)
 ```
 
-That last one is unnamed, but it's silly. Might as well do the simple
-one on the line before.
+Cái cuối là không tên, nhưng ngớ ngẩn. Thà làm cái đơn giản ở dòng
+trước.
 
-But hopefully that provides a little more clarity on the syntax.
+Nhưng hy vọng nó cho thêm chút rõ ràng về cú pháp.
 
 [i[Compound literals]>]
 
@@ -268,27 +264,26 @@ But hopefully that provides a little more clarity on the syntax.
 
 [i[Generic selections]<]
 
-This is an expression that allows you to select different pieces of code
-depending on the _type_ of the first argument to the expression.
+Đây là một biểu thức cho phép bạn chọn các đoạn code khác nhau tuỳ
+vào _type_ của đối số đầu của biểu thức.
 
-We'll look at an example in just a second, but it's important to know
-this is processed at compile time, _not at runtime_. There's no
-runtime analysis going on here.
+Ta sẽ xem ví dụ trong tích tắc, nhưng quan trọng là biết rằng cái
+này được xử lý tại compile time, _không phải runtime_. Không có
+phân tích runtime nào xảy ra ở đây.
 
 [i[`_Generic` keyword]<]
 
-The expression begins with `_Generic`, works kinda like a `switch`, and
-it takes at least two arguments.
+Biểu thức bắt đầu bằng `_Generic`, chạy kiểu như `switch`, và nhận
+ít nhất hai đối số.
 
-The first argument is an expression (or variable^[A variable used here
-_is_ an expression.]) that has a _type_. All expressions have a type.
-The remaining arguments to `_Generic` are the cases of what to
-substitute in for the result of the expression if the first argument is
-that type.
+Đối số đầu là một biểu thức (hay biến^[Biến dùng ở đây _là_ một biểu
+thức.]) có một _type_. Mọi biểu thức đều có type. Các đối số còn lại
+cho `_Generic` là các case về việc thay gì vào cho kết quả của biểu
+thức nếu đối số đầu có type đó.
 
-Wat?
+Cái gì cơ?
 
-Let's try it out and see.
+Thử coi sao.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -309,37 +304,37 @@ int main(void)
 }
 ```
 
-Check out the `_Generic` expression starting on line 9.
+Xem biểu thức `_Generic` bắt đầu ở dòng 9.
 
-When the compiler sees it, it looks at the type of the first argument.
-(In this example, the type of the variable `i`.) It then looks through
-the cases for something of that type. And then it substitutes the
-argument in place of the entire `_Generic` expression. 
+Khi compiler thấy nó, nó nhìn vào type của đối số đầu. (Trong ví dụ
+này, type của biến `i`.) Rồi nó nhìn qua các case để tìm cái nào
+thuộc type đó. Và rồi thay đối số vào chỗ toàn bộ biểu thức
+`_Generic`.
 
-In this case, `i` is an `int`, so it matches that case. Then the string
-is substituted in for the expression. So the line turns into this when
-the compiler sees it:
+Trong trường hợp này, `i` là `int`, nên nó khớp case đó. Rồi chuỗi
+được thay vào chỗ biểu thức. Nên dòng trở thành vầy khi compiler
+thấy:
 
 ``` {.c}
     char *s = "that variable is an int";
 ```
 
-If the compiler can't find a type match in the `_Generic`, it looks for
-the optional `default` case and uses that.
+Nếu compiler không tìm thấy type khớp trong `_Generic`, nó tìm case
+`default` tuỳ chọn và dùng nó.
 
-If it can't find a type match and there's no `default`, you'll get a
-compile error. The first expression **must** match one of the types or
+Nếu không tìm được type khớp và không có `default`, bạn sẽ bị lỗi
+compile. Biểu thức đầu **phải** khớp một trong các type hoặc
 `default`.
 
-Because it's inconvenient to write `_Generic` over and over, it's often
-used to make the body of a macro that can be easily repeatedly reused.
+Vì viết `_Generic` đi viết lại bất tiện, nó thường được dùng để làm
+thân của một macro có thể tái dùng dễ dàng.
 
-Let's make a macro `TYPESTR(x)` that takes an argument and returns a
-string with the type of the argument.
+Hãy làm một macro `TYPESTR(x)` nhận một đối số và trả về chuỗi với
+type của đối số.
 
-So `TYPESTR(1)` will return the string `"int"`, for example.
+Nên `TYPESTR(1)` sẽ trả về chuỗi `"int"`, chẳng hạn.
 
-Here we go:
+Nào:
 
 ``` {.c}
 #include <stdio.h>
@@ -367,7 +362,7 @@ int main(void)
 }
 ```
 
-This outputs:
+Cái này xuất ra:
 
 ``` {.default}
 i is type int
@@ -377,8 +372,8 @@ d is type double
 c is type something else
 ```
 
-Which should be no surprise, because, like we said, that code in
-`main()` is replaced with the following when it is compiled:
+Không có gì bất ngờ, vì như ta đã nói, code trong `main()` được thay
+bằng cái sau khi compile:
 
 ``` {.c}
     printf("i is type %s\n", "int");
@@ -388,9 +383,9 @@ Which should be no surprise, because, like we said, that code in
     printf("c is type %s\n", "something else");
 ```
 
-And that's exactly the output we see.
+Và đó đúng là output ta thấy.
 
-Let's do one more. I've included some macros here so that when you run:
+Làm thêm cái nữa. Tôi đã kèm vài macro ở đây để khi bạn chạy:
 
 ``` {.c}
 int i = 10;
@@ -400,14 +395,14 @@ PRINT_VAL(i);
 PRINT_VAL(s);
 ```
 
-you get the output:
+bạn được output:
 
 ``` {.default}
 i = 10
 s = Foo!
 ```
 
-We'll have to make use of some macro magic to do that.
+Ta sẽ phải dùng chút phép thuật macro để làm được chuyện đó.
 
 ``` {.c .numberLines}
 #include <stdio.h>
@@ -443,7 +438,7 @@ int main(void)
 
 [i[`_Generic` keyword]>]
 
-for the output:
+cho output:
 
 ``` {.default}
 i = 10
@@ -451,7 +446,7 @@ f = 3.141590
 s = Hello, world!
 ```
 
-We could have crammed that all in one big macro, but I broke it into two
-to prevent eye bleeding.
+Ta có thể nhét hết vào một macro to, nhưng tôi chẻ ra hai để tránh
+chảy máu mắt.
 
 [i[Generic selections]>]
